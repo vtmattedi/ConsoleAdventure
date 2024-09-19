@@ -1,29 +1,35 @@
-const {Weapon} = require('./Basics');
-class Player {
-    constructor(name, health, strength) {
+const {Weapon, Unit} = require('./Basics');
+class Player extends Unit {
+    constructor(name) {
+        super(10, 0, 0, 0);
         this.name = name;
-        this.health = health;
-        this.strength = strength;
         this.level = 1;
         this.exp = 0;
-        this.weapon = new Weapon('Fists', 1, 'punch');
+        this.xp_to_next_level = 100;
+        this.weapon = new Weapon('Fists', 1, 'Physical');
         this.equipament = [];
         this.consumables = [];
 
     }
 
-    attack(target) {
-        if (target.health > 0) {
-            target.health -= this.strength;
-            console.log(`${this.name} attacks ${target.name} for ${this.strength} damage.`);
-            if (target.health <= 0) {
-                target.health = 0;
-                console.log(`${target.name} has been defeated!`);
-            } else {
-                console.log(`${target.name} has ${target.health} health remaining.`);
-            }
-        } else {
-            console.log(`${target.name} is already defeated.`);
+    attackTarget(target) {
+        let physical_weapon =  this.weapon.attackType === 'Physical';
+        let magic_weapon =  this.weapon.attackType === 'Magic';
+        let player_attack =
+        {
+            Physical: this.attack,
+            Magic: this.magic_attack    
+        }
+        if (physical_weapon) {
+            player_attack.Physical *= this.weapon.damage;
+
+        }
+        else if (magic_weapon) {
+            player_attack.Magic *= this.weapon.damage;
+        }
+        const damage = {
+            Physical: this.attack * this.weapon.damage,
+            Magic: this.magic_attack * this.weapon.damage
         }
     }
     gainExp(amount) {
@@ -35,10 +41,8 @@ class Player {
         }
     }
     levelUp() {
-        this.level++;
-        this.strength += 5;
-        this.health += 10;
-        console.log(`${this.name} has leveled up to level ${this.level}!`);
+        // Abstract Method
+       throw new Error("Not implemented");
     }
 }
 
