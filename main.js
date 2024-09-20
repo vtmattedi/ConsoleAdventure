@@ -1,10 +1,8 @@
-var setTitle = require('console-title');
+const setTitle = require('console-title');
 const { Game } = require('./Base/Game.js');
 const {Genie, genie_img} = require('./Genie.js');
-const {selectOption } = require('./Base/ConsoleSelector.js');
-const {COLOR, insert_color, Colors} = require('./Base/ConsoleHelp.js');
+const { insert_color, Colors} = require('./Base/ConsoleHelp.js');
 const rl = require('readline-sync');
-const { text } = require('stream/consumers');
 
 
 setTitle('Console Adventure Game');
@@ -26,6 +24,31 @@ Genie.speak(multiLineText, {
         color: Colors.YELLOW
     }]
 });
+const options = ['Left', 'Right'];
+function displayOptions() {
+    process.stdout.write('\x1b[1A'); // Move cursor up one line
+    process.stdout.write('\x1b[2K'); // Clear the line
+    console.log(`Use arrows: [ ${options[0]} ]   [ ${options[1]} ]`);
+}
+process.stdin.setRawMode(true);
+function selectOption() {
+    while (true) {
+        const key = rl.keyIn(' ');
+        console.log(`>`,key);
+        if (key === 'l') {
+            selected = 0;
+        } else if (key === 'r') {
+            selected = 1;
+        } else if (key === ' ') {
+            process.stdout.write('\x1b[1A'); // Move cursor up
+            process.stdout.write('\x1b[2K'); // Clear line
+            console.log(`You selected: ${options[selected]}`);
+            return options[selected];
+        }
+    }
+}
+
+selectOption();
 process.exit();
 while (currentGame.isRunning) {
     Genie.speak("Enter your move (N/S/E/W): ");
