@@ -1,10 +1,24 @@
-const { Attack} = require('./Basics.js');
+const { Attack, Unit} = require('./Basics.js');
 
-class Enemy {
+function getRandomAttackType() {
+    const randomChance = Math.random();
+    const HybridChance = 0.1;
+    if (randomChance < 0.1) {
+        return "Hybrid";
+    } else if (randomChance < HybridChance + (1 - HybridChance) / 2) {
+        return "Magic";
+    } else {
+        return "Physical";
+    }
+}
+
+class Enemy extends Unit {
     constructor(name, health, attackPower) {
+        super(health, 0, 0);
         this.name = name;
-        this.health = health;
         this.attackPower = attackPower;
+        this.demageType = getRandomAttackType();
+
     }
 
     attack(target) {

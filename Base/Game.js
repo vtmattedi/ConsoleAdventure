@@ -2,7 +2,6 @@ const { Console } = require('console');
 const {Player } = require('./Player.js');
 const fs = require('fs');
 const path = require('path');
-const consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'z'];	
 class Game {
     #devMode = false;
     constructor(title) {

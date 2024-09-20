@@ -1,4 +1,8 @@
 
+rollDice = (sides) => {
+    return Math.floor(Math.random() * sides) + 1;
+}
+
 // Should be an Interface but Will switch to TS at this point
 class Attack {
     constructor(damage, attackType) {
@@ -53,5 +57,5 @@ class Unit {
     }
 
 }
-module.exports = { Attack, Weapon, Equipament, Consumable, Unit };
+module.exports = { Attack, Weapon, Equipament, Consumable, Unit, rollDice };
 
