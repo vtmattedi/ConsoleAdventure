@@ -9,6 +9,7 @@ setTitle('Console Adventure Game');
 console.clear();
 const currentGame = new Game('Adventure');
 const genie = new Genie();
+
 // console.log(selectOption(["Save","Load","Continue", "Exit"]));
 
 
@@ -75,7 +76,7 @@ anime_sprite = (text, ms, color = { color: CH.Colors.RED, index: 1, bgcolor: CH.
         let res = '';
         sprite.forEach(element => {
             let line = element.substring(0, index);
-            CH.hcenter(line, width);
+            CH.center(line, width);
             if (color) {
                 line = CH.insert_color(color.bgcolor, line.substring(0, color.index)) + CH.insert_color(color.color, line.substring(color.index));
             }
@@ -96,7 +97,7 @@ anime_sprite = (text, ms, color = { color: CH.Colors.RED, index: 1, bgcolor: CH.
     }
 
 }
-anime_sprite(ca, 15, { color: CH.Colors.GREEN, index: ca_cutoff, bgcolor: CH.Colors.YELLOW });
+anime_sprite(mw, 15, { color: CH.Colors.GREEN, index: 40, bgcolor: CH.Colors.YELLOW });
 CH.pressSpace();
 console.clear();
 genie.introduce();
@@ -107,17 +108,21 @@ CH.pressSpace();
 
 const color_ca = ca.split('\n').map((item) => CH.insert_color(CH.Colors.YELLOW ,item.substring(0, ca_cutoff)) + CH.insert_color(CH.Colors.GREEN, item.substring(ca_cutoff))).join('\n');
 
-mainMenu = () => {
+mainMenu = (selected = 0) => {
     console.clear();
     console.log(color_ca);
-    let select = CH.SelectValue(['New  Game', 'Load Game', 'Exit'], [], true, true);
+    let select = CH.SelectValue(['New  Game', 'Load Game', 'Info','Exit'], {
+        start: selected,
+    }, true, true);
     return select;
 }
 
 let menu_sel  = mainMenu();
 while ( menu_sel != 0) {
-    menu_sel = mainMenu();
-    if (menu_sel == 2) {
+    menu_sel = mainMenu(Math.max(menu_sel, 0));
+    if (menu_sel == 3) {
+        console.clear();
+        genie.goodbye();
         process.exit();
     }
 }
@@ -129,10 +134,11 @@ process.stdout.write('\u001B[?25l'); //hide cursor
 const nameSeed = Math.random();
 let newName = playerName;
 if (genie.missBehaviour > nameSeed) {
+    console.clear();
     newName = genie.generateName();
     genie.speak(`
-    I do not like the name: ${playerName}!
-    I shall call you ${newName}.`);
+I do not like the name: ${playerName}!
+I shall call you ${newName}.`);
 }
 else {
     genie.speak(`Nice to meet you ${playerName}!`);

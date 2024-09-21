@@ -88,11 +88,13 @@ Welcome to the Great ConsoleAdventure!`,
             }]
         );
     }
-    badName() {
+    generateName() {
         const consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'z'];	
-        return consonants[Math.floor(Math.random() * consonants.length)] + 'andy';
+        return consonants[Math.floor(Math.random() * consonants.length)].toUpperCase() + 'andy';
     }
-
+    goodbye() {
+        this.speak('Goodbye! I will miss you!');
+    }
     explainGame() {
         const move = `
 You can choose options with a and d keys
@@ -132,7 +134,7 @@ and use Spacebar to select the option.`;
             const genieSeed = Math.floor(Math.random() * 6)
             console.clear();
             const width = process.stdout.columns;
-            this.speak( breakLine(responses[genieSeed], width/3),
+            this.speak( breakLine(responses[genieSeed], width/2),
                 {
                     text: this.#name.substring(0, this.#name.indexOf(' ')),
                     color: this.#color
@@ -141,7 +143,7 @@ and use Spacebar to select the option.`;
         }
         else if (choice == 3) {
             console.clear();
-            this.speak('Goodbye! I will miss you!');
+            this.goodbye();
             process.exit();
         }
     }
