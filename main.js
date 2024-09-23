@@ -268,18 +268,20 @@ while (currentGame.isRunning) {
             feedback += " dmg: " + player_res.damageTaken + "| dmg_res: " + player_res.damageResisted + "!" + (player_res.isDead ? " You are dead!" : "") + (player_res.critical ? " Critical Hit!" : "");
         }
         if (player.isDead()) {
-            console.clear();
-            genie.speak('You have died!');
-            console.log(feedback);
-            console.log()
-            player.printInfo();
-            console.log()
-            const choice = Menu.gameEnd();
-            if (choice == 1) {
-                CH.pressSpace();
+            while (true) {        
                 console.clear();
-                genie.goodbye();
-                process.exit();
+                genie.speak('You have died!');
+                console.log(feedback);
+                console.log()
+                player.printInfo();
+                console.log()
+                const new_choice = Menu.gameEnd();
+                if (new_choice === 1) {
+                    CH.pressSpace();
+                    console.clear();
+                    genie.goodbye();
+                    process.exit();
+                }
             }
         }
         else if (currentGame.currentEnemy.isDead()) {

@@ -44,7 +44,9 @@ class Menu {
                 text: "Exit",
                 color: CH.Colors.RED
             }]
-        });
+            , 
+
+        }, true);
     }
 
     static infoMenu(genie) {
