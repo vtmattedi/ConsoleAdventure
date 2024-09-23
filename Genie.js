@@ -1,5 +1,5 @@
 const { merge, Colors, paintSprite, SelectValue, waitFor, pressSpace, insert_color,breakLine, vcenter } = require('./Base/ConsoleHelp.js');
-
+const {class_colors} = require('./Classes/GameClasses.js');
 const genie_img =
     `⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣠⣄⣀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⣰⣿⣿⣿⡿⢿⣿⣿⣿⣆⠀⠀⠀⠀⠀⠀⠀
@@ -72,7 +72,7 @@ class Genie {
     introduce() {
         this.speak(`
 Greetings Adventurer,
-I am ${this.#name}!
+I am ${this.#name}
 Welcome to the Great ConsoleAdventure!`,
             [{
                 text: this.#name.substring(0, this.#name.indexOf(' ')),
@@ -94,6 +94,13 @@ Welcome to the Great ConsoleAdventure!`,
     }
     goodbye() {
         this.speak('Goodbye! I will miss you!');
+    }
+    smirk(_class) {
+        if (typeof(_class) !== 'string')
+            this.speak(`Ha, That may be a class but may also be a structure!`);
+        else
+            this.speak(`Oh, a ${_class}! How original!`,
+                class_colors);
     }
     explainGame() {
         const move = `
@@ -193,4 +200,4 @@ function createBubble(text) {
     return `${bubbleTop}\n/${border}\\\n${bubbleMiddle}\n|${border}|\n${bubbleBottom}`;
 }
 
-module.exports = { Genie, genie_img, genie_image2 };
+module.exports = { Genie, genie_img, genie_img2 };

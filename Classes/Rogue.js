@@ -1,5 +1,5 @@
-const { Weapon } = require('../Base/Basics.js');
-const Player = require('../Base/Player.js');
+const { Weapon } = require('../Base/Weapons.js');
+const Player = require('./Player.js');
 
 class Rogue extends Player {
     constructor(name, health, mana, spellPower) {
@@ -8,7 +8,6 @@ class Rogue extends Player {
         this.weapon = new Weapon('Staff', 1, 'Physical');
     }
 
-    gain
 }
 
 module.exports = {Rogue};

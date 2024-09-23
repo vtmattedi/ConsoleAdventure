@@ -1,15 +1,21 @@
 const setTitle = require('console-title');
 const { Game } = require('./Base/Game.js');
 const { Genie, genie_img } = require('./Genie.js');
+const {Player} = require('./Classes/Player.js');
+
 const CH = require('./Base/ConsoleHelp.js');
 const rl = require('readline-sync');
+const { prependListener } = require('process');
+const {class_colors, Mage,Warrior, Rogue} = require('./Classes/GameClasses.js');
 
 
 setTitle('Console Adventure Game');
 console.clear();
 const currentGame = new Game('Adventure');
 const genie = new Genie();
-
+const player = new Mage("Andy");
+console.log(player.PlayerInfo("Mage"));
+process.exit();
 // console.log(selectOption(["Save","Load","Continue", "Exit"]));
 
 
@@ -32,8 +38,7 @@ if (process.platform === 'linux') {
     `;
 }
 
-if (process.stdout.columns < 87)
-{
+if (process.stdout.columns < 87) {
     let error = 'Warning: Your terminal window is too small to play the game properly. Please resize the window to at least 87 characters wide.';
     error = error.replace("Warning", CH.insert_color(CH.Colors.RED, "Warning"));
     error = error.replace("87", CH.insert_color(CH.Colors.YELLOW, "87"));
@@ -106,19 +111,19 @@ console.clear();
 genie.explainGame();
 CH.pressSpace();
 
-const color_ca = ca.split('\n').map((item) => CH.insert_color(CH.Colors.YELLOW ,item.substring(0, ca_cutoff)) + CH.insert_color(CH.Colors.GREEN, item.substring(ca_cutoff))).join('\n');
+const color_ca = ca.split('\n').map((item) => CH.insert_color(CH.Colors.YELLOW, item.substring(0, ca_cutoff)) + CH.insert_color(CH.Colors.GREEN, item.substring(ca_cutoff))).join('\n');
 
 mainMenu = (selected = 0) => {
     console.clear();
     console.log(color_ca);
-    let select = CH.SelectValue(['New  Game', 'Load Game', 'Info','Exit'], {
+    let select = CH.SelectValue(['New  Game', 'Load Game', 'Info', 'Exit'], {
         start: selected,
     }, true, true);
     return select;
 }
 
-let menu_sel  = mainMenu();
-while ( menu_sel != 0) {
+let menu_sel = mainMenu();
+while (menu_sel != 0) {
     menu_sel = mainMenu(Math.max(menu_sel, 0));
     if (menu_sel == 3) {
         console.clear();
@@ -127,14 +132,14 @@ while ( menu_sel != 0) {
     }
 }
 console.clear();
-genie.speak('Hello again Adventurer!\nI didn\'t catch your name. What is it?');
+genie.speak('Hello again Adventurer!\nI didn\'t catch your name. What was it?');
 process.stdout.write('\u001B[?25h'); //show cursor
-const playerName = rl.question('My name is: ');
+const playerName =  rl.question(CH.insert_color(CH.Colors.YELLOW, 'My name is: '));
 process.stdout.write('\u001B[?25l'); //hide cursor
 const nameSeed = Math.random();
 let newName = playerName;
+console.clear();
 if (genie.missBehaviour > nameSeed) {
-    console.clear();
     newName = genie.generateName();
     genie.speak(`
 I do not like the name: ${playerName}!
@@ -143,8 +148,19 @@ I shall call you ${newName}.`);
 else {
     genie.speak(`Nice to meet you ${playerName}!`);
 }
-
-
+CH.pressSpace();
+console.clear();
+genie.speak(`What Are You?`);
+const class_options = ['Warrior', 'Mage', 'Rogue'];
+const class_sel = CH.SelectValue(class_options.map(item => `I'm a ` + item) , {
+    start: 0,
+    colors: class_colors,
+    padding: 10
+}, true, false);
+console.clear();
+genie.smirk(class_options[class_sel]);
+CH.pressSpace();
+process.exit(); //show cursor
 while (currentGame.isRunning) {
     Genie.speak("Enter your move (N/S/E/W): ");
     const move = rl.question('Enter your move (N/S/E/W): ');

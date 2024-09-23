@@ -29,6 +29,55 @@ const Colors = {
     LIGHTWHITE_EX: 97
 }
 
+const class_colors =
+    [
+        {
+            text: 'Warrior',
+            color: Colors.RED
+        },
+        {
+            text: 'Mage',
+            color: Colors.BLUE
+        },
+        {
+            text: 'Rogue',
+            color: Colors.YELLOW
+        }
+    ]
+
+    const weapon_colors =
+    [
+        {
+            text: 'Physical',
+            color: Colors.RED
+        },
+        {
+            text: 'Magic',
+            color: Colors.BLUE
+        },
+        {
+            text: 'Hybrid',
+            color: Colors.YELLOW
+        }
+    ]
+    const equip_colors =
+    [
+        {
+            text: 'Armor',
+            color: Colors.GREEN
+        },
+        {
+            text: 'Amulet',
+            color: Colors.CYAN
+        },
+        {
+            text: 'MagicArmor',
+            color: Colors.MAGENTA
+        }
+    ]
+const get_class_color = (class_name) => {
+    const color = class_colors.find(item => item.text === class_name);
+}
 const insert_color = (color, text) => {
     return CSI + color + `m` + text + reset
 }
@@ -165,16 +214,13 @@ const SelectValue = (options, config, returnIndex, vertical = false) => {
 
 // Horizontal center a line, mode => 0 = center, 1 = left, 2 = right
 const hcenter = (input, size, char = " ", mode = 0) => {
-    if (typeof input !== "string") return undefined;
-    let start = true;
+    //if (typeof input !== "string") return undefined;
+    let start = mode === 2;
 
-    if (mode === 1)
-        return input.padEnd(size, char);
-    else if (mode === 2)
-        return input.padStart(size, char);
     while (input.length < size) {
         if (start) input = char + input;
         else input += char;
+        if (mode === 0)
         start = !start;
     }
     return input;
@@ -297,6 +343,9 @@ const breakLine = (text, width) => {
 
 module.exports = {
     Colors,
+    class_colors,
+    weapon_colors,
+    equip_colors,
     insert_color,
     clear_screen,
     clear_line,

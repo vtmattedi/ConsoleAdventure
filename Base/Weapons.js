@@ -1,4 +1,13 @@
-const { Weapon } = require("./Basics");
+class Weapon {
+    constructor(name, damage, attackType) {
+        this.name = name;
+        this.damage = damage;
+        this.attackType = attackType;
+    }
+    getDamage() {
+        return this.damage;
+    }
+}
 const weaponNames = [
     "Shadowblade", "Dragonfang", "Stormbreaker", "Frostmourne", "Soulreaver", 
     "Doomhammer", "WhisperingDagger", "ObsidianAxe", "ElvenBow", "PhoenixClaw",
@@ -35,5 +44,16 @@ for (let i = 0; i < 30; i++) {
     weapons.push(new Weapon(name, damage, attackType));
 }
 
+const getMaxWeaponLength = () => {
+    let max = 0;
+    for (const weapon of weapons) {
+        if (weapon.name.length > max) {
+            max = weapon.name.length;
+        }
+    }
+    return max;
+};
+
+
 // Export the array and MAX_WEAPON_LENGTH
-module.exports = { weapons, MAX_WEAPON_LENGTH };
+module.exports = { Weapon, getMaxWeaponLength };

@@ -1,5 +1,5 @@
 const { Console } = require('console');
-const {Player } = require('./Player.js');
+const {Player } = require('../Classes/Player.js');
 const fs = require('fs');
 const path = require('path');
 class Game {
