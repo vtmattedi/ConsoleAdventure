@@ -196,7 +196,7 @@ class Enemy extends Unit {
         const hp_health = Math.ceil(hp_percent * 0.01 * (width - 2));
         const missing_hp = (width - 2) - hp_health;
 
-        line = `[${CH.insert_color(CH.Colors.RED, "=".repeat(missing_hp))}${CH.insert_color(CH.Colors.GREEN, "=".repeat(hp_health))}]`;
+        line = `[${CH.insert_color(CH.Colors.RED, "=".repeat(Math.min(missing_hp, width - 2)))}${CH.insert_color(CH.Colors.GREEN, "=".repeat(Math.max(hp_health, 0)))}]`;
         lines.push(line);
 
         line = `str: ${this.strength} int: ${this.intelligence} dex: ${this.dexterity}`;
@@ -229,8 +229,8 @@ class CommonEnemy extends Enemy {
 class Boss extends Enemy {
     constructor(name, maxHealth, level, stats) {
         super(name, maxHealth, level, stats);
-        this.armor = this.armor * 1.5;
-        this.magic_resist = this.magic_resist * 1.5;
+        this.armor = Math.round(this.armor * 1.5);
+        this.magic_resist = Math.round(this.magic_resist * 1.5);
         this.attacks = genAtkPool([2, 2, 1], level);
         this.xp_drop = this.xp_drop * 2;
 
@@ -243,10 +243,10 @@ class Boss extends Enemy {
 class Elite extends Enemy {
     constructor(name, maxHealth, level, stats) {
         super(name, maxHealth, level, stats);
-        this.armor = this.armor * 1.2;
-        this.magic_resist = this.magic_resist * 1.2;
+        this.armor = Math.round(this.armor * 1.2);
+        this.magic_resist = Math.round(this.magic_resist * 1.2);
         this.attacks = genAtkPool([3, 2, 0], level);
-        this.xp_drop = this.xp_drop * 1.5;
+        this.xp_drop = Math.round(this.xp_drop * 1.5);
     }
     getDifficulty() {
         return "E";
@@ -256,8 +256,8 @@ class Elite extends Enemy {
 class Minion extends Enemy {
     constructor(name, maxHealth, level, stats) {
         super(name, maxHealth, level, stats);
-        this.armor = this.armor * 0.75;
-        this.magic_resist = this.magic_resist * 0.75;
+        this.armor = Math.round(this.armor * 0.75);
+        this.magic_resist = Math.round(this.magic_resist * 0.75);
         this.attacks = genAtkPool([2, 0, 0], level);
     }
     getDifficulty() {

@@ -3,7 +3,7 @@ const Assets = require("./Assets/Assets.js");
 const { Genie } = require("./Genie.js");
 class Menu {
     static gameMenuOptions = ["Continue", "New Game", "Info", "Help", "Exit"];
-    static startMenuOptions = ["New Game", "Load Game", "Info", "Exit"];
+    static startMenuOptions = ["New  Game", "Load Game", "Info", "Exit"];
     static gameEndOptions = ["Play Again", "Exit"];
     static startMenu(startIndex = 0) {
         console.clear();

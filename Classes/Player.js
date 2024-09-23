@@ -101,7 +101,7 @@ class Player extends Unit {
         const chars = ['-', '*', '=', '+'];
         const createSlot = (text, index) => {
 
-            let res = CH.center(text, slot_sizes[index], this.#devMode ? chars[index] : ' ') + ' '.repeat(index < 3 ? padding : 0);;
+            let res = CH.hcenter(text, slot_sizes[index], this.#devMode ? chars[index] : ' ') + ' '.repeat(index < 3 ? padding : 0);;
             return res
         }
 
@@ -111,25 +111,27 @@ class Player extends Unit {
         const hp_str = `${CH.hcenter(hp.toFixed(0), 3, " ", 1)}`;
         const getInfo = (line) => {
             if (line === 0)
-                return `Hp: ${CH.hcenter(this.health.toString(), 5, " ", 2)} (${hp_str}%)`;
+                if (this.isDead())
+                    return CH.insert_color(CH.Colors.RED,`Dead`);
+                else
+                    return `Hp: ${CH.hcenter(this.health.toString(), 5, " ", 2)} (${hp_str}%)`;
             else if (line === 1) {
-                const hp_percent = Math.round(this.health / this.maxHealth * 100);
+                const hp_percent = Math.min(Math.max(Math.round(this.health / this.maxHealth * 100), 0),100);
                 const cut_off = Math.ceil(hp_percent * 0.01 * slot_sizes[1] - 2);
                 const missing_hp = slot_sizes[1] - 2 - cut_off;
-                return `|${CH.insert_color(CH.Colors.BG_RED, " ".repeat(missing_hp))}${CH.insert_color(CH.Colors.BG_GREEN, " ".repeat(cut_off > 0? cut_off : 0))}|`;
+                return `|${CH.insert_color(CH.Colors.BG_RED, " ".repeat(Math.min(missing_hp, slot_sizes[1] -2)))}${CH.insert_color(CH.Colors.BG_GREEN, " ".repeat(cut_off > 0 ? cut_off : 0))}|`;
 
             }
             else if (line === 2)
                 return `Xp: ${CH.hcenter(this.exp.toString(), 5, " ", 2)}/${CH.hcenter(this.xp_to_next_level.toString(), 5, " ", 1)}`;
-            else if (line === 3)
-            {
+            else if (line === 3) {
                 const xp_percent = Math.round(this.exp / this.xp_to_next_level * 100);
                 const cut_off = Math.ceil(xp_percent * 0.01 * (slot_sizes[1] - 2));
                 const missing_xp = (slot_sizes[1] - 2) - cut_off;
-                return `|${CH.insert_color(CH.custom_colors(54,true), " ".repeat(cut_off))}${" ".repeat(missing_xp)}|`;
+                return `|${CH.insert_color(CH.custom_colors(54, true), " ".repeat(cut_off))}${" ".repeat(missing_xp)}|`;
 
             }
-            
+
             else
                 return "";
         }

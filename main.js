@@ -196,21 +196,7 @@ genLoot = (level) => {
     return new_loot;
 }
 
-getType = (item) => {
-    if (item instanceof Enemy.Minion) {
-        return "[M]";
-    }
-    else if (item instanceof Enemy.CommonEnemy) {
-        return "[C]";
-    }
-    else if (item instanceof Enemy.Elite) {
-        return "[E]";
-    }
-    else if (item instanceof Enemy.Boss) {
-        return "[B]";
-    }
-    return "Unknown";
-}
+
 const PlayerChoice = ['Attack', 'Flee', 'Equipament', 'Menu'];
 
 while (currentGame.isRunning) {
@@ -278,14 +264,16 @@ while (currentGame.isRunning) {
             feedback += " dmg: " + enemy_res.damageTaken + "| dmg_res: " + enemy_res.damageResisted + "! " + (enemy_res.isDead ? " Enemy is dead!" : "hp:" + currentGame.currentEnemy.health) + (enemy_res.critical ? " Critical Hit!" : "");
             const enemy_atk = currentGame.currentEnemy.randomAttack();
             const player_res = player.takeDamage(enemy_atk);
-            feedback += "\n" + ` ${getType(currentGame.currentEnemy)}` + CH.insert_color(CH.Colors.RED, currentGame.currentEnemy.name) + `(${currentGame.currentEnemy.level}) used:` + CH.insert_color(CH.weapon_colors.find(item => item.text === enemy_atk.attackType).color, enemy_atk.name) + " at you!";
+            feedback += "\n" + ` [${currentGame.currentEnemy.getDifficulty()}]` + CH.insert_color(CH.Colors.RED, currentGame.currentEnemy.name) + `(${currentGame.currentEnemy.level}) used:` + CH.insert_color(CH.weapon_colors.find(item => item.text === enemy_atk.attackType).color, enemy_atk.name) + " at you!";
             feedback += " dmg: " + player_res.damageTaken + "| dmg_res: " + player_res.damageResisted + "!" + (player_res.isDead ? " You are dead!" : "") + (player_res.critical ? " Critical Hit!" : "");
         }
         if (player.isDead()) {
             console.clear();
             genie.speak('You have died!');
             console.log(feedback);
+            console.log()
             player.printInfo();
+            console.log()
             const choice = Menu.gameEnd();
             if (choice == 1) {
                 CH.pressSpace();
