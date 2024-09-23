@@ -1,13 +1,20 @@
-const { Console } = require('console');
+// Purpose: Game class to handle the game logic.
+const CH = require('./ConsoleHelp.js');
 const {Player } = require('../Classes/Player.js');
 const fs = require('fs');
 const path = require('path');
+const Enemies = require('../Enemies/Enemies.js');
 class Game {
     #devMode = false;
     constructor(title) {
         this.title = title;
         this.isRunning = true;
         this.movent = [];
+        this.currentEnemy = new Enemies.Minion("Bob", 10, 1, {
+            strength: 5,
+            intelligence: 2,
+            dexterity: 3,
+        });
     }
     playerMove(move) {
         this.movent.push(move);

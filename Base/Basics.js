@@ -4,12 +4,6 @@ rollDice = (sides) => {
 }
 
 // Should be an Interface but Will switch to TS at this point
-class Attack {
-    constructor(damage, attackType) {
-        this.damage = damage;
-        this.attackType = attackType;
-    }
-}
 
 
 class Unit {
@@ -22,17 +16,18 @@ class Unit {
         this.strength = 1;
         this.intelligence = 1;
         this.dexterity = 1;
+        this.attacks = [];
         if (maxHealth <= 0) {
             throw new TypeError("Cannot create a dead unit");
         }
     }
-    setStats(attack, magic_attack, dexterity) {
-        this.attack = attack;
-        this.magic_attack = magic_attack;
+    setStats(strength, intelligence, dexterity) {
+        this.strength = strength;
+        this.intelligence = intelligence;
         this.dexterity = dexterity;
     }
     getStats() {
-        return { attack: this.attack, magic_attack: this.magic_attack, dexterity: this.dexterity };
+        return { strength: this.strength, intelligence: this.intelligence, dexterity: this.dexterity };
     }
     getBuffsStats() {
         let stats = { attack: 0, magic_attack: 0, dexterity: 0 };
@@ -42,9 +37,34 @@ class Unit {
             stats.dexterity += buff.dexterity;
         }
     }
+    clearCombatBuffs() {
+        this.combatBuffs = [];
+    }
+    takeDamage(Attack)
+    {
+        let damage = Math.max(Attack.getDamage()["physical_damage"], Attack.getDamage()["magic_damage"]);
+        let critical = rollDice(20) == 20;
+        if (critical) {
+            damage *= 2;
+        }
+        let damageTaken = damage * (1 - this.magic_resist/100) * (1 - this.armor/100);
+        damageTaken = Math.round(damageTaken);
+        let damageResisted = damage - damageTaken;
+        
+        this.health -= damageTaken;
+        return {  
+            damageTaken: damageTaken,
+            damageResisted: damageResisted,
+            critical: critical,
+            isDead: this.isDead()
+        };
+    }
+    isDead() {
+        return this.health <= 0;
+    }
 
 }
 
 
-module.exports = { Attack, Unit, rollDice };
+module.exports = {  Unit, rollDice };
 

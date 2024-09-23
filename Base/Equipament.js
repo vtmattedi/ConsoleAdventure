@@ -51,8 +51,7 @@ class Amulet extends Equipament {
 //     }
 // }
 
-class MagicalArmor extends  Armor
-{
+class MagicalArmor extends Armor {
     #armor;
     #magic_resist;
     constructor(name, armor, magic_resist) {
@@ -93,25 +92,60 @@ const magicalArmorNames = [
 
 
 // Function to randomly select items from an array
-function getRandomItem(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
+function getRandomItem(arr, used) 
+{
+    if (used.length >= arr.length) {
+        used = [];
+    }
+    let seed = Math.floor(Math.random() * arr.length);
+    let name = arr[seed];
+    if (used) {
+        while (used.includes(name)) {
+            seed ++;
+            if (seed >= arr.length) {
+                seed = 0;
+            }
+            name = arr[seed];
+        }
+    }
+    return name;
 }
 
 // Generating 50 equipment items with 45% armor, 45% amulet, and 10% magical armor
-const equipaments = [];
 
-const MagicArmorProbability = 0.10;
 
-for (let i = 0; i < 50; i++) {
-    const rand = Math.random();
-    if (rand < MagicArmorProbability) {
-        equipaments.push(new MagicalArmor(getRandomItem(magicalArmorNames), Math.floor(Math.random() * 100), Math.floor(Math.random() * 100)));
-    } else if (rand < MagicArmorProbability + (1 - MagicArmorProbability) / 2) {
-        equipaments.push(new Amulet(getRandomItem(amuletNames), Math.floor(Math.random() * 100)));
-    } else {
-        equipaments.push(new Armor(getRandomItem(armorNames), Math.floor(Math.random() * 100)));
+const MagicArmorProbability = 0.1;
+
+const genEquipament = (size) => {
+    let equipaments = [];
+    let used_armor = [];
+    let used_amulet = [];
+    let used_magical_armor = [];
+
+    for (let i = 0; i < size; i++) {
+        const rand = Math.random();
+        const armor = Math.floor(Math.random() * 100);
+        const magic_resist = Math.floor(Math.random() * 100);
+        
+        if (rand < MagicArmorProbability) {
+            const name = getRandomItem(magicalArmorNames, used_magical_armor);
+            used_magical_armor.push(name);
+            equipaments.push(new MagicalArmor(name, armor, magic_resist));
+        } else if (rand < MagicArmorProbability + (1 - MagicArmorProbability) / 2) {
+            const name = getRandomItem(amuletNames, used_amulet);
+            used_amulet.push(name);
+            equipaments.push(new Amulet(name, magic_resist));
+        } else {
+            const name = getRandomItem(armorNames, used_armor);
+            used_armor.push(name);
+            equipaments.push(new Armor(name, armor));
+        }
+
+        //console.log(equipaments[i].name);
     }
+    return equipaments;
 }
+
 
 const getMaxEquipamentNameLength = () => {
     let max = 0;
@@ -135,4 +169,4 @@ const getMaxEquipamentNameLength = () => {
 
 
 
-module.exports = { Armor, Amulet, MagicalArmor, equipaments, getMaxEquipamentNameLength };
+module.exports = { Armor, Amulet, MagicalArmor,Equipament, getMaxEquipamentNameLength, genEquipament };

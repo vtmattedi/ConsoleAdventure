@@ -1,11 +1,23 @@
 class Weapon {
-    constructor(name, damage, attackType) {
+    constructor(name, damage, attackType, stats) {
         this.name = name;
         this.damage = damage;
         this.attackType = attackType;
+        if(typeof stats === 'undefined') {
+            stats = {
+                strength: 0,
+                intelligence: 0,
+                dexterity: 0
+            };
+        }
+        this.stats = stats;
     }
+    
     getDamage() {
         return this.damage;
+    }
+    getStats() {
+        return this.stats;
     }
 }
 const weaponNames = [
@@ -35,13 +47,18 @@ function getRandomAttackType() {
     }
 }
 
-let weapons = [];
+const weapons = [];
 
 for (let i = 0; i < 30; i++) {
     const name = weaponNames[i];
     const damage = getRandomDamage();
     const attackType = getRandomAttackType();
-    weapons.push(new Weapon(name, damage, attackType));
+    const stats = {
+        strength: Math.floor(Math.random() * 10) + attackType === "Physical" ? 2 : 0,
+        intelligence: Math.floor(Math.random() * 10) + attackType === "Magic" ? 2 : 0,
+        dexterity: Math.floor(Math.random() * 10) + attackType === "Hybrid" ? 4 : 0
+    };
+    weapons.push(new Weapon(name, damage, attackType, stats));
 }
 
 const getMaxWeaponLength = () => {
@@ -56,4 +73,4 @@ const getMaxWeaponLength = () => {
 
 
 // Export the array and MAX_WEAPON_LENGTH
-module.exports = { Weapon, getMaxWeaponLength };
+module.exports = { Weapon, getMaxWeaponLength, weapons };

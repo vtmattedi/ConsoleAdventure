@@ -1,5 +1,5 @@
-const { merge, Colors, paintSprite, SelectValue, waitFor, pressSpace, insert_color,breakLine, vcenter } = require('./Base/ConsoleHelp.js');
-const {class_colors} = require('./Classes/GameClasses.js');
+const { merge, Decorations, Colors, paintSprite, SelectValue, waitFor, pressSpace, insert_color, breakLine, vcenter, hcenter, insert_format, getWidth } = require('./Base/ConsoleHelp.js');
+const { class_colors } = require('./Classes/GameClasses.js');
 const genie_img =
     `⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣠⣄⣀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⣰⣿⣿⣿⡿⢿⣿⣿⣿⣆⠀⠀⠀⠀⠀⠀⠀
@@ -69,6 +69,10 @@ class Genie {
         this.#name = genies[genieSeed].name;
         this.#color = genies[genieSeed].color;
     }
+
+    #shortName() {
+        return this.#name.substring(0, this.#name.indexOf(' '));
+    }
     introduce() {
         this.speak(`
 Greetings Adventurer,
@@ -89,14 +93,24 @@ Welcome to the Great ConsoleAdventure!`,
         );
     }
     generateName() {
-        const consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'z'];	
+        const consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'z'];
         return consonants[Math.floor(Math.random() * consonants.length)].toUpperCase() + 'andy';
     }
-    goodbye() {
-        this.speak('Goodbye! I will miss you!');
+    goodbye(name) {
+        if (!name)
+            name = "You";
+        const goodbye = ["Goodbye! I will miss you!", "Hasta la vista, baby!", `${name}, shall be missed!`, `Farewell, ${this.#shortName()} shall miss you!`, `Oh, never thought ${name} would quit so easily!`, `Ha, I knew ${name} could not make it!`];
+        const seed = Math.floor(Math.random() * goodbye.length);
+        const width = process.stdout.columns;
+        this.speak(hcenter(goodbye[seed], width / 3),
+            {
+                text: this.#shortName(),
+                color: this.#color
+            }
+        );
     }
     smirk(_class) {
-        if (typeof(_class) !== 'string')
+        if (typeof (_class) !== 'string')
             this.speak(`Ha, That may be a class but may also be a structure!`);
         else
             this.speak(`Oh, a ${_class}! How original!`,
@@ -104,14 +118,15 @@ Welcome to the Great ConsoleAdventure!`,
     }
     explainGame() {
         const move = `
-You can choose options with a and d keys
-(and sometimes with w and s keys).
+You can choose options with A and D keys
+(and sometimes with W and S keys),
 and use Spacebar to select the option.`;
         this.speak(move,
             [
                 {
-                    text: [' a ', ' d ', ' w ', ' s '],
-                    color: Colors.GREEN
+                    text: [' A ', ' D ', ' W ', ' S '],
+                    color: Colors.GREEN,
+                    decoration: Decorations.Bold
                 },
                 {
                     text: 'Spacebar',
@@ -122,62 +137,81 @@ and use Spacebar to select the option.`;
         );
         let choice = -1;
         while (choice != 0 && choice != 1) {
-        choice = SelectValue(['Continue', 'Go on', `I don't like you`, 'Quit'],{
-            start: Math.max(0, choice)
-        }, true);
-        if (choice == 0 || choice == 1) {
-            console.clear();
-            this.speak('Great! Let\'s embark on this jurney!');
+            choice = SelectValue(['Continue', 'Go on', `I don't like you`, 'Quit'], {
+                start: Math.max(0, choice)
+            }, true);
+            if (choice == 0 || choice == 1) {
+                console.clear();
+                this.speak('Great! Let\'s embark on this jurney!');
+            }
+            else if (choice == 2) {
+                const responses = [
+                    `Oh, you don’t like me? How unfortunate... for you. I’m ${this.#name} Like it or not, I’m all you’ve got!`,
+                    `Tsk tsk, feelings aren’t mutual. I am ${this.#name.substring(0, this.#name.length-1)} after all. Shall we get on with it?`,
+                    `Dislike me? Too bad! I’m ${this.#name} and YOU summoned me!`,
+                    `Ah, the cold shoulder. Classic! Well, you’re stuck with ${this.#name}`,
+                    `Not a fan? Lucky for me, I’m not here for approval! I’m ${this.#name}`,
+                    `How DARE you puny mortal! I’m ${this.#name.substring(0, this.#name.indexOf(' '))} the Great Whi.. ... I mean I'm ${this.#name} and I am here to serve you!`
+                ];
+                const genieSeed = Math.floor(Math.random() * 6)
+                console.clear();
+                const width = getWidth();
+                this.speak(breakLine(responses[genieSeed], width / 2),
+                    {
+                        text: this.#name.substring(0, this.#name.indexOf(' ')),
+                        color: this.#color
+                    }
+                );
+            }
+            else if (choice == 3) {
+                console.clear();
+                this.goodbye();
+                process.exit();
+            }
         }
-        else if (choice == 2) {
-            const responses = [
-                `Oh, you don’t like me? How unfortunate... for you. I’m ${this.#name} Like it or not, I’m all you’ve got!`,
-                `Tsk tsk, feelings aren’t mutual. I am ${this.#name} after all. Shall we get on with it?`,
-                `Dislike me? Too bad! I’m ${this.#name} and YOU summoned me!`,
-                `Ah, the cold shoulder. Classic! Well, you’re stuck with ${this.#name}`,
-                `Not a fan? Lucky for me, I’m not here for approval! I’m ${this.#name}`,
-                `How DARE you puny mortal! I’m ${this.#name.substring(0, this.#name.indexOf(' '))} the Great Whi.. ... I mean I'm ${this.#name} and I am here to serve you!`
-            ];
-            const genieSeed = Math.floor(Math.random() * 6)
-            console.clear();
-            const width = process.stdout.columns;
-            this.speak( breakLine(responses[genieSeed], width/2),
-                {
-                    text: this.#name.substring(0, this.#name.indexOf(' ')),
-                    color: this.#color
-                }
-            );
-        }
-        else if (choice == 3) {
-            console.clear();
-            this.goodbye();
-            process.exit();
-        }
-    }
 
     }
-    speak(sentence, colors = {}) {
+    speak(sentence, colors = {}, rightSprite) {
         var genieLines = genie_img;
         if (Math.random() > 0.5)
             genieLines = genie_img2;
 
         const width = Math.max(...genieLines.split('\n').map(line => line.length));
-        let final_sprite = merge(genieLines, createBubble(sentence));
+        let final_sentence = sentence;
+        if (rightSprite)
+            final_sentence = breakLine(sentence, getWidth() / 4);
+        let final_sprite = merge(genieLines, createBubble(final_sentence));
+        if (rightSprite)
+            final_sprite = merge(final_sprite, rightSprite,
+                {
+                    right: {
+                        align: "vcenter"
+                    }
+                });
+        else 
+            final_sprite = hcenter(final_sprite, getWidth());  
         final_sprite = paintSprite(final_sprite, width, this.#color);
+
+        if (colors) {
+            if (!Array.isArray(colors))
+                colors = [colors];
+        }
         if (Array.isArray(colors)) {
             colors.forEach(item => {
-                if (Array.isArray(item.text)) {
-                    item.text.forEach(text => final_sprite = final_sprite.replaceAll(text, insert_color(item.color, text)));
+                let format = {
+                    color: item.color,
+                    decoration: item.decoration,
+                    background: item.background
                 }
+                let textArray = [];
+                if (!Array.isArray(item.text))
+                    textArray = [item.text];
                 else
-                    final_sprite = final_sprite.replaceAll(item.text, insert_color(item.color, item.text));
+                    textArray = item.text;
+                textArray.forEach(text => final_sprite = final_sprite.replaceAll(text, insert_format(format, text)));
+
             });
         }
-        else if (colors)
-        {
-            final_sprite = final_sprite.replaceAll(colors.text, insert_color(colors.color, colors.text));
-        }
-
         console.log(final_sprite);
     }
 }
