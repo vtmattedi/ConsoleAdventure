@@ -3,72 +3,40 @@ const CH = new ConsoleImpl.ConsoleImplementation_x86();
 const Colors = ConsoleImpl.DefaultColors
 const Decorations = ConsoleImpl.Decorations
 const { class_colors } = require('./Classes/GameClasses.js');
-const genie_img =
-    `⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣠⣄⣀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⣰⣿⣿⣿⡿⢿⣿⣿⣿⣆⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠹⠿⠛⣁⣤⣤⣈⠛⠿⠏⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⣀⣤⣴⣶⣤⣈⠙⠻⠟⠋⣁⣤⣶⣦⣤⣀⠀⠀⠀⠀
-⠀⣤⣾⣿⣿⣿⣿⣿⣿⣿⣿⣶⣶⣿⣿⣿⣿⣿⣿⣿⣿⣷⣤⠀
-⣾⣿⣿⣿⣿⣿⣧⣀⣀⣀⣀⣀⡀⠀⢀⣀⣠⣿⣿⣿⣿⣿⣿⣷
-⠙⠿⣿⣿⣿⣿⣿⣿⠿⠿⠋⠁⠀⠶⢿⣿⣿⣿⣿⣿⣿⠿⠿⠋
-⠀⠀⠀⠀⠀⣀⣀⣤⣤⣶⣾⣿⣷⣶⣤⣤⣀⣀⣀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠁⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠘⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠁⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠘⣿⣿⣿⣿⣿⣿⣿⣿⣿⠁⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠈⢿⣿⣿⣿⠿⠟⠛⢉⣄⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠠⢤⣤⣶⣾⣿⣿⣿⣶⣶⣶⠶⠒⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠙⠛⠉⠉⠉⠀⠀⠀⠀`;
-const genie_image2 = `
-⠀⠀⠀⠀⠀⢀⣴⣾⣿⣿⣿⣿⣷⣦⡀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⢸⣿⠟⠋⣉⣉⠙⠻⣿⡇⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠉⢠⣾⣿⣿⣷⡄⠉⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⣀⣤⡄⠘⣿⣿⣿⣿⠃⢠⣤⣄⡀⠀⠀⠀
-⠀⢀⣴⣿⣿⣿⣿⣦⣈⠉⠉⣁⣴⣿⣿⣿⣿⣷⣄⠀
-⠀⣾⣿⣿⣿⡿⠛⠛⠛⠛⠛⠛⠛⠛⢿⣿⣿⣿⣿⣧
-⢸⣿⣿⣿⣿⣷⣤⣤⣤⡄⢠⣤⣤⣤⣾⣿⣿⣿⣿⣿
-⠀⢻⣿⣿⣿⣿⣿⣿⡿⠁⠀⢻⣿⣿⣿⣿⣿⣿⣿⠏
-⠀⠀⠙⠻⠿⠿⠟⠛⢁⣼⣷⣄⠙⠛⠿⠿⠿⠟⠁⠀
-⠀⠀⠀⠀⠠⣤⣶⣾⣿⣿⣿⣿⣿⣶⣶⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⡀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠙⠿⣿⣿⣿⣿⣿⣿⣿⣿⣄⡀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠻⠿⢿⣿⣿⣿⣿⣷⠄`;
-
-const genie_img2 = CH.vcenter(genie_image2.split('\n'), genie_img.split('\n').length, Math.max(...genie_img.split('\n').map(line => line.length))).join('\n');
-
-const genies = [
-    {
-        name: 'Zephiroth the Red Genie!',
-        color: Colors.RED,
-    },
-    {
-        name: 'Calidra the Blue Genie!',
-        color: Colors.BLUE,
-    },
-    {
-        name: 'Azarmis the Green Genie!',
-        color: Colors.GREEN,
-    },
-    {
-        name: 'Faerithan the Yellow Genie!',
-        color: Colors.YELLOW,
-    },
-    {
-        name: 'Jinnira the Magenta Genie!',
-        color: Colors.MAGENTA,
-    }
-];
-
-
-
+const Assets = require("./Assets/Assets.js");
 class Genie {
+    static #genie_pool =[
+        {
+            name: 'Zephiroth the Red Genie!',
+            color: Colors.RED,
+        },
+        {
+            name: 'Calidra the Blue Genie!',
+            color: Colors.BLUE,
+        },
+        {
+            name: 'Azarmis the Green Genie!',
+            color: Colors.GREEN,
+        },
+        {
+            name: 'Faerithan the Yellow Genie!',
+            color: Colors.YELLOW,
+        },
+        {
+            name: 'Jinnira the Magenta Genie!',
+            color: Colors.MAGENTA,
+        }
+    ];
+    
+    
+    
     #color;
     #name;
     constructor() {
-        const genieSeed = Math.floor(Math.random() * 5)
-        this.missBehaviour = Math.random().toFixed(2);
-        this.#name = genies[genieSeed].name;
-        this.#color = genies[genieSeed].color;
+        const genieSeed = Math.floor(Math.random() * Genie.#genie_pool.length -1 )
+        this.missBehaviour = Number(Math.random().toFixed(2));
+        this.#name = Genie.#genie_pool[genieSeed].name;
+        this.#color = Genie.#genie_pool[genieSeed].color;
     }
 
     #shortName() {
@@ -78,18 +46,10 @@ class Genie {
         this.speak(`
 Greetings Adventurer,
 I am ${this.#name}
-Welcome to the Great ConsoleAdventure!`,
+Welcome to the Great ${CH.insert_color(Colors.YELLOW, "Console")} ${CH.insert_color(Colors.GREEN, "Adventure")}!`,
             [{
                 text: this.#name.substring(0, this.#name.indexOf(' ')),
                 color: this.#color
-            },
-            {
-                text: 'Console',
-                color: Colors.GREEN
-            },
-            {
-                text: 'Adventure!',
-                color: Colors.YELLOW
             }]
         );
     }
@@ -173,10 +133,7 @@ and use Spacebar to select the option.`;
 
     }
     speak(sentence, colors = {}, rightSprite) {
-        var genieLines = genie_img;
-        if (Math.random() > 0.5)
-            genieLines = genie_img2;
-
+        var genieLines = Assets.GenieSprite.genie_img;
         const width = Math.max(...genieLines.split('\n').map(line => line.length));
         let final_sentence = sentence;
         if (rightSprite)
@@ -235,4 +192,4 @@ function createBubble(text) {
     return `${bubbleTop}\n/${border}\\\n${bubbleMiddle}\n|${border}|\n${bubbleBottom}`;
 }
 
-module.exports = { Genie, genie_img, genie_img2 };
+module.exports = { Genie };

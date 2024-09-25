@@ -2,13 +2,11 @@
 const ConsoleImpl = require('./Base/ConsoleHelp.js');
 const CH = new ConsoleImpl.ConsoleImplementation_x86();
 const { Player } = require('./Classes/Player.js');
-const Enemy = require('./Enemies/Enemies.js');
-const fs = require('fs');
-const path = require('path');
 const Enemies = require('./Enemies/Enemies.js');
 const { Menu } = require('./Menu.js');
 const { DamageType } = require('./Base/DamageTypes.js');
 const { Weapon } = require('./Base/Weapons.js');
+const { DevMode } = require('./Base/DevMode.js');
 class Game {
     #devMode = false; // private
     #demoMode = false // {get; private set}
@@ -16,6 +14,7 @@ class Game {
     #currentEnemy = new Enemies.Enemy(); // {get; private set}
     #isRunning = true;//{get; private set}
     #fleeAttempt = 0; // private
+    
     constructor() {
         this.#currentEnemy = new Enemies.Minion("Bob", 10, 1, {
             strength: 5,
@@ -41,7 +40,6 @@ class Game {
     get isRunning() {
         return this.#isRunning;
     }
-
 
     setDevMode(value) {
         if (typeof value !== "boolean") {
@@ -93,7 +91,6 @@ class Game {
         this.#currentEnemy = new_enemy;
         return this.#currentEnemy
     }
-
 
 }
 

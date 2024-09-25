@@ -212,8 +212,6 @@ class Player extends Unit {
                 return "";
         }
 
-
-
         let bonusStats = [0, 0, 0, 0, 0]
         bonusStats[0] = this.#weapon.getStats()["strength"];
         bonusStats[1] = this.#weapon.getStats()["intelligence"];
@@ -266,6 +264,8 @@ class Player extends Unit {
                     return "<Armor Slot>";
             else return "";
         }
+
+
         //console. log (CH.hcenter(`${this.#name} (${player_class}) lv: ${this.#level}`,size,'-'));
         const bags = ["Bag:", ...this.consumables.map(item => item.name)];
         lines.push(CH.hcenter(` ${this.#name} (${player_class}) lv: ${this.#level} `, size, '-'));
@@ -407,8 +407,6 @@ const getWeaponColor = (weapon) => {
 const getAttackColor = (attack) => {
     if (!(attack instanceof Attacks.Attack))
         throw new Error(attack + " is not an Attack");
-    CH.clear_screen();
-    CH.print(attack,attack.attackType, attack.name,GameColors.weapon_colors)
     return GameColors.weapon_colors.find(item => item.text === attack.attackType).color;
 }
 

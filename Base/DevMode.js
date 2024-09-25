@@ -1,6 +1,7 @@
 class DevMode {
-    static #instance
-    #value = false
+    static #instance = null
+    #value = false // Do not change directly, use setValue() (assure type is boolean) and handles toggle
+    #gameInstance = null
     constructor() {
         if (!DevMode.#instance) {
             DevMode.#instance = new DevMode();
@@ -13,17 +14,27 @@ class DevMode {
         return DevMode.#instance;
     }
 
-    get value ()
-    {
+    get value() {
         return this.#value
     }
 
-    setValue(value)
-    {
-        this.#value = value
+    setValue(value) {
+        if (typeof value !== "boolean") {
+            this.#value = !this.#value;
+        }
+        else
+            this.#value = value
+        return this.#value
     }
 
-    
+    set gameInstance(value) {
+        this.#gameInstance = value
+    }
+
+    get gameInstance() { 
+        return this.#gameInstance
+    }
+
 }
 
-module.exports = {DevMode};
+module.exports = { DevMode };
