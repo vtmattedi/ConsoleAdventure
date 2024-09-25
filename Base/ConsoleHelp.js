@@ -296,19 +296,20 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
      * @param {boolean} [vertical=false] - If true, the options are displayed vertically. Otherwise, they are displayed horizontally.
      * @returns {string|number} - The selected option text or index, depending on the value of `returnIndex`.
      */
-    SelectValue = (options, config = {}, returnIndex =false, vertical = false) => {
+    SelectValue = (options, config, returnIndex = false, vertical = false) => {
         let _current = 0;
         if (!Array.isArray(options)) {
             return 0;
         };
-
-
+        
+        
         if (config && config.start)
-            _current = config.start;
-        if (config && config.colors && !Array.isArray(config.colors)) {
-            config.colors = [config.colors];
-        }
-        const printOptions = () => {
+        _current = config.start;
+    if (config && config.colors && !Array.isArray(config.colors)) {
+        config.colors = [config.colors];
+    }
+    const printOptions = () => {
+            console.log(options, config, returnIndex, vertical)
             let res = "";
             let padding = " ".repeat(3);
             const width = this.getWidth();
@@ -359,7 +360,7 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
         printOptions();
         //hide cursor
         this.show_cursor(false);
-
+        const devKeys = ["o", "p", "j", "k", "y"]
         while (true) {
             let key = readline.keyIn(" ", { hideEchoBack: true, mask: '' });
             this.show_cursor(false);
@@ -396,14 +397,21 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
                 return options[_current];
 
             }
-            if (key === "p" || key === "o") {
+            if (devKeys.includes(key)) {
                 let opt = ""
-                if (config.gameInstance && config.devMode)
-                {
+                if (config.gameInstance && config.devMode) {
                     if (key === "p")
                         opt = this.gameStats(config.gameInstance, 'player')
-                    else
+                    else if (key == "o")
                         opt = this.gameStats(config.gameInstance, 'enemy')
+                    else if (key == "k")
+                        opt = this.gameStats(config.gameInstance, 'game')
+                    else if (key == "y")
+                        console.log(config)
+                }
+                else if (key == "j") {
+                    config.gameInstance.setDevMode()
+                    opt = `${this.insert_color(DefaultColors.YELLOW, "Developer Mode")} Toggled`
                 }
                 const size = opt.split("\n").length
                 this.print(opt)
@@ -567,23 +575,24 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
             console.log(text);
     }
 
-    gameStats = (gameinstace, text) => {
+    gameStats = (game_instance, text) => {
         let obj = "";
-        if (text === 'enemy')
-        {
-            obj = "Enemy: \n"
-            obj += JSON.stringify(gameinstace.currentEnemy,undefined,"\t")
+        if (text === 'enemy') {
+            obj = this.insert_color(DefaultColors.YELLOW, "Enemy: \n")
+            obj += JSON.stringify(game_instance.currentEnemy, undefined, "\t")
         }
-        else if (text === 'player')
-        {
-            obj = "Player \n"
-            obj += JSON.stringify(gameinstace.player,undefined,"\t")
+        else if (text === 'player') {
+            obj = this.insert_color(DefaultColors.YELLOW, "Player: \n")
+            obj += JSON.stringify(game_instance.player, undefined, "\t")
+        }
+        else if (text === game) {
+            obj = this.insert_color(DefaultColors.YELLOW, "Game: \n")
+            obj += JSON.stringify(game_instance, undefined, "\t")
         }
         return obj
     }
 
-    setTitle = (title) =>
-    {		
+    setTitle = (title) => {
         process.stdout.write('\x1b]2;' + title + '\x1b\x5c');
     }
 

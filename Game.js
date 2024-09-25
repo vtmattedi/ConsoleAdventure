@@ -22,7 +22,7 @@ class Game {
             intelligence: 2,
             dexterity: 3,
         });
-        Menu.setDevMode(true);
+        Menu.setDevMode(false);
         Menu.gameInstance = this;
     }
 
@@ -43,7 +43,7 @@ class Game {
     }
 
 
-    setdevMode(value) {
+    setDevMode(value) {
         if (typeof value !== "boolean") {
             this.#devMode = !this.#devMode;
         }

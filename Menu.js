@@ -24,6 +24,7 @@ class Menu {
             options, {
             devMode: Menu.#devMode,
             start: startIndex,
+            gameInstance: Menu.gameInstance,
             colors: [{
                 text: options[options.length - 1],
                 color: Colors.RED
@@ -55,6 +56,7 @@ class Menu {
         const options = Menu.gameEndOptions;
         return CH.SelectValue(options, {
             devMode: Menu.#devMode,
+            gameInstance: Menu.gameInstance,
             colors: [{
                 text: "Exit",
                 color: Colors.RED
@@ -72,7 +74,7 @@ class Menu {
         Designed and Developed by: Vitor Mattedi - MattediWorks
         `;
         const info = [
-            "Welcome to ConsoleAdventure!",
+            "Welcome to Console Adventure!",
             "This is a text-based adventure game",
             "where you can explore a world",
             "filled with magic and mystery.",
@@ -87,7 +89,7 @@ class Menu {
                     color: Colors.YELLOW
                 },
                 {
-                    text: "Adventure!",
+                    text: "Adventure",
                     color: Colors.GREEN
                 }
             ]);

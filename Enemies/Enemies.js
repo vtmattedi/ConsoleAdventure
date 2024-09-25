@@ -143,6 +143,7 @@ const genArmor = (level) => {
 
 class Enemy extends Unit {
     // Should not be  created without a type
+    #devMode = false;
     constructor(name, maxHealth, level, stats) {
         const armor = genArmor(level);
         super(maxHealth, armor.armor, armor.magic_resist);
@@ -154,11 +155,15 @@ class Enemy extends Unit {
         if (stats) {
             this.setStats(stats.strength, stats.intelligence, stats.dexterity);
         }
+        this.#devMode = false;
     }
 
 
 
-  
+    setDevMode(value)
+    {
+        this.#devMode = value
+    }
 
     randomAttack() {
         if (this.attacks.length == 0)
