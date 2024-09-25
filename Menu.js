@@ -1,38 +1,50 @@
-const CH = require("./Base/ConsoleHelp.js");
+const ConsoleImpl = require('./Base/ConsoleHelp.js')
+const CH = new ConsoleImpl.ConsoleImplementation_x86();
+const Colors = ConsoleImpl.DefaultColors
+const Decorations = ConsoleImpl.Decorations
+
 const Assets = require("./Assets/Assets.js");
 const { Genie } = require("./Genie.js");
+
+/*
+    Menu Singleton for handling game menus
+*/
+
 class Menu {
     static gameMenuOptions = ["Continue", "New Game", "Info", "Help", "Exit"];
     static startMenuOptions = ["New  Game", "Load Game", "Info", "Exit"];
     static gameEndOptions = ["Play Again", "Exit"];
+    static #devMode = false;
     static startMenu(startIndex = 0) {
-        console.clear();
-        console.log(Assets.Logos.paintedConsoleAdventure());
+        CH.clear_screen();
+        CH.print(Assets.Logos.paintedConsoleAdventure());
         const options = Menu.startMenuOptions;
         return CH.SelectValue(
             options, {
+            devMode: Menu.#devMode,
             start: startIndex,
             colors: [{
                 text: options[options.length - 1],
-                color: CH.Colors.RED
+                color: Colors.RED
             },
             {
                 text: "Load Game",
-                color: CH.Colors.LIGHTBLACK_EX
+                color: Colors.LIGHTBLACK_EX
             }]
         }, true, true
         );
     }
     static gameMenu(startIndex = 0) {
-        console.clear();
-        console.log(Assets.Logos.paintedConsoleAdventure());
+        CH.clear_screen();
+        CH.print(Assets.Logos.paintedConsoleAdventure());
         const options = Menu.gameMenuOptions;
         return CH.SelectValue(
             options, {
+            devMode: Menu.#devMode,
             start: Math.max(startIndex, 0),
             colors: [{
                 text: options[options.length - 1],
-                color: CH.Colors.RED
+                color: Colors.RED
             }]
         }, true, true
         );
@@ -40,25 +52,23 @@ class Menu {
     static gameEnd() {
         const options = Menu.gameEndOptions;
         return CH.SelectValue(options, {
+            devMode: Menu.#devMode,
             colors: [{
                 text: "Exit",
-                color: CH.Colors.RED
+                color: Colors.RED
             }]
-            , 
+            ,
 
         }, true);
     }
-
     static infoMenu(genie) {
-        console.clear();
-        console.log(Assets.Logos.paintedMattediWorks());
+        CH.clear_screen();
+        CH.print(Assets.Logos.paintedMattediWorks());
 
         const devInfo =
             `
         Designed and Developed by: Vitor Mattedi - MattediWorks
         `;
-
-
         const info = [
             "Welcome to ConsoleAdventure!",
             "This is a text-based adventure game",
@@ -72,16 +82,22 @@ class Menu {
             genie.speak(info.join("\n"), [
                 {
                     text: "Console",
-                    color: CH.Colors.YELLOW
+                    color: Colors.YELLOW
                 },
                 {
                     text: "Adventure!",
-                    color: CH.Colors.GREEN
+                    color: Colors.GREEN
                 }
             ]);
         }
-        console.log(devInfo.split("\n").map((line) => CH.hcenter(line, CH.getWidth())).join("\n"));
+        CH.print(devInfo.split("\n").map((line) => CH.hcenter(line, CH.getWidth())).join("\n"));
         CH.pressSpace("to go back");
+    }
+    static setDevMode(value) {
+        if (typeof value !== "boolean") {
+            Menu.#devMode !=  Menu.#devMode;
+        }
+        Menu.#devMode = value;
     }
 }
 

@@ -1,6 +1,8 @@
 const { Unit } = require('../Base/Basics.js');
 const Attacks = require('../Base/Attack.js');
-const CH = require('../Base/ConsoleHelp.js');
+const ConsoleImpl = require ('../Base/ConsoleHelp.js');
+const CH = new ConsoleImpl.ConsoleImplementation_x86();
+const Colors = ConsoleImpl.DefaultColors;
 const magicAttackNames = [
     "Mystic Blast", "Arcane Surge", "Flame Wave", "Frostbolt", "Shadow Strike",
     "Lightning Bolt", "Void Pulse", "Spirit Lash", "Eldritch Burst", "Mana Storm"
@@ -154,9 +156,9 @@ class Enemy extends Unit {
         }
     }
 
-    getDefence() {
-        return { armor: this.armor, magic_resist: this.magic_resist };
-    }
+
+
+  
 
     randomAttack() {
         if (this.attacks.length == 0)
@@ -196,10 +198,10 @@ class Enemy extends Unit {
         const hp_health = Math.ceil(hp_percent * 0.01 * (width - 2));
         const missing_hp = (width - 2) - hp_health;
 
-        line = `[${CH.insert_color(CH.Colors.RED, "=".repeat(Math.min(missing_hp, width - 2)))}${CH.insert_color(CH.Colors.GREEN, "=".repeat(Math.max(hp_health, 0)))}]`;
+        line = `[${CH.insert_color(Colors.RED, "=".repeat(Math.min(missing_hp, width - 2)))}${CH.insert_color(Colors.GREEN, "=".repeat(Math.max(hp_health, 0)))}]`;
         lines.push(line);
 
-        line = `str: ${this.strength} int: ${this.intelligence} dex: ${this.dexterity}`;
+        line = `Str: ${this.strength} Int: ${this.intelligence} Dex: ${this.dexterity}`;
         line = CH.hcenter(line, width, " ");
         lines.push(line);
         line = `Armor: ${this.armor} MR: ${this.magic_resist}`;

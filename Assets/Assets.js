@@ -1,4 +1,6 @@
-const CH = require('../Base/ConsoleHelp.js');
+const ConsoleImpl = require ('../Base/ConsoleHelp.js');
+const CH = new ConsoleImpl.ConsoleImplementation_x86();
+const Colors = ConsoleImpl.DefaultColors
 const { genie_img } = require('../Genie.js');
 
 const Logos = {
@@ -25,7 +27,7 @@ const Logos = {
     ca_cutoff: 36,
     mw_cutoff: 40,
 
-    animate: (logo, ms, color = { color: CH.Colors.RED, index: 1, bgcolor: CH.Colors.YELLOW }, center = true) => {
+    animate: (logo, ms, color = { color: Colors.RED, index: 1, bgcolor: Colors.YELLOW }, center = true) => {
         CH.show_cursor(false);
         let textArray = logo.split('\n');
         if (center) {
@@ -44,7 +46,7 @@ const Logos = {
             let res = '';
             sprite.forEach(element => {
                 let line = element.substring(0, index);
-                CH.center(line, width);
+                CH.hcenter(line, width);
                 if (color) {
                     line = CH.insert_color(color.bgcolor, line.substring(0, color.index)) + CH.insert_color(color.color, line.substring(color.index));
                 }
@@ -58,8 +60,8 @@ const Logos = {
 
         for (let i = 0; i < hval; i++) {
             let start = Date.now();
-            console.clear();
-            console.log(get_partial(textArray, i + 1));
+            CH.clear_screen();
+            CH.print(get_partial(textArray, i + 1));
             while (Date.now() - start < ms) { }
         }
 
@@ -78,7 +80,7 @@ const Logos = {
             }
             cut_off = Math.floor((logo_sprite[1].length - old_len)/2) + cut_off;
         }
-        return logo_sprite.map((item) => CH.insert_color(CH.Colors.YELLOW, item.substring(0, cut_off)) + CH.insert_color(CH.Colors.GREEN, item.substring(cut_off))).join('\n');
+        return logo_sprite.map((item) => CH.insert_color(Colors.YELLOW, item.substring(0, cut_off)) + CH.insert_color(Colors.GREEN, item.substring(cut_off))).join('\n');
     },
     paintedMattediWorks: (center = true,colors = {color1:39, color2:208}) => {
         let logo_sprite = Logos.MattediWorks.split('\n');
@@ -95,7 +97,7 @@ const Logos = {
 
         }
 
-        return logo_sprite.map((item) => CH.insert_color(CH.custom_colors(colors.color1), item.substring(0, cut_off)) + CH.insert_color(CH.custom_colors(colors.color2), item.substring(cut_off))).join('\n');
+        return logo_sprite.map((item) => CH.insert_color(Colors.custom_colors(colors.color1), item.substring(0, cut_off)) + CH.insert_color(Colors.custom_colors(colors.color2), item.substring(cut_off))).join('\n');
     },
 };
 

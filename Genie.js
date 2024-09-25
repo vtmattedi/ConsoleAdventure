@@ -1,4 +1,7 @@
-const { merge, Decorations, Colors, paintSprite, SelectValue, waitFor, pressSpace, insert_color, breakLine, vcenter, hcenter, insert_format, getWidth } = require('./Base/ConsoleHelp.js');
+const ConsoleImpl  = require('./Base/ConsoleHelp.js')
+const CH = new ConsoleImpl.ConsoleImplementation_x86();
+const Colors = ConsoleImpl.DefaultColors
+const Decorations = ConsoleImpl.Decorations
 const { class_colors } = require('./Classes/GameClasses.js');
 const genie_img =
     `⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣠⣄⣀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -31,9 +34,7 @@ const genie_image2 = `
 ⠀⠀⠀⠀⠀⠀⠙⠿⣿⣿⣿⣿⣿⣿⣿⣿⣄⡀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠻⠿⢿⣿⣿⣿⣿⣷⠄`;
 
-const genie_img2 = vcenter(genie_image2.split('\n'), genie_img.split('\n').length, Math.max(...genie_img.split('\n').map(line => line.length))).join('\n');
-
-
+const genie_img2 = CH.vcenter(genie_image2.split('\n'), genie_img.split('\n').length, Math.max(...genie_img.split('\n').map(line => line.length))).join('\n');
 
 const genies = [
     {
@@ -102,7 +103,7 @@ Welcome to the Great ConsoleAdventure!`,
         const goodbye = ["Goodbye! I will miss you!", "Hasta la vista, baby!", `${name}, shall be missed!`, `Farewell, ${this.#shortName()} shall miss you!`, `Oh, never thought ${name} would quit so easily!`, `Ha, I knew ${name} could not make it!`];
         const seed = Math.floor(Math.random() * goodbye.length);
         const width = process.stdout.columns;
-        this.speak(hcenter(goodbye[seed], width / 3),
+        this.speak(CH.hcenter(goodbye[seed], width / 3),
             {
                 text: this.#shortName(),
                 color: this.#color
@@ -137,11 +138,11 @@ and use Spacebar to select the option.`;
         );
         let choice = -1;
         while (choice != 0 && choice != 1) {
-            choice = SelectValue(['Continue', 'Go on', `I don't like you`, 'Quit'], {
+            choice = CH.SelectValue(['Continue', 'Go on', `I don't like you`, 'Quit'], {
                 start: Math.max(0, choice)
             }, true);
             if (choice == 0 || choice == 1) {
-                console.clear();
+                CH.clear_screen();
                 this.speak('Great! Let\'s embark on this jurney!');
             }
             else if (choice == 2) {
@@ -154,8 +155,8 @@ and use Spacebar to select the option.`;
                     `How DARE you puny mortal! I’m ${this.#name.substring(0, this.#name.indexOf(' '))} the Great Whi.. ... I mean I'm ${this.#name} and I am here to serve you!`
                 ];
                 const genieSeed = Math.floor(Math.random() * 6)
-                console.clear();
-                const width = getWidth();
+                CH.clear_screen();
+                const width = CH.getWidth();
                 this.speak(breakLine(responses[genieSeed], width / 2),
                     {
                         text: this.#name.substring(0, this.#name.indexOf(' ')),
@@ -164,7 +165,7 @@ and use Spacebar to select the option.`;
                 );
             }
             else if (choice == 3) {
-                console.clear();
+                CH.clear_screen();
                 this.goodbye();
                 process.exit();
             }
@@ -179,18 +180,18 @@ and use Spacebar to select the option.`;
         const width = Math.max(...genieLines.split('\n').map(line => line.length));
         let final_sentence = sentence;
         if (rightSprite)
-            final_sentence = breakLine(sentence, getWidth() / 4);
-        let final_sprite = merge(genieLines, createBubble(final_sentence));
+            final_sentence = CH.breakLine(sentence, CH.getWidth() / 4);
+        let final_sprite = CH.merge(genieLines, createBubble(final_sentence));
         if (rightSprite)
-            final_sprite = merge(final_sprite, rightSprite,
+            final_sprite = CH.merge(final_sprite, rightSprite,
                 {
                     right: {
                         align: "vcenter"
                     }
                 });
         else 
-            final_sprite = hcenter(final_sprite, getWidth());  
-        final_sprite = paintSprite(final_sprite, width, this.#color);
+            final_sprite = CH.hcenter(final_sprite, CH.getWidth());  
+        final_sprite = CH.paintSprite(final_sprite, width, this.#color);
 
         if (colors) {
             if (!Array.isArray(colors))
@@ -208,11 +209,11 @@ and use Spacebar to select the option.`;
                     textArray = [item.text];
                 else
                     textArray = item.text;
-                textArray.forEach(text => final_sprite = final_sprite.replaceAll(text, insert_format(format, text)));
+                textArray.forEach(text => final_sprite = final_sprite.replaceAll(text, CH.insert_format(format, text)));
 
             });
         }
-        console.log(final_sprite);
+        CH.print(final_sprite);
     }
 }
 

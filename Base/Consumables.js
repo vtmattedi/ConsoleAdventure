@@ -4,6 +4,12 @@ class Consumable {
     constructor(name) {
         this.name = name;
     }
+    get name() {
+        return this.name;
+    } 
+    set name(value) {
+        this.name = value;
+    }
     use() {
         //Abstract Method
         throw new Error("Method not implemented.");
@@ -21,19 +27,26 @@ class HealthPotion extends Potion {
         super(name);
         this.#health = health;
     }
-    use() {
+    get health() {
         return this.#health;
+    }
+    use() {
+        return {
+            hp: this.#health
+        };
     }
 }
 
 class CombatPotion extends Potion {
-    #attack;
-    constructor(name, attack) {
+    #stats;
+    constructor(name, stats) {
         super(name);
-        this.#attack = attack;
+        this.#stats = stats;
     }
     use() {
-        return this.#attack;
+        return{
+            stats: this.#stats
+        };
     }
 }
 
@@ -44,13 +57,8 @@ class Utility extends Consumable {
 }
 
 class CombatUtility extends Utility {
-    #attack;
     constructor(name, attack) {
         super(name);
-        this.#attack = attack;
-    }
-    use() {
-        return this.#attack;
     }
 }
 

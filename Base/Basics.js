@@ -3,8 +3,17 @@ rollDice = (sides) => {
     return Math.floor(Math.random() * sides) + 1;
 }
 
-// Should be an Interface but Will switch to TS at this point
+class Stats {
+    constructor(strength, intelligence, dexterity) {
+        this.strength = strength;
+        this.intelligence = intelligence;
+        this.dexterity = dexterity;
+    }
 
+}
+
+// Should be an Interface but Will switch to TS at this point
+const {Damage} = require('./DamageTypes.js');
 
 class Unit {
     combatBuffs = [];
@@ -40,27 +49,44 @@ class Unit {
     clearCombatBuffs() {
         this.combatBuffs = [];
     }
-    takeDamage(Attack)
+    takeDamage(damage)
     {
-        let damage = Math.max(Attack.getDamage()["physical_damage"], Attack.getDamage()["magic_damage"]);
+        if (!(damage instanceof Damage)) {
+            console.log(damage);
+            throw new TypeError("Damage must be an instance of Damage");
+        }
+        let [physical_damage, magic_damage] = damage.getDamageArray();
+
         let critical = rollDice(20) == 20;
         if (critical) {
-            damage *= 2;
+            physical_damage *= 2;
+            magic_damage *= 2;
         }
-        let damageTaken = damage * (1 - this.magic_resist/100) * (1 - this.armor/100);
-        damageTaken = Math.round(damageTaken);
-        let damageResisted = damage - damageTaken;
-        
+        const totalDamage = physical_damage + magic_damage;
+        Math.round(totalDamage,2    );
+        let damageTaken = Math.max(Math.round(physical_damage * (1 - this.armor/100)), 0) + Math.max(Math.round(magic_damage * (1 - this.magic_resist/100),0));
+        let damageResisted = totalDamage - damageTaken;
+        damageTaken =  Number(damageTaken.toFixed(2));
+        damageResisted = Number(damageResisted.toFixed(2));
         this.health -= damageTaken;
+        this.health = Math.max(0, this.health);
         return {  
-            damageTaken: damageTaken,
-            damageResisted: damageResisted,
+            damageTaken: damageTaken.toFixed(2),
+            damageResisted: damageResisted.toFixed(2),
             critical: critical,
             isDead: this.isDead()
         };
     }
     isDead() {
         return this.health <= 0;
+    }
+
+    recoverHealth(amount) {
+        if (amount < 0 || typeof amount !== 'number') {
+            throw new TypeError("Amount must be a number and positive");
+        }
+        this.health += amount;
+        this.health = Math.min(this.health, this.maxHealth);
     }
 
 }

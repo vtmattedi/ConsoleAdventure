@@ -1,22 +1,26 @@
 const setTitle = require('console-title');
-const { Game } = require('./Base/Game.js');
+const { Game } = require('./Game.js');
+const {GameColors} = require('./Base/GameColors.js')
 const { Genie, genie_img } = require('./Genie.js');
 const { Player } = require('./Classes/Player.js');
 const Enemy = require('./Enemies/Enemies.js');
 const Assets = require('./Assets/Assets.js');
-const CH = require('./Base/ConsoleHelp.js');
-const rl = require('readline-sync');
-const { class_colors, Mage, Warrior, Rogue } = require('./Classes/GameClasses.js');
+
+const ConsoleImpl = require ('./Base/ConsoleHelp.js');
+const CH = new ConsoleImpl.ConsoleImplementation_x86();
+const Colors = ConsoleImpl.DefaultColors;
+const { Mage, Warrior, Rogue } = require('./Classes/GameClasses.js');
 const { equipaments, genEquipament, Equipament } = require('./Base/Equipament.js');
 const { Weapon, weapons } = require('./Base/Weapons.js');
 const { Consumable } = require('./Base/Consumables.js');
 const { Menu } = require('./Menu.js');
 setTitle('Console Adventure Game');
-console.clear();
+
 const currentGame = new Game('Adventure');
 const genie = new Genie();
 let player = new Mage("Andy");
 
+/*Test Area*/
 if (false) {
     Menu.infoMenu(genie);
     while (true) {
@@ -29,15 +33,15 @@ if (false) {
             break;
         }
         CH.show_cursor(true);
-        console.clear();
-        console.log(a)
-        console.log(Assets.Logos.paintedMattediWorks(true, a));
+        CH.clear_screen();
+        CH.print(a)
+        CH.print(Assets.Logos.paintedMattediWorks(true, a));
         //Assets.Logos.paintedMattediWorks(true,a);
         
     }
     process.exit();
     
-}// console.log(selectOption(["Save","Load","Continue", "Exit"]));
+}// CH.print(selectOption(["Save","Load","Continue", "Exit"]));
 if (false) {
     const c = genEquipament(50);
     player.weapon = new Weapon("Old Stick", 1, "Magic", {
@@ -50,32 +54,35 @@ if (false) {
     player.printInfo();
     CH.pressSpace();
     process.exit();
-}// console.log(selectOption(["Save","Load","Continue", "Exit"]));
+}// CH.print(selectOption(["Save","Load","Continue", "Exit"]));
 
 if (false) {
-    console.clear();
-    console.log(CH.getWidth());
+    CH.clear_screen();
+    CH.print(CH.getWidth());
     const b = new Enemy.Boss("Andy",100,15)
     b.health = 0 * b.maxHealth;
-    console.log(b.generateEnemyInfo());
+    CH.print(b.generateEnemyInfo());
     genie.speak("Hello Adventurer! What is your name?");
     genie.speak("Hello Adventurer! What is your name?", {},b.generateEnemyInfo());
     process.exit();
 }
 
-
 const MIN_WIDTH = 87;
 
-CH.hide_cursor();
-if (process.stdout.columns < MIN_WIDTH) {
-    let error = 'Warning: Your terminal window is too small to play the game properly. Please resize the window to at least 87 characters wide.';
-    error = error.replace("Warning", CH.insert_color(CH.Colors.RED, "Warning"));
-    error = error.replace(`${MIN_WIDTH}`, CH.insert_color(CH.Colors.YELLOW, `${MIN_WIDTH}`));
-    console.log(CH.insert_color(CH.Colors.RED, error));
+CH.show_cursor(false);
+CH.clear_screen();
+const current_width = CH.getWidth();
+if (current_width  < MIN_WIDTH) {
+    let error = `Warning: Your terminal window is too small to play the game properly. Please resize the window to at least 87 characters wide. (current width: ${current_width}) Graphics won't be displayed properly.`;
+    error =  CH.breakLine(error, current_width - 2);
+    error = error.replace("Warning", CH.insert_color(Colors.RED, "Warning"));
+    error = error.replace(`${MIN_WIDTH}`, CH.insert_color(Colors.YELLOW, `${MIN_WIDTH}`));
+    error = error.replace(`${current_width}`, CH.insert_color(Colors.YELLOW, `${current_width}`));
+    CH.print(CH.insert_color(Colors.RED, error));
 }
 CH.pressSpace("to start")
 
-// console.log(createBubble(genie_img));
+// CH.print(createBubble(genie_img));
 
 //hide cursor
 
@@ -83,20 +90,20 @@ Assets.Logos.animate(
     Assets.Logos.ConsoleAdventure,
     15,
     {
-        color: CH.Colors.GREEN,
+        color: Colors.GREEN,
         index: Assets.Logos.ca_cutoff,
-        bgcolor: CH.Colors.YELLOW
+        bgcolor: Colors.YELLOW
     }
 );
 
-
 CH.pressSpace("to start");
-console.clear();
+CH.clear_screen();
 
 let sel = Menu.startMenu();
+
 while (sel) {
     if (sel == 3) {
-        console.clear();
+        CH.clear_screen();
         genie.goodbye();
         process.exit();
     }
@@ -106,24 +113,21 @@ while (sel) {
     sel = Menu.startMenu(Math.max(sel, 0));
 }
 
-
-
-console.clear();
+CH.clear_screen();
 genie.introduce();
 player.PlayerInfo();
 CH.pressSpace();
-console.clear();
+CH.clear_screen();
 player.PlayerInfo();
 genie.explainGame();
 CH.pressSpace();
-console.clear();
+CH.clear_screen();
 genie.speak('Hello again Adventurer!\nI didn\'t catch your name. What was it?');
-CH.show_cursor(true);
-const playerName = rl.question(CH.insert_color(CH.Colors.YELLOW, '\tMy name is: '));
-CH.show_cursor(false);
+const playerName = CH.question(CH.insert_color(Colors.YELLOW, '\tMy name is: '));
 const nameSeed = Math.random();
 let newName = playerName.trim();
-console.clear();
+CH.clear_screen();
+
 if (genie.missBehaviour > nameSeed || playerName === "" || typeof playerName === "undefined") {
     newName = genie.generateName();
     genie.speak(`
@@ -135,15 +139,15 @@ else {
 }
 
 CH.pressSpace();
-console.clear();
+CH.clear_screen();
 genie.speak(`What Are You?`);
 const class_options = ['Warrior', 'Mage', 'Rogue'];
 const class_sel = CH.SelectValue(class_options.map(item => `I'm a ` + item), {
     start: 0,
-    colors: class_colors,
+    colors: GameColors.class_colors,
     padding: 10
 }, true, false);
-console.clear();
+CH.clear_screen();
 genie.smirk(class_options[class_sel]);
 CH.pressSpace();
 if (class_sel == 0) {
@@ -177,7 +181,6 @@ const genEnemy = (level) => {
     
 }
 
-
 genLoot = (level) => {
     const seed = Math.random();
     let new_loot = [];
@@ -200,15 +203,15 @@ genLoot = (level) => {
 const PlayerChoice = ['Attack', 'Flee', 'Equipament', 'Menu'];
 
 while (currentGame.isRunning) {
-    console.clear();
+    CH.clear_screen();
     genie.speak('What will you do?', {}, currentGame.currentEnemy.generateEnemyInfo());
     if (feedback !== "") {
-        console.log(CH.hcenter(feedback, width));
+        CH.print(CH.hcenter(feedback, width));
         feedback = "";
-        console.log();
+        CH.print();
     }
-    console.log(player.PlayerInfo());
-    console.log();
+    CH.print(player.PlayerInfo());
+    CH.print();
     
     const choice = CH.SelectValue(PlayerChoice, {
         start: 0,
@@ -228,7 +231,7 @@ while (currentGame.isRunning) {
                 CH.pressSpace("to go back");
             }
             else if (menu_choice == Menu.gameMenuOptions.length - 1) {
-                console.clear();
+                CH.clear_screen();
                 genie.goodbye();
                 process.exit();
             }
@@ -241,51 +244,52 @@ while (currentGame.isRunning) {
         CH.pressSpace();
     }
     else if (choice == 2) {
-        console.clear();
+        CH.clear_screen();
         genie.speak('You have found an equipament!');
         const equip_seed = (Math.random() * loot.length - 1).toFixed(0);;
         let equipament = loot[equip_seed];
-        console.log(loot.map((item, index) => `${index}: ${item.name} [${item.constructor.name}]`));
+        CH.print(loot.map((item, index) => `${index}: ${item.name} [${item.constructor.name}]`));
         player.findEquipament(equipament);
     }
     else if (choice === PlayerChoice.length - 1) {
-        console.clear();
+        CH.clear_screen();
         genie.goodbye(player.name);
         CH.pressSpace();
     }
     else {
         const atk = player.selectAttack();
-        if (atk == -1) {
+        if (atk === -1) {
             continue;
         }
         else {
-            feedback = "You used: " + CH.insert_color(CH.weapon_colors.find(item => item.text === player.attacks[atk].attackType).color, player.attacks[atk].name) + " at the enemy!";
-            const enemy_res = currentGame.currentEnemy.takeDamage(player.attacks[atk]);
+            feedback = "You used: " + CH.insert_color(GameColors.weapon_colors.find(item => item.text === player.attacks[atk].attackType).color, player.attacks[atk].name) + " at the enemy!";
+            const enemy_res = player.attackTarget(atk, currentGame.currentEnemy);
             feedback += " dmg: " + enemy_res.damageTaken + "| dmg_res: " + enemy_res.damageResisted + "! " + (enemy_res.isDead ? " Enemy is dead!" : "hp:" + currentGame.currentEnemy.health) + (enemy_res.critical ? " Critical Hit!" : "");
             const enemy_atk = currentGame.currentEnemy.randomAttack();
-            const player_res = player.takeDamage(enemy_atk);
-            feedback += "\n" + ` [${currentGame.currentEnemy.getDifficulty()}]` + CH.insert_color(CH.Colors.RED, currentGame.currentEnemy.name) + `(${currentGame.currentEnemy.level}) used:` + CH.insert_color(CH.weapon_colors.find(item => item.text === enemy_atk.attackType).color, enemy_atk.name) + " at you!";
+            const player_res = player.takeDamage(enemy_atk.calculateDamage(currentGame.currentEnemy.getStats()));
+            CH.pressSpace();
+            feedback += "\n" + ` [${currentGame.currentEnemy.getDifficulty()}]` + CH.insert_color(Colors.RED, currentGame.currentEnemy.name) + `(${currentGame.currentEnemy.level}) used:` + CH.insert_color(GameColors.weapon_colors.find(item => item.text === enemy_atk.attackType).color, enemy_atk.name) + " at you!";
             feedback += " dmg: " + player_res.damageTaken + "| dmg_res: " + player_res.damageResisted + "!" + (player_res.isDead ? " You are dead!" : "") + (player_res.critical ? " Critical Hit!" : "");
         }
         if (player.isDead()) {
             while (true) {        
-                console.clear();
+                CH.clear_screen();
                 genie.speak('You have died!');
-                console.log(feedback);
-                console.log()
+                CH.print(feedback);
+                CH.print()
                 player.printInfo();
-                console.log()
+                CH.print()
                 const new_choice = Menu.gameEnd();
                 if (new_choice === 1) {
                     CH.pressSpace();
-                    console.clear();
+                    CH.clear_screen();
                     genie.goodbye();
                     process.exit();
                 }
             }
         }
         else if (currentGame.currentEnemy.isDead()) {
-            console.clear();
+            CH.clear_screen();
             genie.speak('You have defeated the enemy!');
             const xp = currentGame.currentEnemy.xp_drop;
             const dead_loot = currentGame.currentEnemy.loot;
@@ -304,11 +308,9 @@ while (currentGame.isRunning) {
             currentGame.currentEnemy = genEnemy(player.level);
             currentGame.currentEnemy.loot = genLoot(currentGame.currentEnemy.level);
             player.gainExp(xp);
-            console.log("\n")
+            CH.print("\n")
             player.PlayerInfo();
             CH.pressSpace();
         }
     }
 }
-
-

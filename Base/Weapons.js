@@ -1,3 +1,6 @@
+const {DamageType} = require('./DamageTypes')
+
+
 class Weapon {
     constructor(name, damage, attackType, stats) {
         this.name = name;
@@ -39,11 +42,11 @@ function getRandomAttackType() {
     const randomChance = Math.random();
     const HybridChance = 0.1;
     if (randomChance < 0.1) {
-        return "Hybrid";
+        return DamageType.Hybrid;
     } else if (randomChance < HybridChance + (1 - HybridChance) / 2) {
-        return "Magic";
+        return DamageType.Magic;
     } else {
-        return "Physical";
+        return DamageType.Physical;
     }
 }
 

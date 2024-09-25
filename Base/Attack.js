@@ -1,86 +1,119 @@
+const { DamageType, Damage } = require('./DamageTypes.js')
+
 class Attack {
+    #damage;     //Should be protected but ES6 so... {get; private set}
+    #name;  //{get; private set}
+    #attackType;   //{get; private set}
     constructor(name, damage, attackType) {
-        this.name = name;
-        this.damage = damage;
-        this.attackType = attackType;
+        if (typeof name !== 'string' || typeof damage !== 'number' || isNaN(attackType))
+            throw new Error("Invalid parameters");
+        this.#name = name; //Final {get; private set}
+        this.#damage = damage; //Final, Private, use fn to get proper demage
+        this.#attackType = attackType; //Final 
+    }
+    get name() {
+        return this.#name;
     }
 
-    /// Abstract method
-    getDamage() {
-        throw new Error("Not implemented");
+
+    get attackType() {
+        return this.#attackType;
     }
 
-    applyStats(weapon, stats) {
-        if (this.attackType == "Physical") {
-            this.damage *= (1 + stats.strength / 100 + 0.5 * stats.dexterity / 100);
-        }
-        else if (this.attackType == "Magic") {
-            this.damage *= (1 + stats.intelligence / 100 + 0.5 * stats.dexterity / 100);
-        }
-        if (weapon) {
+    get damage() {
+        return this.#damage
+    }
+
+
+    // /// Abstract method
+    // getDamage() {
+    //     throw new Error("Not implemented");
+    // }
+
+
+    calculateDamage(stats, weapon) {
+       
+        if (!stats)
+            throw new Error("Stats must be provided");
+        if (isNaN(stats.strength) || isNaN(stats.intelligence) || isNaN(stats.dexterity))
+            throw new Error("Stats must be a valid object with strength, intelligence and dexterity");
+        if (![DamageType.Magic, DamageType.Physical].includes(this.attackType))
+            throw new Error("Method must be implemented in non Magic/Physical Attacks");
+        
+        let physical_damage = 0;
+        let magic_damage = 0;
+        if (this.attackType === DamageType.Physical)
+            physical_damage = this.damage;
+        else if (this.attackType === DamageType.Magic)
+            magic_damage = this.damage;
+
+        //Calculate damage based on stats
+        //Physical Damage   = Base Damage + 1% per point of Strength + 0.5% per point of Dexterity
+        //Magic Damage      = Base Damage + 1% per point of Intelligence + 0.5% per point of Dexterity
+        magic_damage *= (1 + stats.intelligence / 100 + 0.5 * stats.dexterity / 100)
+        physical_damage *= (1 + stats.strength / 100 + 0.5  * stats.dexterity / 100);
+       if (weapon) {
             const weaponType = weapon.attackType;
-            if (this.attackType === weaponType || weaponType === "Hybrid") {
-                this.damage *= weapon.getDamage();
+            if (weaponType === this.attackType) {
+                magic_damage *= weapon.getDamage();
+            }
+            else if (weaponType === DamageType.Hybrid) {
+                magic_damage *= weapon.getDamage();
+                physical_damage *= weapon.getDamage();
             }
         }
+        return new Damage(physical_damage, magic_damage);
     }
 
 }
 
 class MagicAttack extends Attack {
     constructor(name, damage) {
-        super(name, damage, "Magic");
-    }
-
-    getDamage() {
-        return {
-            magic_damage: this.damage,
-            physical_damage: 0
-        }
+        super(name, damage, DamageType.Magic);
     }
 
 }
 
 class PhysicalAttack extends Attack {
     constructor(name, damage) {
-        super(name, damage, "Physical");
+        super(name, damage, DamageType.Physical);
     }
-    getDamage() {
-        return {
-            magic_damage: 0,
-            physical_damage: this.damage
-        }
-    }
+
 }
+
 class HybridAttack extends Attack {
+    #physical_damage; //strictly private
+    #magic_damage; //strictly private
     constructor(name, magic_damage, physical_damage) {
-        super(name, magic_damage, "Hybrid");
-        this.physical_damage = physical_damage;
-        this.magic_damage = magic_damage;
+        super(name, magic_damage, DamageType.Hybrid);
+        this.#physical_damage = physical_damage;
+        this.#magic_damage = magic_damage;
     }
-    getDamage() {
+    get damage() {
         return {
-            magic_damage: this.magic_damage,
-            physical_damage: this.physical_damage
-        }
+            physical_damage: this.#physical_damage,
+            magic_damage: this.#magic_damage
+        };
     }
-    applyStats(weapon, stats) {
-        this.magic_damage *= (1 + stats.intelligence / 100 + 0.5 * stats.dexterity / 100);
-        this.physical_damage *= (1 + stats.strength / 100 + 0.5 * stats.dexterity / 100);
+    calculateDamage(stats, weapon) {
+        this.#magic_damage *= (1 + stats.intelligence / 100 + 0.5 * stats.dexterity / 100);
+        this.#physical_damage *= (1 + stats.strength / 100 + 0.5 * stats.dexterity / 100);
 
         if (weapon) {
             const weaponType = weapon.attackType;
-            if (weaponType === "Hybrid") {
+            if (weaponType === DamageType.Hybrid) {
                 this.magic_damage *= weapon.getDamage();
                 this.physical_damage *= weapon.getDamage();
             }
-            else if (weaponType === "Physical") {
+            else if (weaponType === DamageType.Physical) {
                 this.physical_damage *= weapon.getDamage();
             }
-            else if (weaponType === "Magic") {
+            else if (weaponType === DamageType.Magic) {
                 this.magic_damage *= weapon.getDamage();
             }
         }
+
+        return new Damage(this.#physical_damage, this.#magic_damage);
     }
 }
 

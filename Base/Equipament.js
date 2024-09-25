@@ -141,7 +141,7 @@ const genEquipament = (size) => {
             equipaments.push(new Armor(name, armor));
         }
 
-        //console.log(equipaments[i].name);
+        //CH.print(equipaments[i].name);
     }
     return equipaments;
 }
