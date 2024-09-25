@@ -130,7 +130,9 @@ class Player extends Unit {
         if (this.#xp >= this.#xp_to_next_level) {
             this.#xp = this.#xp - this.#xp_to_next_level;
             this.levelUp();
+            return true;
         }
+        return false;
     }
     //Base level up
     //Implement stats increase and
@@ -157,7 +159,6 @@ class Player extends Unit {
 
 
         */
-        const weap = CH.hcenter(`Weapon:${Weapons.getMaxWeaponLength()}`, Weapons.getMaxWeaponLength(), '-');
 
         const equip = CH.hcenter(`Equip:${Equipament.getMaxEquipamentNameLength()}`, Equipament.getMaxEquipamentNameLength(), '+');
         const ds = 'Armor: 100 +100'.length;

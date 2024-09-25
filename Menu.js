@@ -15,6 +15,7 @@ class Menu {
     static startMenuOptions = ["New  Game", "Load Game", "Info", "Exit"];
     static gameEndOptions = ["Play Again", "Exit"];
     static #devMode = false;
+    static gameInstance = undefined;
     static startMenu(startIndex = 0) {
         CH.clear_screen();
         CH.print(Assets.Logos.paintedConsoleAdventure());
@@ -42,6 +43,7 @@ class Menu {
             options, {
             devMode: Menu.#devMode,
             start: Math.max(startIndex, 0),
+            gameInstance: Menu.gameInstance,
             colors: [{
                 text: options[options.length - 1],
                 color: Colors.RED

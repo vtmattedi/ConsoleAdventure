@@ -267,7 +267,6 @@ while (currentGame.isRunning) {
             feedback += " dmg: " + enemy_res.damageTaken + "| dmg_res: " + enemy_res.damageResisted + "! " + (enemy_res.isDead ? " Enemy is dead!" : "hp:" + currentGame.currentEnemy.health) + (enemy_res.critical ? " Critical Hit!" : "");
             const enemy_atk = currentGame.currentEnemy.randomAttack();
             const player_res = player.takeDamage(enemy_atk.calculateDamage(currentGame.currentEnemy.getStats()));
-            CH.pressSpace();
             feedback += "\n" + ` [${currentGame.currentEnemy.getDifficulty()}]` + CH.insert_color(Colors.RED, currentGame.currentEnemy.name) + `(${currentGame.currentEnemy.level}) used:` + CH.insert_color(GameColors.weapon_colors.find(item => item.text === enemy_atk.attackType).color, enemy_atk.name) + " at you!";
             feedback += " dmg: " + player_res.damageTaken + "| dmg_res: " + player_res.damageResisted + "!" + (player_res.isDead ? " You are dead!" : "") + (player_res.critical ? " Critical Hit!" : "");
         }
@@ -305,8 +304,7 @@ while (currentGame.isRunning) {
                 }
 
             });
-            currentGame.currentEnemy = genEnemy(player.level);
-            currentGame.currentEnemy.loot = genLoot(currentGame.currentEnemy.level);
+            currentGame.currentEnemy = currentGame.generateEnemy(player.level);
             player.gainExp(xp);
             CH.print("\n")
             player.PlayerInfo();

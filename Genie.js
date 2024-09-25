@@ -157,7 +157,7 @@ and use Spacebar to select the option.`;
                 const genieSeed = Math.floor(Math.random() * 6)
                 CH.clear_screen();
                 const width = CH.getWidth();
-                this.speak(breakLine(responses[genieSeed], width / 2),
+                this.speak(CH.breakLine(responses[genieSeed], width / 2),
                     {
                         text: this.#name.substring(0, this.#name.indexOf(' ')),
                         color: this.#color

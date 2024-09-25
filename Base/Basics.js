@@ -52,7 +52,7 @@ class Unit {
     takeDamage(damage)
     {
         if (!(damage instanceof Damage)) {
-            console.log(damage);
+            console.print(damage);//prob should change for ConsoleImplementation
             throw new TypeError("Damage must be an instance of Damage");
         }
         let [physical_damage, magic_damage] = damage.getDamageArray();

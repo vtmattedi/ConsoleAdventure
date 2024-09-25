@@ -1,9 +1,9 @@
 
 //ANSI escape codes: https://en.wikipedia.org/wiki/ANSI_escape_code
-// Terminal Coloring Helping functions for the final project of js POO
+// Terminal Handling implementations
 const readline = require("readline-sync");
-const a_rl = require("readline");
 
+// ANSI control sequences => color = CSI n m
 class ControlSequences {
     static get CSI() { return '\x1b['; }
     static get OSC() { return '\x1b]'; }
@@ -11,6 +11,7 @@ class ControlSequences {
     static get Reset() { return '\x1b[0m'; }
 }
 
+//n number for colors and 8/24bit color constructor
 class DefaultColors {
     static get BLACK() { return 30; }
     static get RED() { return 31; }
@@ -62,6 +63,7 @@ class DefaultColors {
     }
 }
 
+//ANSI text decoration n
 class Decorations {
     static get Bold() { return 1; }
     static get Dim() { return 2; }
@@ -73,6 +75,7 @@ class Decorations {
     static get no_underline() { return 24; }
 }
 
+//Custom console error
 class ConsoleNotImplemented extends Error {
     constructor() {
         super("The ConsoleHelper was not properly implemented.");
@@ -86,6 +89,7 @@ class ConsoleImplementation {
     //
     // Strictly Abstract 
     //
+    // Should only throw error if a not implement NESCESSARY feature is tryng to be used
     fillBar = (percent, size, char) => {
         throw new ConsoleNotImplemented();
     }
@@ -162,6 +166,7 @@ class ConsoleImplementation {
     }
 }
 
+//Singleton for most VTI terminals and OS use
 class ConsoleImplementation_x86 extends ConsoleImplementation {
     static #instance = null;
     constructor() {
@@ -272,7 +277,7 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
         percent = Math.max(percent, 0);
         percent = Math.min(percent, 1);
         const cut_off = Math.round(percent * size)
-        
+
         let line = this.insert_color(color, char.repeat(cut_off)) + this.insert_color(bg_color, char.repeat(size - cut_off));
         return line;
 
@@ -293,7 +298,9 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
      */
     SelectValue = (options, config, returnIndex, vertical = false) => {
         let _current = 0;
-        if (!Array.isArray(options)) return "";
+        if (!Array.isArray(options)) {
+            return 0;
+        };
 
         if (config && config.start)
             _current = config.start;
@@ -318,12 +325,11 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
                 //line = `${line} :[${line.length}]`;
                 let char = ' ';
                 options.devMode = true;
-                if (options.devMode)
-                {
+                if (options.devMode) {
                     char = '#';
                 }
                 if (vertical) {
-                    res += this.hcenter(line , width, char);
+                    res += this.hcenter(line, width, char);
                     res += '\n';
                 }
                 else {
@@ -390,11 +396,19 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
                 return options[_current];
 
             }
-            if (key === "p") {
-                const width = process.stdout.columns;
-                this.print("width:", width);
-                pressSpace();
-                this.clear_last_line(2);
+            if (key === "p" || key === "o") {
+                let opt = ""
+                if (config.gameInstance && config.devMode)
+                {
+                    if (key === "p")
+                        opt = this.gameStats(config.gameInstance, 'player')
+                    else
+                        opt = this.gameStats(config.gameInstance, 'enemy')
+                }
+                const size = opt.split("\n").length
+                this.print(opt)
+                this.pressSpace();
+                this.clear_last_line(size + 1);
             }
             if (vertical) {
                 this.clear_last_line(options.length + 1); //clear all lines from the options
@@ -550,7 +564,27 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
             console.log();
         }
         else
-        console.log(text);
+            console.log(text);
+    }
+
+    gameStats = (gameinstace, text) => {
+        let obj = "";
+        if (text === 'enemy')
+        {
+            obj = "Enemy: \n"
+            obj += JSON.stringify(gameinstace.currentEnemy,undefined,"\t")
+        }
+        else if (text === 'player')
+        {
+            obj = "Player \n"
+            obj += JSON.stringify(gameinstace.player,undefined,"\t")
+        }
+        return obj
+    }
+
+    setTitle = (title) =>
+    {		
+        process.stdout.write('\x1b]2;' + title + '\x1b\x5c');
     }
 
 }
