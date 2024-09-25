@@ -296,11 +296,12 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
      * @param {boolean} [vertical=false] - If true, the options are displayed vertically. Otherwise, they are displayed horizontally.
      * @returns {string|number} - The selected option text or index, depending on the value of `returnIndex`.
      */
-    SelectValue = (options, config, returnIndex, vertical = false) => {
+    SelectValue = (options, config = {}, returnIndex =false, vertical = false) => {
         let _current = 0;
         if (!Array.isArray(options)) {
             return 0;
         };
+
 
         if (config && config.start)
             _current = config.start;
@@ -324,8 +325,7 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
 
                 //line = `${line} :[${line.length}]`;
                 let char = ' ';
-                options.devMode = true;
-                if (options.devMode) {
+                if (config.devMode) {
                     char = '#';
                 }
                 if (vertical) {
