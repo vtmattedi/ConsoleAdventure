@@ -1,4 +1,4 @@
-![Alt text](./Assets//Logo.png)
+![Alt text](./Game/Assets//Logo.png)
 
 # Console Adventure
 
@@ -30,6 +30,9 @@ and run main.js with node
 node main.js
 ```
 
+On Windows you can run the ConsoleAdventure.bat included
+(which is just a script with ```node main.js``` and ```pause```) but you can also create shourt cuts to it and paste on the Desktop for example
+
 # Future Features
 
 Some features that are still not implemented but are coming soon:
@@ -44,16 +47,16 @@ Some features that are still not implemented but are coming soon:
 # Preview
 
 ### 5 Mysterious Genies
-![Alt text](./Assets//Genies.png)
+![Alt text](./Game/Assets//Genies.png)
 
 ### 3 Classes
 
-![Alt text](./Assets//Classes.png)
+![Alt text](./Game/Assets//Classes.png)
 
 
-![Alt text](./Assets//Warrior.png)
+![Alt text](./Game/Assets//Warrior.png)
 
 ### And a lot of Adventure!
-![Alt text](./Assets//Adventure2.png)
+![Alt text](./Game/Assets//Adventure2.png)
 
-![Alt text](./Assets//Slain2.png)
+![Alt text](./Game/Assets//Slain2.png)

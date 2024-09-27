@@ -266,7 +266,6 @@ I shall call you ${CH.insert_format(
             CH.clear_screen();
             let phrase = `You have slain ${CH.insert_color(Colors.RED, this.#currentEnemy.name)}!`;
             phrase += `\nYou gain ${CH.insert_color(Colors.YELLOW, this.#currentEnemy.xp_drop)} XP!`;
-            const names = this.#currentEnemy.loot.map(item => item.name);
             if (this.#currentEnemy.loot.length > 0) {
                 phrase += `\nYou found: `;
                 for (const item of this.#currentEnemy.loot) {

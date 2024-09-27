@@ -1,11 +1,10 @@
-const { Game } = require('./Game.js');
-const { Genie } = require('./Genie.js');
-const Assets = require('./Assets/Assets.js');
-const ConsoleImpl = require ('./Base/ConsoleHelp.js');
+const { Game } = require('./Game/Game.js');
+const { Genie } = require('./Game/Genie.js');
+const Assets = require('./Game/Assets/Assets.js');
+const ConsoleImpl = require ('./Game/Base/ConsoleHelp.js');
 const CH = new ConsoleImpl.ConsoleImplementation_x86();
 const Colors = ConsoleImpl.DefaultColors;
-const { Menu, StartMenuOptions } = require('./Menu.js');
-const { DevMode } = require('./Base/DevMode.js');
+const { Menu, StartMenuOptions } = require('./Game/Menu.js');
 CH.setTitle('Console Adventure Game');
 
 /*Graphics Display Warning*/
