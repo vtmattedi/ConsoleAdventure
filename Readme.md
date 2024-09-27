@@ -2,7 +2,7 @@
 
 # Console Adventure
 
-<span style="color:Yellow">Console</span> <span style="color:Green">Adventure</span>. is a terminal fantasy game. Where 
+<span style="color:Yellow">Console</span> <span style="color:Green">Adventure</span> is a terminal fantasy game. Where 
 the player wanders through the Magical Lands fighting enemies, getting gear and .
 It was designed using oop the only node package is readline-sync. It is a fantasy turn based game that 
 
