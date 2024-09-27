@@ -1,4 +1,4 @@
-const { Weapon } = require('../Base/Weapons.js');
+const { Weapon, WeaponBuilder } = require('../Base/Weapons.js');
 const {Player} = require('./Player.js');
 const Attacks = require('../Base/Attack.js');
 const { DamageType } = require('../Base/DamageTypes.js');
@@ -28,10 +28,10 @@ class Warrior extends Player {
         this.intelligence = 1;
         this.dexterity = 2;
         this.strength = 6;
-        this.weapon = new Weapon.Builder()
-            .setName('Own Fist')
-            .setDamage(1)
-            .setDamageType(DamageType.Physical)
+        this.weapon = new WeaponBuilder()
+            .withName('Own Fist')
+            .withDamage(1)
+            .withAttackType(DamageType.Physical)
             .build();
         this.attacks.push(Warrior.#atk_pool[0].attack);
 

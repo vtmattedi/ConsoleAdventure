@@ -1,4 +1,4 @@
-const { Weapon } = require('../Base/Weapons.js');
+const { Weapon, WeaponBuilder } = require('../Base/Weapons.js');
 const Attacks = require('../Base/Attack.js');
 const {Player} = require('./Player.js');
 const { DamageType } = require('../Base/DamageTypes.js');
@@ -30,10 +30,10 @@ const { DamageType } = require('../Base/DamageTypes.js');
             this.intelligence = 5;
             this.dexterity = 3;
             this.strength = 1;
-            this.weapon = new Weapon.Builder()
-                .setName('Old Stick')
-                .setDamage(1)
-                .setDamageType(DamageType.Magic)
+            this.weapon = new WeaponBuilder()
+                .withName('Old Stick')
+                .withDamage(1)
+                .withAttackType(DamageType.Magic)
                 .build();
             this.attacks.push(Mage.#atk_pool[0].attack);
         }

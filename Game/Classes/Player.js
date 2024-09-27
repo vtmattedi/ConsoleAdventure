@@ -54,9 +54,9 @@ class Player extends Unit {
         this.#xp = 0;
         this.#xp_to_next_level = 100;
         this.#weapon = new Weapons.WeaponBuilder()
-            .setName('Fists')
-            .setDamage(1)
-            .setDamageType(DamageType.Physical)
+            .withName('Fists')
+            .withDamage(1)
+            .withAttackType(DamageType.Physical)
             .build();
 
     }

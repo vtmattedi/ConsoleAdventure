@@ -1,4 +1,4 @@
-const { Weapon } = require('../Base/Weapons.js');
+const { Weapon, WeaponBuilder } = require('../Base/Weapons.js');
 const {Player} = require('./Player.js');
 const Attacks = require('../Base/Attack.js');
 const { DamageType } = require('../Base/DamageTypes.js');
@@ -29,10 +29,10 @@ class Rogue extends Player {
         this.intelligence = 2;
         this.dexterity = 5;
         this.strength = 2;
-        this.weapon = new Weapon.Builder()
-            .setName('Kitchen Knife')
-            .setDamage(1)
-            .setDamageType(DamageType.Physical)
+        this.weapon = new WeaponBuilder()
+            .withName('Kitchen Knife')
+            .withDamage(1)
+            .withAttackType(DamageType.Physical)
             .build();
         this.attacks.push(Rogue.#atk_pool[0].attack);
     }

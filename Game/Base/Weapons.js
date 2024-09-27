@@ -116,7 +116,7 @@ class WeaponBuilder
         return this;
     }
     withAttackType(attackType) {
-        if (!Object.values(DamageType).includes(attackType))
+        if (typeof attackType !== 'number')
             throw new TypeError('Invalid attack type');
         this.attackType = attackType;
         return this;
