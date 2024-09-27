@@ -53,7 +53,11 @@ class Player extends Unit {
         this.#level = 1;
         this.#xp = 0;
         this.#xp_to_next_level = 100;
-        this.#weapon = new Weapons.Weapon('Fists', 1, DamageType.Physical);
+        this.#weapon = new Weapons.WeaponBuilder()
+            .setName('Fists')
+            .setDamage(1)
+            .setDamageType(DamageType.Physical)
+            .build();
 
     }
     ///Setter and Getters

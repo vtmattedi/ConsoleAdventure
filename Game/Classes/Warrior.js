@@ -28,7 +28,11 @@ class Warrior extends Player {
         this.intelligence = 1;
         this.dexterity = 2;
         this.strength = 6;
-        this.weapon = new Weapon('Own Fist', 1, DamageType.Physical);
+        this.weapon = new Weapon.Builder()
+            .setName('Own Fist')
+            .setDamage(1)
+            .setDamageType(DamageType.Physical)
+            .build();
         this.attacks.push(Warrior.#atk_pool[0].attack);
 
     }

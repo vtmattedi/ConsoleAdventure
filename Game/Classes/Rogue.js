@@ -29,7 +29,11 @@ class Rogue extends Player {
         this.intelligence = 2;
         this.dexterity = 5;
         this.strength = 2;
-        this.weapon = new Weapon('Kitchen Knife', 1, DamageType.Physical);
+        this.weapon = new Weapon.Builder()
+            .setName('Kitchen Knife')
+            .setDamage(1)
+            .setDamageType(DamageType.Physical)
+            .build();
         this.attacks.push(Rogue.#atk_pool[0].attack);
     }
     playerInfo() {

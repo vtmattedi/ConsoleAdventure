@@ -30,7 +30,11 @@ const { DamageType } = require('../Base/DamageTypes.js');
             this.intelligence = 5;
             this.dexterity = 3;
             this.strength = 1;
-            this.weapon = new Weapon('Old Stick', 1, DamageType.Magic);
+            this.weapon = new Weapon.Builder()
+                .setName('Old Stick')
+                .setDamage(1)
+                .setDamageType(DamageType.Magic)
+                .build();
             this.attacks.push(Mage.#atk_pool[0].attack);
         }
         playerInfo() {

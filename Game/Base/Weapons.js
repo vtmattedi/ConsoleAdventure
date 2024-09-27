@@ -91,4 +91,43 @@ class Weapon {
 
 }
 
-module.exports = { Weapon };
+class WeaponBuilder 
+{
+    constructor() {
+        this.name = "";
+        this.damage = 0;
+        this.attackType = DamageType.Physical;
+        this.stats = {
+            strength: 0,
+            intelligence: 0,
+            dexterity: 0
+        };
+    }
+    withName(name) {
+        if (typeof name !== 'string')
+            throw new TypeError('Invalid name');
+        this.name = name;
+        return this;
+    }
+    withDamage(damage) {
+        if (typeof damage !== 'number')
+            throw new TypeError('Invalid damage');
+        this.damage = damage;
+        return this;
+    }
+    withAttackType(attackType) {
+        if (!Object.values(DamageType).includes(attackType))
+            throw new TypeError('Invalid attack type');
+        this.attackType = attackType;
+        return this;
+    }
+    withStats(stats) {
+        this.stats = stats;
+        return this;
+    }
+    build() {
+        return new Weapon(this.name, this.damage, this.attackType, this.stats);
+    }
+}
+
+module.exports = { Weapon, WeaponBuilder};
