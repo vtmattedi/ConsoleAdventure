@@ -20,7 +20,7 @@ class Game {
     #player = new PlayerFactory().createPlayer("Cheater", "Warrior"); // {get; private set}
     #currentEnemy = new Enemy.Enemy(); // {get; private set}
     #isRunning = false;//{get; private set}
-    #fleeAttempt = 0; // private
+    #fleeAttempt = 0; //strictly private
     #exitGame = false; // {get; private set} game exit flag
     #feedback = ""; // strictly private
     constructor() {
@@ -60,11 +60,14 @@ class Game {
 
         if (genie.missBehaviour > nameSeed || playerName === "" || typeof playerName === "undefined") {
             newName = genie.generateName();
-            genie.speak(`I do not like the name: ${CH.insert_format(
+            let phrase = `I do not like the name: ${CH.insert_format(
                 {
                     decoration: [ConsoleImpl.Decorations.Bold, ConsoleImpl.Decorations.Underlined]
                 }
-                , playerName)}!
+                , playerName)}!`;
+                if (playerName === "" || typeof playerName === "undefined")
+                    phrase = "Funny you are, but smart are not!"
+            genie.speak(`${phrase}
 I shall call you ${CH.insert_format(
                     {
                         decoration: [ConsoleImpl.Decorations.Bold, ConsoleImpl.Decorations.Underlined]
@@ -350,7 +353,10 @@ I shall call you ${CH.insert_format(
                 const attack_res = this.#player.attackTarget(attack_index, this.#currentEnemy);
                 const player_atk = this.#player.attacks[attack_index];
                 this.#feedback = CH.insert_color(GameColors.class_colors.find(item => item.text === this.#player.getClass()).color, this.#player.name);
-                this.#feedback += CH.insert_color(GameColors.weapon_colors.find(item => item.text === player_atk.attackType).color, ` ${getThirdPerson(player_atk.name)} `);
+                if (player_atk.attackType === DamageType.Magic)
+                    this.#feedback += " casts" + CH.insert_color(GameColors.weapon_colors.find(item => item.text === player_atk.attackType).color, ` ${player_atk.name} `);
+                else 
+                 this.#feedback += CH.insert_color(GameColors.weapon_colors.find(item => item.text === player_atk.attackType).color, ` ${getThirdPerson(player_atk.name)} `);
                 this.#feedback += "it for " + CH.insert_color(Colors.RED, attack_res.damageTaken) + " damage! ";
                 if (attack_res.damageResisted > 0)
                     this.#feedback += CH.insert_color(Colors.LIGHTBLACK_EX, `(${attack_res.damageResisted} resisted) `);
@@ -367,11 +373,13 @@ I shall call you ${CH.insert_format(
                     const enemy_atk = this.#currentEnemy.randomAttack();
                     const enemy_res = this.#player.takeDamage(enemy_atk.calculateDamage(this.#currentEnemy.getStats()));
                     this.#feedback += "The " + CH.insert_color(Colors.RED, `${this.#currentEnemy.name}`);
-                    this.#feedback += " strikes back, it ";
-                    this.#feedback += CH.insert_color(GameColors.weapon_colors.find(
-                        item => item.text === enemy_atk.attackType).color, getThirdPerson(enemy_atk.name));
+                    this.#feedback += " strikes back, it";
+                    if (enemy_atk.attackType === DamageType.Magic)
+                        this.#feedback += " casts" + CH.insert_color(GameColors.weapon_colors.find(item => item.text === enemy_atk.attackType).color, ` ${enemy_atk.name} `);
+                    else 
+                     this.#feedback += CH.insert_color(GameColors.weapon_colors.find(item => item.text === enemy_atk.attackType).color, ` ${getThirdPerson(enemy_atk.name)} `);
+                    
                     this.#feedback += ` you dealing ${CH.insert_color(Colors.RED, enemy_res.damageTaken)} damage! `;
-
                     if (enemy_atk.damageResisted > 0)
                         this.#feedback += CH.insert_color(Colors.LIGHTBLACK_EX, `(${attack_res.damageResisted} resisted) `);
                     if (enemy_atk.crit) {

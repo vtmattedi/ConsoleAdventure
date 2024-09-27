@@ -9,7 +9,8 @@ const { GameColors } = require('./Base/GameColors.js');
 * Once create the Genie instance, it will be the same instance for the whole session.
 */
 class Genie {
-    static #instance = null;
+    static #instance = null; //private
+    // strictly private
     static #genie_pool = [
         {
             name: 'Zephiroth the Red Genie!',
@@ -57,8 +58,8 @@ class Genie {
 
         return `${bubbleTop}\n/${border}\\\n${bubbleMiddle}\n|${border}|\n${bubbleBottom}`;
     }
-    #color;
-    #name;
+    #color;//{get; private set}
+    #name;//{public with type check on assignment}
     constructor() {
         if (Genie.#instance) {
             return Genie.#instance;
@@ -112,8 +113,25 @@ Welcome to the Great ${CH.insert_color(Colors.YELLOW, "Console")} ${CH.insert_co
         if (typeof (_class) !== 'string')
             this.speak(`Ha, That may be a class but may also be a structure!`);
         else
-            this.speak(`Oh, a ${_class}! How original!`,
-                GameColors.class_colors);
+        {
+            // this.speak(`Oh, a ${_class}! How original!`,
+            //     GameColors.class_colors);
+            let phrase = "";
+                if (_class === "Mage")
+                {
+                    phrase = (`Oh, a ${_class}! pew pew Fireball, pew pew Alter Time.`)
+                }
+                else if (_class === "Warrior")
+                {
+                    phrase = (`Oh, a ${_class}! I shall speak as you: Zug, zug zug? zug zug zug zug.`)
+                }
+                else if (_class === "Rogue")
+                {
+                    phrase = (`A ${_class}? Where? now I see you, now I don't.`)
+
+                }
+                this.speak(CH.breakLine(phrase,CH.getWidth()),GameColors.class_colors)
+            }
     }
     explainGame() {
         CH.clear_screen();
@@ -227,6 +245,23 @@ and use Spacebar to select the option.`;
             });
         }
         CH.print(final_sprite);
+    }
+
+    get name()
+    {
+        return this.#name;
+    }
+
+    set name(value)
+    {
+        if (!(typeof value === "string"))
+            throw new TypeError("name must be a string");
+        this.#name = value
+    }
+
+    get color ()
+    {
+        return this.color;
     }
 }
 

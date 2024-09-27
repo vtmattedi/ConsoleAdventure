@@ -1,6 +1,6 @@
 // Objective: Provide utility functions for generating enemies
 const Attacks = require('../Base/Attack.js');
-const {DamageTypes} = require('../Base/DamageTypes.js');
+const { DamageTypes } = require('../Base/DamageTypes.js');
 
 
 class EnemyUtils {
@@ -8,60 +8,61 @@ class EnemyUtils {
         "Mystic Blast", "Arcane Surge", "Flame Wave", "Frostbolt", "Shadow Strike",
         "Lightning Bolt", "Void Pulse", "Spirit Lash", "Eldritch Burst", "Mana Storm"
     ];
-    
+
     static physicalAttackNames = [
         "Sword Slash", "Axe Chop", "Spear Thrust", "Mace Smash", "Orcish Cleave",
         "Hammer Blow", "Frenzied Bite", "Skull Crusher", "Shield Bash", "Brutal Kick"
     ];
-    
+
     static hybridAttackNames = [
         "Enchanted Blade", "Cursed Arrow", "Stormstrike", "Inferno Fist", "Arcane Slash"
     ];
-    
+
     // Function to generate attacks
     static generateAttacks() {
         const common_attacks = [];
         const special_abilities = [];
         const super_spell = [];
-    
+
         const default_attack_value = 1;
-    
-        // Generate common_attacks: 0 Hybrid, 10 Magic, 10 Physical
+
+        // 20 common atks
         for (let i = 0; i < 10; i++) {
             const magicAttack = new Attacks.MagicAttack(EnemyUtils.magicAttackNames[i], 1);
             const physicalAttack = new Attacks.PhysicalAttack(EnemyUtils.physicalAttackNames[i], 1);
             common_attacks.push(magicAttack, physicalAttack);
         }
-    
+
+        // 10 special atks
         const hybrid1 = new Attacks.HybridAttack(EnemyUtils.hybridAttackNames[0], 1, 1);
         special_abilities.push(hybrid1);
-    
+
         for (let i = 0; i < 5; i++) {
             const magicAttack = new Attacks.MagicAttack(EnemyUtils.magicAttackNames[i], 1);
             special_abilities.push(magicAttack);
         }
-    
+
         for (let i = 5; i < 9; i++) {
             const physicalAttack = new Attacks.PhysicalAttack(EnemyUtils.physicalAttackNames[i], 1);
             special_abilities.push(physicalAttack);
         }
-    
-        // Generate super_spell: 3 Hybrid, 4 Magic, 3 Physical
+
+        // 10 super spells
         for (let i = 0; i < 3; i++) {
             const hybridAttack = new Attacks.HybridAttack(EnemyUtils.hybridAttackNames[i], 1, 1);
             super_spell.push(hybridAttack);
         }
-    
+
         for (let i = 0; i < 4; i++) {
             const magicAttack = new Attacks.MagicAttack(EnemyUtils.magicAttackNames[i], 1);
             super_spell.push(magicAttack);
         }
-    
+
         for (let i = 0; i < 3; i++) {
             const physicalAttack = new Attacks.PhysicalAttack(EnemyUtils.physicalAttackNames[i], 1);
             super_spell.push(physicalAttack);
         }
-    
+
         return { common_attacks, special_abilities, super_spell };
     }
     static atk_pool = EnemyUtils.generateAttacks();
@@ -75,7 +76,7 @@ class EnemyUtils {
             throw new Error("At least one attack must be generated");
         if (types[0] > EnemyUtils.atk_pool["common_attacks"].length || types[1] > EnemyUtils.atk_pool["special_abilities"].length || types[2] > EnemyUtils.atk_pool["super_spell"].length)
             throw new Error("Not enough attacks to generate");
-    
+
         for (let i = 0; i < types[0]; i++) {
             const atk = EnemyUtils.atk_pool["common_attacks"];
             let seed = Math.floor(Math.random() * atk.length);
@@ -127,7 +128,7 @@ class EnemyUtils {
         }
         return res;
     }
-    
+
     static genArmor(level) {
         let res = {
             armor: level + Math.floor(level / 2 * Math.random() - 0.5),

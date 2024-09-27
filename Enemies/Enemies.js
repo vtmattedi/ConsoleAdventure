@@ -11,13 +11,17 @@ const { Weapon } = require('../Base/Weapons.js');
 
 class Enemy extends Unit {
     // Should not be  created without a type
+    #name; //{get; private set}
+    #level; //{get; private set}
+    #loot = []; // {fake public with type check}
+    #xp_drop = 0; // {fake public with type check}
     constructor(name, maxHealth, level, stats) {
         const armor = EnemyUtils.genArmor(level);
         super(maxHealth, armor.armor, armor.magic_resist);
-        this.name = name;
-        this.level = level;
-        this.loot = [];
-        this.xp_drop = level * 10;
+        this.#name = name;
+        this.#level = level;
+        this.#loot = [];
+        this.#xp_drop = level * 10;
         if (stats) {
             this.setStats(stats.strength, stats.intelligence, stats.dexterity);
         }
@@ -112,6 +116,23 @@ class Enemy extends Unit {
             else
                 return item;
         }).join('\n');
+    }
+
+    get name () { return this.#name}
+    get level() { return this.#level}
+    get xp_drop () {return this.#xp_drop}
+    set xp_drop(value)
+    {
+        if (!(typeof value === "number"))
+            throw new TypeError("xp must be a number!")
+         this.#xp_drop = value;
+    }
+    get loot() { return this.#loot}
+    set loot(value)
+    {
+        if (!Array.isArray(value))
+            throw new TypeError("loot must be an Array, even empty.")
+        this.#loot = value
     }
 }
 

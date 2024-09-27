@@ -7,8 +7,8 @@ class DamageType {
 
 ///Damage instance class <interface>
 class Damage {
-    #magic_damage
-    #physical_damage
+    #magic_damage // {get; private set}
+    #physical_damage// {get; private set}
     constructor(magic_damage, physical_damage) {
         if (typeof magic_damage !== 'number' || typeof physical_damage !== 'number') {
             throw new Error('Damage must be a number');

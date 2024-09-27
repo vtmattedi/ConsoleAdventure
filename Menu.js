@@ -11,7 +11,7 @@ const { Genie } = require("./Genie.js");
 */
 
 class Menu {
-    static gameMenuOptions = ["Continue", "Main Menu", "Save Game", "Info", "Help", "Exit"];
+    static gameMenuOptions = ["Continue", "Main Menu...", "Save Game...", "Info", "Help", "Exit"];
     static startMenuOptions = ["New Game", "Load Game!", "Info", "Exit"];
     static gameEndOptions = ["Play Again", "Exit"];
     static battleMenuOptions = ['Attack', 'Flee', 'Equipament', 'Menu', 'Dev Button'];
@@ -43,7 +43,11 @@ class Menu {
             colors: [{
                 text: options[options.length - 1],
                 color: Colors.RED
-            }]
+            },
+        {
+            text:"Continue",
+            color:ConsoleImpl.DefaultColors.LIGHTGREEN_EX
+        }]
         }, true, true
         );
     }
