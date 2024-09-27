@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "console-title": "^1.1.0",
     "readline-sync": "^1.4.10"
   }
 }

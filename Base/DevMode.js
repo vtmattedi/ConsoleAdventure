@@ -1,10 +1,10 @@
 class DevMode {
     static #instance = null
     #value = false // Do not change directly, use setValue() (assure type is boolean) and handles toggle
-    #gameInstance = null
+    #gameInstance;
     constructor() {
         if (!DevMode.#instance) {
-            DevMode.#instance = new DevMode();
+            DevMode.#instance = this;
         }
         else
             return this

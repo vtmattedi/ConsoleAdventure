@@ -5,7 +5,7 @@ class DamageType {
     static get Hybrid() { return 2; }
 }
 
-///
+///Damage instance class <interface>
 class Damage {
     #magic_damage
     #physical_damage
@@ -24,9 +24,10 @@ class Damage {
     get physical_damage() {
         return this.#physical_damage;
     }
-    getDamageArray() {
-        return [this.#physical_damage, this.#magic_damage];
-    }
+
+    // getDamageArray() {
+    //     return [this.#physical_damage, this.#magic_damage];
+    // }
 }
 
 module.exports = {DamageType, Damage};

@@ -1,15 +1,15 @@
-const {DamageType} = require('./DamageTypes')
-
+// Static class to generate weapons
+const { DamageType } = require('./DamageTypes')
 
 class Weapon {
     static weaponNames = [
-        "Shadowblade", "Dragonfang", "Stormbreaker", "Frostmourne", "Soulreaver", 
+        "Shadowblade", "Dragonfang", "Stormbreaker", "Frostmourne", "Soulreaver",
         "Doomhammer", "WhisperingDagger", "ObsidianAxe", "ElvenBow", "PhoenixClaw",
         "Moonblade", "Windshear", "Thunderstrike", "Ironfury", "Nightshade",
         "HellfireSpear", "Bloodthirst", "GleamingSword", "MysticStaff", "InfernalAxe",
         "Lightbringer", "CelestialHammer", "Flameheart", "Ghoulblade", "Runebinder",
         "ArcaneWand", "Griffon'sTalon", "TitanMaul", "Serpentstrike", "Deathbringer"
-    ]; 
+    ];
     static getRandomDamage() {
         return (Math.random() * (2.00 - 1.00) + 1.00).toFixed(2);
     }
@@ -27,19 +27,18 @@ class Weapon {
     static weapons = [];
     static getMaxWeaponLength = () => {
         let max = 0;
-        for (const weapon of weapons) {
+        for (const weapon of Weapon.weapons) {
             if (weapon.name.length > max) {
                 max = weapon.name.length;
             }
         }
         return max;
     };
-    static genWeapons = ()=>
-    {
+    static genWeapons = () => {
         for (let i = 0; i < 30; i++) {
-            const name = weaponNames[i];
-            const damage = getRandomDamage();
-            const attackType = getRandomAttackType();
+            const name = Weapon.weaponNames[i];
+            const damage = Weapon.getRandomDamage();
+            const attackType = Weapon.getRandomAttackType();
             const stats = {
                 strength: Math.floor(Math.random() * 10) + attackType === DamageType.Physical ? 2 : 0,
                 intelligence: Math.floor(Math.random() * 10) + attackType === DamageType.Magic ? 2 : 0,
@@ -49,27 +48,30 @@ class Weapon {
         }
         return Weapon.weapons;
     }
-
-    static genRandomWeapon = (level) =>
-    {
-        if (Weapon.weapons.length <= 0);
+    static genRandomWeapon = (level) => {
+        if (Weapon.weapons.length <= 0)
             Weapon.genWeapons()
         const seed = Math.floor(Math.random(Weapon.weapons.length - 1))
-        const stats = {
-            strength: Math.floor(Math.random() * 10 + level) + attackType === DamageType.Physical ? 2 : 0,
-            intelligence: Math.floor(Math.random() * 10 + level) + attackType === DamageType.Magic ? 2 : 0,
-            dexterity: Math.floor(Math.random() * 10 + level) + attackType === DamageType.Hybrid ? 4 : 0
-        };
         let w = Weapon.weapons[seed];
+        const stats = {
+            strength: Math.floor(Math.random() * 10 + level) + w.attackType === DamageType.Physical ? 2 : 0,
+            intelligence: Math.floor(Math.random() * 10 + level) + w.attackType === DamageType.Magic ? 2 : 0,
+            dexterity: Math.floor(Math.random() * 10 + level) + w.attackType === DamageType.Hybrid ? 4 : 0
+        };
         w.stats = stats
         return w
     }
-    
+
+    #name; // {get; private set;}
+    //Damage need to be public for now
+    #attackType;// {get; private set;}
+    //Stats need to be public for now
     constructor(name, damage, attackType, stats) {
-        this.name = name;
-        this.damage = damage;
-        this.attackType = attackType;
-        if(typeof stats === 'undefined') {
+        this.#name = name; // Name of the weapon
+        this.damage = damage; // Damage of the weapon
+        this.#attackType = attackType; // Damage type of the weapon
+        //stats may need to be changed after generation
+        if (typeof stats === 'undefined') {
             stats = {
                 strength: 0,
                 intelligence: 0,
@@ -78,21 +80,15 @@ class Weapon {
         }
         this.stats = stats;
     }
-    
-    getDamage() {
-        return this.damage;
+
+    get name() {
+        return this.#name;
     }
-    getStats() {
-        return this.stats;
+
+    get attackType() {
+        return this.#attackType;
     }
 
 }
 
-
-
-
-
-
-
-// Export the array and MAX_WEAPON_LENGTH
 module.exports = { Weapon };

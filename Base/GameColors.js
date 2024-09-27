@@ -1,5 +1,6 @@
 /// Contains the default colors for the game classes, weapons, equipment, hp, and stats
 const {DamageType } = require('./DamageTypes.js')
+const Equip = require('./Equipament.js');
 const { DefaultColors } = require('./ConsoleHelp.js');
 
 class GameColors
@@ -54,7 +55,21 @@ class GameColors
             }
         ]
     }
-
+    static getEquipamentColor(equipament) {
+        if (!(equipament instanceof Equip.Equipament)) {
+           throw new Error("Equipament must be an instance of Equipament");
+        }
+        
+        if (equipament instanceof Equip.Armor) {
+            return GameColors.equip_colors[0].color;
+        }
+        else if (equipament instanceof Equip.Amulet) {
+            return GameColors.equip_colors[1].color;
+        }
+        else if (equipament instanceof Equip.MagicalArmor) {
+            return GameColors.equip_colors[2].color;
+        }
+    }
     static get hp_colors() {
         return [
             {

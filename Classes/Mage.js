@@ -33,17 +33,13 @@ const { DamageType } = require('../Base/DamageTypes.js');
             this.weapon = new Weapon('Old Stick', 1, DamageType.Magic);
             this.attacks.push(Mage.#atk_pool[0].attack);
         }
-        PlayerInfo() {
-            return super.PlayerInfo("Mage");
+        playerInfo() {
+            return super.playerInfo("Mage");
         }
 
-        castSpell(spellName) {
-            if (this.mana > 0) {
-                CH.print(`${this.name} casts ${spellName} with power ${this.spellPower}!`);
-                this.mana -= 10; // Assume each spell costs 10 mana
-            } else {
-                CH.print(`${this.name} does not have enough mana to cast ${spellName}.`);
-            }
+        getClass()
+        {
+            return "Mage";
         }
         levelUp() {
             super.levelUp();

@@ -3,6 +3,7 @@
 // Terminal Handling implementations
 const readline = require("readline-sync");
 const { DevMode } = require('./DevMode.js');
+
 // ANSI control sequences => color = CSI n m
 class ControlSequences {
     static get CSI() { return '\x1b['; }
@@ -112,11 +113,7 @@ class ConsoleImplementation {
     clear_last_line = (times) => {
         throw new ConsoleNotImplemented();
     }
-
-    center = (input, size, char = " ") => {
-        throw new ConsoleNotImplemented();
-    }
-
+    
     hide_cursor = () => {
         throw new ConsoleNotImplemented();
     }
@@ -164,11 +161,30 @@ class ConsoleImplementation {
     show_cursor = (value = true) => {
         throw new ConsoleNotImplemented();
     }
+
+
+    question = (phrase) => {
+        throw new ConsoleNotImplemented();
+    }
+
+    print = (text) => {
+        throw new ConsoleNotImplemented();
+
+    }
+
+    gameStats = (text) => {
+        throw new ConsoleNotImplemented();
+
+    }
+
+    setTitle = (title) => {
+        throw new ConsoleNotImplemented();
+    }
 }
 
-//Singleton for most VTI terminals and OS use
+//Singleton for most VTI terminals and OS usage
 class ConsoleImplementation_x86 extends ConsoleImplementation {
-    static #instance = null;
+    static #instance = null; //Singleton instance
     constructor() {
         if (ConsoleImplementation_x86.#instance) {
             return ConsoleImplementation_x86.#instance;
@@ -190,7 +206,9 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
         let lines = [];
         let line = '';
         words.forEach(word => {
-            if (line.length + word.length > width) {
+            const lineLength = this.getLineWidth(line);
+            const wordLength = this.getLineWidth(word);
+            if (lineLength + wordLength > width) {
                 lines.push(line);
                 line = '';
             }
@@ -310,7 +328,11 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
         const printOptions = () => {
 
             let res = "";
-            let padding = " ".repeat(3);
+            const padChar = DevMode.getInstance().value ? '#' : ' ';
+            let padding = padChar.repeat(3);
+            if (config && config.padding) {
+                padding = padChar.repeat(config.padding);
+            }
             const width = this.getWidth();
             const maxLength = Math.max(...options.map(item => item.length));
             const totalLength = options.reduce((acc, item) => acc + item.length, 0) + padding.length * options.length;
@@ -325,7 +347,7 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
 
                 //line = `${line} :[${line.length}]`;
                 let char = ' ';
-                if (config.devMode) {
+                if (DevMode.getInstance().value) {
                     char = '#';
                 }
                 if (vertical) {
@@ -373,19 +395,20 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
                 else if (cmd === "B") key = "down";
                 this.clear_last_line();
             }
+            key = key.toLowerCase();
             if (vertical) {
                 if (key === "w" || key === "up") {
-                    _current = Math.max(0, _current - 1);
+                    _current = _current - 1 < 0 ? options.length - 1 : _current - 1;
                 } else if (key === "s" || key === "down") {
-                    _current = Math.min(options.length - 1, _current + 1);
+                   _current = (_current + 1) % options.length;
                 }
             }
             else {
                 if (key === "a" || key === "left") {
-                    _current = Math.max(0, _current - 1);
+                    _current = _current - 1 < 0 ? options.length - 1 : _current - 1;
                 }
                 else if (key === "d" || key === "right") {
-                    _current = Math.min(options.length - 1, _current + 1);
+                    _current = (_current + 1) % options.length;
                 }
             }
             if (key === " ") {
@@ -399,16 +422,16 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
             if (devKeys.includes(key)) {
                 let opt = ""
                 if (key === "p")
-                    opt = this.gameStats(config.gameInstance, 'player')
+                    opt = this.gameStats('player')
                 else if (key == "o")
-                    opt = this.gameStats(config.gameInstance, 'enemy')
+                    opt = this.gameStats('enemy')
                 else if (key == "k")
-                    opt = this.gameStats(config.gameInstance, 'game')
+                    opt = this.gameStats('game')
                 else if (key == "y")
-                    console.log(config)
+                    opt = JSON.stringify(config, undefined, "\t")
                 else if (key == "j") {
-                        new DevMode().setValue()
-                    opt = `${this.insert_color(DefaultColors.YELLOW, "Developer Mode")} Toggled is now ${DevMode.value}.`
+                    DevMode.getInstance().setValue()
+                    opt = `${this.insert_color(DefaultColors.YELLOW, "Developer Mode")} Toggled is now ${DevMode.getInstance().value}.`
                 }
                 const size = opt.split("\n").length
                 this.print(opt)
@@ -572,19 +595,19 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
             console.log(text);
     }
 
-    gameStats = (game_instance, text) => {
+    gameStats = (text) => {
         let obj = "";
         if (text === 'enemy') {
             obj = this.insert_color(DefaultColors.YELLOW, "Enemy: \n")
-            obj += JSON.stringify(game_instance.currentEnemy, undefined, "\t")
+            obj += JSON.stringify(DevMode.getInstance().gameInstance.currentEnemy, undefined, "\t")
         }
         else if (text === 'player') {
             obj = this.insert_color(DefaultColors.YELLOW, "Player: \n")
-            obj += JSON.stringify(game_instance.player, undefined, "\t")
+            obj += JSON.stringify(DevMode.getInstance().gameInstance.player, undefined, "\t")
         }
         else if (text === game) {
             obj = this.insert_color(DefaultColors.YELLOW, "Game: \n")
-            obj += JSON.stringify(game_instance, undefined, "\t")
+            obj += JSON.stringify(DevMode.getInstance().gameInstance, undefined, "\t")
         }
         return obj
     }
@@ -592,8 +615,6 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
     setTitle = (title) => {
         process.stdout.write('\x1b]2;' + title + '\x1b\x5c');
     }
-
-
 
 }
 

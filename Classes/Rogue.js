@@ -32,8 +32,12 @@ class Rogue extends Player {
         this.weapon = new Weapon('Kitchen Knife', 1, DamageType.Physical);
         this.attacks.push(Rogue.#atk_pool[0].attack);
     }
-    PlayerInfo() {
-        return super.PlayerInfo("Rogue");
+    playerInfo() {
+        return super.playerInfo("Rogue");
+    }
+    getClass()
+    {
+        return "Rogue";
     }
     levelUp() {
         super.levelUp();

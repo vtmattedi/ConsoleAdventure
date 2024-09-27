@@ -67,106 +67,102 @@ class MagicalArmor extends Armor {
     }
 }
 
-const armorNames = [
-    "Steel Breastplate", "Iron Helm", "Dragon Scale Shield", "Knight's Gauntlets", "Brigandine Armor",
-    "Leather Jerkin", "Chainmail Hauberk", "Ornate Pauldrons", "Bronze Greaves", "Silver Chestplate",
-    "Viking Helmet", "Fire-resistant Cloak", "Templar Shield", "Thief's Leather Armor", "Ranger's Vest",
-    "Cavalry Helm", "Mythril Chainmail", "Paladin's Plate", "Dwarven Chestguard", "Elven Light Armor",
-    "Huntsman's Cuirass", "Barbarian Chestpiece", "Gladiator's Harness", "Gilded Armor", "Mercenary Armor",
-    "Holy Knight Breastplate", "Shaman's Hide Armor", "Demonhunter Armor", "Stormguard Plate", "Frostguard Armor"
-];
 
-const amuletNames = [
-    "Amulet of Fire Resistance", "Necklace of the Storm", "Talisman of the Moon", "Charm of the Arcane",
-    "Pendant of Shadows", "Locket of Protection", "Amulet of the Serpent", "Necklace of Vitality", "Orb of Tranquility",
-    "Talisman of Wisdom", "Rune of Regeneration", "Amulet of True Sight", "Pendant of Resilience", "Charm of Silence",
-    "Amulet of the Phoenix", "Talisman of the Earth", "Amulet of the Frozen Wastes", "Charm of Lightning",
-    "Pendant of the Sea", "Talisman of Energy", "Rune of Fortune", "Necklace of the Sun", "Charm of Clarity",
-    "Amulet of the Storm King", "Necklace of Binding", "Charm of Foresight", "Pendant of Valor", "Rune of the Ancients",
-    "Amulet of the Eclipse", "Locket of the Wind"
-];
+class EquipamentUtils {
+    static armorNames = [
+        "Steel Breastplate", "Iron Helm", "Dragon Scale Shield", "Knight's Gauntlets", "Brigandine Armor",
+        "Leather Jerkin", "Chainmail Hauberk", "Ornate Pauldrons", "Bronze Greaves", "Silver Chestplate",
+        "Viking Helmet", "Fire-resistant Cloak", "Templar Shield", "Thief's Leather Armor", "Ranger's Vest",
+        "Cavalry Helm", "Mythril Chainmail", "Paladin's Plate", "Dwarven Chestguard", "Elven Light Armor",
+        "Huntsman's Cuirass", "Barbarian Chestpiece", "Gladiator's Harness", "Gilded Armor", "Mercenary Armor",
+        "Holy Knight Breastplate", "Shaman's Hide Armor", "Demonhunter Armor", "Stormguard Plate", "Frostguard Armor"
+    ];
 
-const magicalArmorNames = [
-    "Dragonbone Armor", "Runic Plate", "Spectral Armor", "Sorcerer's Shield", "Eldritch Plate"
-];
+    static amuletNames = [
+        "Amulet of Fire Resistance", "Necklace of the Storm", "Talisman of the Moon", "Charm of the Arcane",
+        "Pendant of Shadows", "Locket of Protection", "Amulet of the Serpent", "Necklace of Vitality", "Orb of Tranquility",
+        "Talisman of Wisdom", "Rune of Regeneration", "Amulet of True Sight", "Pendant of Resilience", "Charm of Silence",
+        "Amulet of the Phoenix", "Talisman of the Earth", "Amulet of the Frozen Wastes", "Charm of Lightning",
+        "Pendant of the Sea", "Talisman of Energy", "Rune of Fortune", "Necklace of the Sun", "Charm of Clarity",
+        "Amulet of the Storm King", "Necklace of Binding", "Charm of Foresight", "Pendant of Valor", "Rune of the Ancients",
+        "Amulet of the Eclipse", "Locket of the Wind"
+    ];
 
+    static magicalArmorNames = [
+        "Dragonbone Armor", "Runic Plate", "Spectral Armor", "Sorcerer's Shield", "Eldritch Plate"
+    ];
 
-// Function to randomly select items from an array
-function getRandomItem(arr, used) 
-{
-    if (used.length >= arr.length) {
-        used = [];
-    }
-    let seed = Math.floor(Math.random() * arr.length);
-    let name = arr[seed];
-    if (used) {
-        while (used.includes(name)) {
-            seed ++;
-            if (seed >= arr.length) {
-                seed = 0;
+    // Function to randomly select items from an array
+    static getRandomItem(arr, used) {
+        if (used.length >= arr.length) {
+            used = [];
+        }
+        let seed = Math.floor(Math.random() * arr.length);
+        let name = arr[seed];
+        if (used) {
+            while (used.includes(name)) {
+                seed++;
+                if (seed >= arr.length) {
+                    seed = 0;
+                }
+                name = arr[seed];
             }
-            name = arr[seed];
         }
+        return name;
     }
-    return name;
-}
 
-// Generating 50 equipment items with 45% armor, 45% amulet, and 10% magical armor
+    // Generating 50 equipment items with 45% armor, 45% amulet, and 10% magical armor
+    static MagicArmorProbability = 0.1;
 
+    static genEquipament(size) {
+        let equipaments = [];
+        let used_armor = [];
+        let used_amulet = [];
+        let used_magical_armor = [];
 
-const MagicArmorProbability = 0.1;
+        for (let i = 0; i < size; i++) {
+            const rand = Math.random();
+            const armor = Math.floor(Math.random() * 100);
+            const magic_resist = Math.floor(Math.random() * 100);
 
-const genEquipament = (size) => {
-    let equipaments = [];
-    let used_armor = [];
-    let used_amulet = [];
-    let used_magical_armor = [];
-
-    for (let i = 0; i < size; i++) {
-        const rand = Math.random();
-        const armor = Math.floor(Math.random() * 100);
-        const magic_resist = Math.floor(Math.random() * 100);
-        
-        if (rand < MagicArmorProbability) {
-            const name = getRandomItem(magicalArmorNames, used_magical_armor);
-            used_magical_armor.push(name);
-            equipaments.push(new MagicalArmor(name, armor, magic_resist));
-        } else if (rand < MagicArmorProbability + (1 - MagicArmorProbability) / 2) {
-            const name = getRandomItem(amuletNames, used_amulet);
-            used_amulet.push(name);
-            equipaments.push(new Amulet(name, magic_resist));
-        } else {
-            const name = getRandomItem(armorNames, used_armor);
-            used_armor.push(name);
-            equipaments.push(new Armor(name, armor));
+            if (rand < EquipamentUtils.MagicArmorProbability) {
+                const name = EquipamentUtils.getRandomItem(EquipamentUtils.magicalArmorNames, used_magical_armor);
+                used_magical_armor.push(name);
+                equipaments.push(new MagicalArmor(name, armor, magic_resist));
+            } else if (rand < EquipamentUtils.MagicArmorProbability + (1 - EquipamentUtils.MagicArmorProbability) / 2) {
+                const name = EquipamentUtils.getRandomItem(EquipamentUtils.amuletNames, used_amulet);
+                used_amulet.push(name);
+                equipaments.push(new Amulet(name, magic_resist));
+            } else {
+                const name = EquipamentUtils.getRandomItem(EquipamentUtils.armorNames, used_armor);
+                used_armor.push(name);
+                equipaments.push(new Armor(name, armor));
+            }
         }
+        return equipaments;
+    }
 
-        //CH.print(equipaments[i].name);
-    }
-    return equipaments;
-}
-
-
-const getMaxEquipamentNameLength = () => {
-    let max = 0;
-    for (const name of armorNames) {
-        if (name.length > max) {
-            max = name.length;
+    static getMaxEquipamentNameLength() {
+        let max = 0;
+        for (const name of EquipamentUtils.armorNames) {
+            if (name.length > max) {
+                max = name.length;
+            }
         }
-    }
-    for (const name of amuletNames) {
-        if (name.length > max) {
-            max = name.length;
+        for (const name of EquipamentUtils.amuletNames) {
+            if (name.length > max) {
+                max = name.length;
+            }
         }
-    }
-    for (const name of magicalArmorNames) {
-        if (name.length > max) {
-            max = name.length;
+        for (const name of EquipamentUtils.magicalArmorNames) {
+            if (name.length > max) {
+                max = name.length;
+            }
         }
+        return max;
     }
-    return max;
 }
 
 
 
-module.exports = { Armor, Amulet, MagicalArmor,Equipament, getMaxEquipamentNameLength, genEquipament };
+module.exports = { Armor, Amulet, MagicalArmor,Equipament, EquipamentUtils };

@@ -1,11 +1,11 @@
 const ConsoleImpl = require('../Base/ConsoleHelp.js');
 const CH = new ConsoleImpl.ConsoleImplementation_x86();
 const Colors = ConsoleImpl.DefaultColors
-const { genie_img } = require('../Genie.js');
 
-const Logos = {
-    MattediWorks:
-        `
+
+class Logos {
+    static get MattediWorks() {
+        return `
  __  __         _    _             _  _ __          __           _         
 |  \\/  |       | |  | |           | |(_)\\ \\        / /          | |        
 | \\  / |  __ _ | |_ | |_  ___   __| | _  \\ \\  /\\  / /___   _ __ | | __ ___ 
@@ -14,49 +14,49 @@ const Logos = {
 |_|  |_| \\__,_| \\__| \\__|\\___| \\__,_||_|    \\/  \\/  \\___/ |_|   |_|\\_\\|___/
                     
                                                                            
-`,
-    ConsoleAdventure:
-        `
+`}
+    static get ConsoleAdventure() {
+        return `
     ___                      _          _       _                 _                  
    / __\\___  _ __  ___  ___ | | ___    /_\\   __| |_   _____ _ __ | |_ _   _ _ __ ___ 
   / /  / _ \\| '_ \\/ __|/ _ \\| |/ _ \\  //_\\\\ / _\` \\ \\ / / _ | '_ \\| __| | | | '__/ _ \\
  / /__| (_) | | | \\__ | (_) | |  __/ /  _  | (_| |\\ V |  __| | | | |_| |_| | | |  __/
 /____/ \\___/|_| |_|___/\\___/|_|\\___| \\_/ \\_/\\__,_| \\_/ \\___|_| |_|\\__|\\__,_|_|  \\___|
                                                                                   
-`,
-    ca_cutoff: 36,
-    mw_cutoff: 40,
+`}
+    static get ca_cutoff() { return 36 }
+    static get mw_cutoff() { return 40 }
 
-    animate: (logo, ms, color = { color: Colors.RED, index: 1, bgcolor: Colors.YELLOW }, center = true) => {
+    static animate = (logo, ms, color = { color: Colors.RED, index: 1, bgcolor: Colors.YELLOW }, center = true) => {
         CH.show_cursor(false);
         let textArray = logo.split('\n');
+        //center line and compensate for the new width
         if (center) {
-
             const old_len = Math.max(...textArray.map((item) => item.length));
-
             for (let i = 0; i < textArray.length; i++) {
                 textArray[i] = CH.hcenter(textArray[i], CH.getWidth());
             }
-
-            color.index = Math.round((textArray[1].length - old_len) / 2) + Logos.ca_cutoff;
+            const w_diff = (textArray[1].length - old_len)
+            color.index = Math.round(w_diff/2) + color.index;
+            
         }
         const hval = Math.max(...textArray.map((item) => item.length));
         const width = CH.getWidth();
-        get_partial = (sprite, index) => {
+        const get_partial = (sprite, index) => {
+
             let res = '';
             sprite.forEach(element => {
                 let line = element.substring(0, index);
-                CH.hcenter(line, width);
                 if (color) {
-                    line = CH.insert_color(color.bgcolor, line.substring(0, color.index)) + CH.insert_color(color.color, line.substring(color.index));
+                        line = CH.insert_color(color.bgcolor, line.substring(0, color.index)) + CH.insert_color(color.color, line.substring(color.index));
                 }
-
                 res += CH.hcenter(line, width);
                 res += '\n';
             });
 
             return res;
         }
+       
 
         for (let i = 0; i < hval; i++) {
             let start = Date.now();
@@ -65,12 +65,12 @@ const Logos = {
             while (Date.now() - start < ms) { }
         }
 
-    },
+    }
 
-    paintedConsoleAdventure: (center = true) => {
-        let logo_sprite = Logos.ConsoleAdventure.split('\n');
-        const max_len = Math.max(...logo_sprite.map((item) => item.length));
-        logo_sprite = logo_sprite.map((item) => item.padEnd(max_len, ' '));
+    static paintedConsoleAdventure = (center = true) => {
+        let logo_sprite = Logos.ConsoleAdventure.split('\n');//Get Lines
+        const max_len = Math.max(...logo_sprite.map((item) => item.length));//Max h length
+        logo_sprite = logo_sprite.map((item) => item.padEnd(max_len, ' '));//Pad all lines to max length
         const old_len = logo_sprite[1].length;
         let cut_off = Logos.ca_cutoff;
 
@@ -78,16 +78,16 @@ const Logos = {
             for (let i = 0; i < logo_sprite.length; i++) {
                 logo_sprite[i] = CH.hcenter(logo_sprite[i], CH.getWidth());
             }
-            cut_off = Math.floor((logo_sprite[1].length - old_len) / 2) + cut_off;
+            cut_off = Math.round((logo_sprite[1].length - old_len) / 2) + cut_off;
         }
         return logo_sprite.map((item) => CH.insert_color(Colors.YELLOW, item.substring(0, cut_off)) + CH.insert_color(Colors.GREEN, item.substring(cut_off))).join('\n');
-    },
-    paintedMattediWorks: (center = true, colors = { color1: 39, color2: 208 }) => {
+    }
+    static paintedMattediWorks = (center = true, colors = { color1: 39, color2: 208 }) => {
         let logo_sprite = Logos.MattediWorks.split('\n');
         const max_len = Math.max(...logo_sprite.map((item) => item.length));
         logo_sprite = logo_sprite.map((item) => item.padEnd(max_len, ' '));
         const old_len = logo_sprite[1].length;
-        let cut_off = Logos.mw_cutoff;
+        let cut_off = Logos.mw_cutoff + 1;
 
         if (center) {
             for (let i = 0; i < logo_sprite.length; i++) {
@@ -98,7 +98,7 @@ const Logos = {
         }
 
         return logo_sprite.map((item) => CH.insert_color(Colors.custom_colors(colors.color1), item.substring(0, cut_off)) + CH.insert_color(Colors.custom_colors(colors.color2), item.substring(cut_off))).join('\n');
-    },
+    }
 };
 
 class GenieSprite {
@@ -133,7 +133,9 @@ class GenieSprite {
 ⠀⠀⠀⠀⠀⠀⠙⠿⣿⣿⣿⣿⣿⣿⣿⣿⣄⡀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠻⠿⢿⣿⣿⣿⣿⣷⠄`;
 
-    static get genie_img () {
+    static getSprite(value) {
+        if (typeof value === `boolean`)
+            return value ? GenieSprite.#image_1 : GenieSprite.#image_2;
         const genie_seed = Math.random() > 0.5;//50-50 chance
         if (genie_seed) {
             return GenieSprite.#image_1;

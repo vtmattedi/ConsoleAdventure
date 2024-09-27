@@ -14,14 +14,16 @@ class Attack {
     get name() {
         return this.#name;
     }
-
-
     get attackType() {
         return this.#attackType;
     }
 
     get damage() {
         return this.#damage
+    }
+
+    set damage(value) {
+        this.#damage = value;
     }
 
 
@@ -32,14 +34,15 @@ class Attack {
 
 
     calculateDamage(stats, weapon) {
-       
+        console.log("Calculating damage for " + this.name);
+        console.log("Stats: " + JSON.stringify(stats));
         if (!stats)
             throw new Error("Stats must be provided");
         if (isNaN(stats.strength) || isNaN(stats.intelligence) || isNaN(stats.dexterity))
             throw new Error("Stats must be a valid object with strength, intelligence and dexterity");
         if (![DamageType.Magic, DamageType.Physical].includes(this.attackType))
             throw new Error("Method must be implemented in non Magic/Physical Attacks");
-        
+     
         let physical_damage = 0;
         let magic_damage = 0;
         if (this.attackType === DamageType.Physical)
@@ -55,11 +58,11 @@ class Attack {
        if (weapon) {
             const weaponType = weapon.attackType;
             if (weaponType === this.attackType) {
-                magic_damage *= weapon.getDamage();
+                magic_damage *= weapon.damage;
             }
             else if (weaponType === DamageType.Hybrid) {
-                magic_damage *= weapon.getDamage();
-                physical_damage *= weapon.getDamage();
+                magic_damage *= weapon.damage;
+                physical_damage *= weapon.damage;
             }
         }
         return new Damage(physical_damage, magic_damage);

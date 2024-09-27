@@ -1,103 +1,114 @@
-const { Module } = require("module");
+const { DefaultColors } = require("./ConsoleHelp");
 
 class Consumable {
-    constructor(name) {
-        this.name = name;
+    #name;
+    #color;
+    constructor(name, color) {
+        if (typeof name !== "string") {
+            throw new Error("Invalid name type");
+        }
+        if (typeof color !== "string" && typeof color !== "number") {
+            throw new Error("Invalid color type");
+        }
+        this.#name = name;
+        this.#color = color;
     }
     get name() {
-        return this.name;
-    } 
-    set name(value) {
-        this.name = value;
+        return this.#name;
+    }
+    get color() {
+        return this.#color;
     }
     use() {
         //Abstract Method
         throw new Error("Method not implemented.");
     }
 }
+
+/*
+* Potion types = Health, Combat, Utility
+*/
 class Potion extends Consumable {
-    constructor(name) {
-        super(name);
+    #value;//{get; private set};
+    constructor(name, value, color) {
+        super(name, color);
+        if (typeof value !== "number") 
+            throw new Error("Invalid value type");
+        this.#value = value;
+    }
+    get value() {
+        return this.#value;
     }
 }
 
+//only hp potions for now
 class HealthPotion extends Potion {
-    #health;
     constructor(name, health) {
-        super(name);
-        this.#health = health;
-    }
-    get health() {
-        return this.#health;
+        super(name, health, DefaultColors.RED);
     }
     use() {
         return {
-            hp: this.#health
+            hp: this.value
         };
     }
 }
 
-class CombatPotion extends Potion {
-    #stats;
-    constructor(name, stats) {
-        super(name);
-        this.#stats = stats;
-    }
-    use() {
-        return{
-            stats: this.#stats
-        };
-    }
-}
+// class CombatPotion extends Potion {
+//     #stats;
+//     constructor(name, stats) {
+//         super(name);
+//         this.#stats = stats;
+//     }
+//     use() {
+//         return{
+//             stats: this.#stats
+//         };
+//     }
+// }
 
-class Utility extends Consumable {
-    constructor(name) {
-        super(name);
-    }
-}
+// class Utility extends Consumable {
+//     constructor(name) {
+//         super(name);
+//     }
+// }
 
-class CombatUtility extends Utility {
-    constructor(name, attack) {
-        super(name);
-    }
-}
+// class CombatUtility extends Utility {
+//     constructor(name, attack) {
+//         super(name);
+//     }
+// }
 
-class OffCombatUtility extends Utility {
-    constructor(name) {
-        super(name);
-    }
-    use() {
-        //Abstract Method
-        throw new Error("Method not implemented.");
-    }
-}
+// class OffCombatUtility extends Utility {
+//     constructor(name) {
+//         super(name);
+//     }
+//     use() {
+//         //Abstract Method
+//         throw new Error("Method not implemented.");
+//     }
+// }
 
 
-const ConsumablesNames = [
-    'Health Potion',
-    'Dex. Potion',
-    'Str. Potion',
-    'Int. Potion',
-    'MR Potion',
-    'Armor Potion',
-    'Lucky Dice',
-    'Magic Dust',
-    'Magic Scroll',
-    'Magic Map',
-]
+// const ConsumablesNames = [
+//     'Health Potion',
+//     'Dex. Potion',
+//     'Str. Potion',
+//     'Int. Potion',
+//     'MR Potion',
+//     'Armor Potion',
+//     'Lucky Dice',
+//     'Magic Dust',
+//     'Magic Scroll',
+//     'Magic Map',
+// ]
 
-const getMaxConsumableName = () => {
-    return Math.max(...ConsumablesNames.map(name => name.length));
-}
+// const getMaxConsumableName = () => {
+//     return Math.max(...ConsumablesNames.map(name => name.length));
+// }
 
 module.exports = 
 {
     Consumable,
+    Potion,
     HealthPotion,
-    CombatPotion,
-    Utility,
-    CombatUtility,
-    OffCombatUtility,
-    ConsumablesNames,
-    getMaxConsumableName
 };
