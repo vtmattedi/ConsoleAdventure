@@ -26,7 +26,9 @@ class Enemy extends Unit {
             this.setStats(stats.strength, stats.intelligence, stats.dexterity);
         }
     }
-
+    suicide() {
+        this.health = 0;
+    }
     randomAttack() {
         if (this.attacks.length == 0)
             throw new Error("No attacks available");
@@ -80,18 +82,8 @@ class Enemy extends Unit {
             lines.push(line);
             if (this.loot.length > 0) {
                 for (const loot of this.loot) {
-                    let color = Colors.WHITE;
-                    if (loot instanceof Potion) {
-                        color = loot.color;
-                    }
-                    else if (loot instanceof Equipament) {
-                        color = GameColors.getEquipamentColor(loot);
-                    }
-                    else if (loot instanceof Weapon) {
-                        color = GameColors.weapon_colors.find(item => item.text === loot.attackType).color;
-                    }
-
-                    line = CH.insert_color(color, loot.name);
+                    console.log(this,loot,this.loot);
+                    line = CH.insert_color(loot.getColor(), loot.name);
                     line = CH.hcenter(line, width, " ");
                     lines.push(line);
                 }

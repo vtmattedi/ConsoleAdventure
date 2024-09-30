@@ -1,5 +1,6 @@
 // Static class to generate weapons
-const { DamageType } = require('./DamageTypes')
+const { DamageType } = require('./DamageTypes');
+const { GameColors } = require('./GameColors');
 
 class Weapon {
     static weaponNames = [
@@ -16,7 +17,7 @@ class Weapon {
     static getRandomAttackType() {
         const randomChance = Math.random();
         const HybridChance = 0.1;
-        if (randomChance < 0.1) {
+        if (randomChance < HybridChance) {
             return DamageType.Hybrid;
         } else if (randomChance < HybridChance + (1 - HybridChance) / 2) {
             return DamageType.Magic;
@@ -89,10 +90,22 @@ class Weapon {
         return this.#attackType;
     }
 
+    getColor() {
+        if (this.attackType === DamageType.Physical)
+            return GameColors.weapon_colors[0].color;
+        else if (this.attackType === DamageType.Magic)
+            return GameColors.weapon_colors[1].color;
+        else
+            return GameColors.weapon_colors[2].color;
+    }
+
+    getDamage() {
+        return this.damage;
+    }
+
 }
 
-class WeaponBuilder 
-{
+class WeaponBuilder {
     constructor() {
         this.name = "";
         this.damage = 0;
@@ -130,4 +143,4 @@ class WeaponBuilder
     }
 }
 
-module.exports = { Weapon, WeaponBuilder};
+module.exports = { Weapon, WeaponBuilder };

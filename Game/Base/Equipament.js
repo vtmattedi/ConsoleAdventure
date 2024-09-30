@@ -1,3 +1,5 @@
+const { DefaultColors } = require("./ConsoleHelp");
+const { GameColors } = require("./GameColors");
 
 
 class Equipament {
@@ -12,6 +14,9 @@ class Equipament {
     //Abstract Method
     getDefense() {
         throw new Error("Method not implemented.");
+    }
+    getColor() {
+        return DefaultColors.WHITE;
     }
 }
 
@@ -28,6 +33,9 @@ class Armor extends Equipament {
         };
 
     }
+    getColor() {
+        return GameColors.equip_colors[0].color;
+    }
 }
 
 class Amulet extends Equipament {
@@ -41,6 +49,9 @@ class Amulet extends Equipament {
             armor: 0,
             magic_resist: this.#magic_resist
         };
+    }
+    getColor() {
+        return GameColors.equip_colors[1].color;
     }
 }
 
@@ -64,6 +75,9 @@ class MagicalArmor extends Armor {
             armor: this.#armor,
             magic_resist: this.#magic_resist
         };
+    }
+    getColor() {
+        return GameColors.equip_colors[2].color;
     }
 }
 
@@ -113,7 +127,6 @@ class EquipamentUtils {
 
     // Generating 50 equipment items with 45% armor, 45% amulet, and 10% magical armor
     static MagicArmorProbability = 0.1;
-
     static genEquipament(size) {
         let equipaments = [];
         let used_armor = [];

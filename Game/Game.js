@@ -49,6 +49,9 @@ class Game {
         return this.#exitGame;
     }
 
+    handleKeyPress(key) {
+    }
+
     startGame() {
         this.#feedback = "";
         CH.clear_screen();
@@ -272,7 +275,7 @@ I shall call you ${CH.insert_format(
                     phrase += `\n`;
                     if (item instanceof Weapon) {
                         phrase += `The ${CH.insert_color(
-                            GameColors.weapon_colors.find(weapon => weapon.text === item.attackType).color, item.name
+                            item.getColor(), item.name
                         )}.`;
                     }
                     else if (item instanceof Potion) {

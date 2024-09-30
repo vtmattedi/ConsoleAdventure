@@ -13,27 +13,6 @@ const { DevMode } = require('../Base/DevMode.js');
 class Player extends Unit {
     static #MAX_EQUIPAMENT = 2 //{get; private set;}
     static #MAX_CONSUMABLES = 5 //{get; private set;}
-    static #getEquipColor = (equipament) => {
-        if (equipament instanceof Equipament.MagicalArmor)
-            return GameColors.equip_colors.find(item => item.text === "MagicArmor").color;
-        else if (equipament instanceof Equipament.Amulet)
-            return GameColors.equip_colors.find(item => item.text === "Amulet").color;
-        else
-            return GameColors.equip_colors.find(item => item.text === "Armor").color;
-        ;
-    };
-
-    static #getWeaponColor = (weapon) => {
-        if (!(weapon instanceof Weapons.Weapon))
-            throw new Error(weapon + " is not a Weapon");
-        return GameColors.weapon_colors.find(item => item.text === weapon.attackType).color || Colors.BG_CYAN;
-    }
-
-    static #getAttackColor = (attack) => {
-        if (!(attack instanceof Attacks.Attack))
-            throw new Error(attack + " is not an Attack");
-        return GameColors.weapon_colors.find(item => item.text === attack.attackType).color;
-    }
     #name;
     #level;
     #xp;
@@ -131,6 +110,9 @@ class Player extends Unit {
         //Abstract Method
         //Implement in subclasses
         throw new Error("Method not implemented");
+    }
+    getClassColor() {
+        return GameColors.class_colors.find(item => item.text === this.getClass()).color;
     }
     /*
     Attack target with a specific attack from the attack pool
@@ -297,20 +279,20 @@ class Player extends Unit {
         //Colors
 
         //Class Color
-        lines[0] = lines[0].replace(player_class, CH.insert_color(GameColors.class_colors.find(item => item.text === player_class).color, player_class));
+        lines[0] = lines[0].replace(player_class, CH.insert_color(this.getClassColor(), player_class));
         //Hp Color
-        const hp_color = hp > 50 ? GameColors.hp_colors.find(item => item.text === "High").color : GameColors.hp_colors.find(item => item.text === "Low").color;
+        const hp_color = hp > 50 ? GameColors.hp_colors[2].color : GameColors.hp_colors[0].color;
         lines[1] = lines[1].replace(hp_str, CH.insert_color(hp_color, hp_str));
         //Weapon Color
-        lines[1] = lines[1].replace(this.#weapon.name, CH.insert_color(Player.#getWeaponColor(this.#weapon), this.#weapon.name));
+        lines[1] = lines[1].replace(this.#weapon.name, CH.insert_color(this.weapon.getColor(), this.#weapon.name));
 
         //Equipament Color
         for (let i = 2; i < 4; i++) {
 
             if (this.equipaments[i - 2])
-                lines[i] = lines[i].replace(this.equipaments[i - 2].name, CH.insert_color(Player.#getEquipColor(this.equipaments[i - 2]), this.equipaments[i - 2].name));
+                lines[i] = lines[i].replace(this.equipaments[i - 2].name, CH.insert_color(this.equipaments[i - 2], this.equipaments[i - 2].name));
             else
-                lines[i] = lines[i].replace("Armor Slot", CH.insert_color(Colors.LIGHTBLACK_EX, "Armor Slot"));
+                lines[i] = lines[i].replace("Armor Slot", CH.insert_color(GameColors.ArmorSlot, "Armor Slot"));
         }
 
         //Stats Color
@@ -336,6 +318,7 @@ class Player extends Unit {
             this.recoverHealth(item.value);
             this.consumables.splice(itemIndex, 1);
         }
+        return item;
     }
 
     findConsumable(consumable) {
@@ -347,14 +330,15 @@ class Player extends Unit {
     }
 
     findWeapon(weapon) {
+        return;
         if (!(weapon instanceof Weapons.Weapon))
             throw new Error("Weapon must be an instance of Weapon");
-        CH.print(CH.hcenter("You found a " + CH.insert_color(Player.#getWeaponColor(weapon), weapon.name) + "!", CH.getWidth()));
+        CH.print(CH.hcenter("You found a " + CH.insert_color(weapon.getColor(), weapon.name) + "!", CH.getWidth()));
         CH.print(CH.hcenter("You can only carry one weapon at a time", CH.getWidth()));
         CH.print();//ln
         const choice = CH.SelectValue(["Equip: " + weapon.name, "Toss it away"], {
             start: 0,
-            colors: [{ text: weapon.name, color: Player.#getWeaponColor(weapon) }]
+            colors: [{ text: weapon.name, color: weapon.getColor() }]
         }, true, false);
         if (choice === 0)
             this.#weapon = weapon;
@@ -362,7 +346,8 @@ class Player extends Unit {
     }
 
     findEquipament(equipament) {
-        const phrase = "You found a " + CH.insert_color(Player.#getEquipColor(equipament), equipament.name) + "!";
+        return;
+        const phrase = "You found a " + CH.insert_color(equipament.getColor(), equipament.name) + "!";
         CH.print(CH.hcenter(phrase, CH.getWidth()));
         const max_equip = CH.hcenter("You can only have carry 2 equipament:", CH.getWidth());
         if (this.equipaments.length >= this.MAX_EQUIPAMENT)
@@ -373,7 +358,7 @@ class Player extends Unit {
         const colors = [...this.equipaments, equipament].map(item => {
             return {
                 text: item.name,
-                color: Player.#getEquipColor(item)
+                color: item.getColor()
             }
         }
         );
@@ -408,7 +393,7 @@ class Player extends Unit {
         const colors = this.attacks.map(item => {
             return {
                 text: item.name,
-                color: Player.#getAttackColor(item)
+                color: item.getColor()
             }
         }
         );

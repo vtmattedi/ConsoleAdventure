@@ -27,7 +27,7 @@ class Logos {
     static get ca_cutoff() { return 36 }
     static get mw_cutoff() { return 40 }
 
-    static animate = (logo, ms, color = { color: Colors.RED, index: 1, bgcolor: Colors.YELLOW }, center = true) => {
+    static animateSynced = (logo, ms, color = { color: Colors.RED, index: 1, bgcolor: Colors.YELLOW }, center = true) => {
         CH.show_cursor(false);
         let textArray = logo.split('\n');
         //center line and compensate for the new width
@@ -37,8 +37,8 @@ class Logos {
                 textArray[i] = CH.hcenter(textArray[i], CH.getWidth());
             }
             const w_diff = (textArray[1].length - old_len)
-            color.index = Math.round(w_diff/2) + color.index;
-            
+            color.index = Math.round(w_diff / 2) + color.index;
+
         }
         const hval = Math.max(...textArray.map((item) => item.length));
         const width = CH.getWidth();
@@ -48,7 +48,7 @@ class Logos {
             sprite.forEach(element => {
                 let line = element.substring(0, index);
                 if (color) {
-                        line = CH.insert_color(color.bgcolor, line.substring(0, color.index)) + CH.insert_color(color.color, line.substring(color.index));
+                    line = CH.insert_color(color.bgcolor, line.substring(0, color.index)) + CH.insert_color(color.color, line.substring(color.index));
                 }
                 res += CH.hcenter(line, width);
                 res += '\n';
@@ -56,7 +56,7 @@ class Logos {
 
             return res;
         }
-       
+
 
         for (let i = 0; i < hval; i++) {
             let start = Date.now();
@@ -66,6 +66,59 @@ class Logos {
         }
 
     }
+
+    static animate = (logo, ms, color = { color: Colors.RED, index: 1, bgcolor: Colors.YELLOW }, center = true, callback) => {
+    
+        CH.show_cursor(false);
+        let textArray = logo.split('\n');
+        //center line and compensate for the new width
+        if (center) {
+            const old_len = Math.max(...textArray.map((item) => item.length));
+            for (let i = 0; i < textArray.length; i++) {
+                textArray[i] = CH.hcenter(textArray[i], CH.getWidth());
+            }
+            const w_diff = (textArray[1].length - old_len)
+            color.index = Math.round(w_diff / 2) + color.index;
+
+        }
+        const hval = Math.max(...textArray.map((item) => item.length));
+        const width = CH.getWidth();
+        const get_partial = (sprite, index) => {
+
+            let res = '';
+            sprite.forEach(element => {
+                let line = element.substring(0, index);
+                if (color) {
+                    line = CH.insert_color(color.bgcolor, line.substring(0, color.index)) + CH.insert_color(color.color, line.substring(color.index));
+                }
+                res += CH.hcenter(line, width);
+                res += '\n';
+            });
+
+            return res;
+        }
+
+        const render = (index) => {
+            CH.clear_screen();
+            CH.print(get_partial(textArray, index + 1));
+            if (index < hval) {
+                setTimeout(() => {
+                    render(index + 1);
+                }, ms);
+            }
+            else {
+                if (callback) {
+                    callback();
+                }
+            }
+        }
+
+        setTimeout(() => {
+            render(1);
+        }, ms);
+    
+    }
+
 
     static paintedConsoleAdventure = (center = true) => {
         let logo_sprite = Logos.ConsoleAdventure.split('\n');//Get Lines

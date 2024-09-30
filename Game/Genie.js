@@ -14,26 +14,26 @@ class Genie {
     static #genie_pool = [
         {
             name: 'Zephiroth the Red Genie!',
-            color: Colors.RED,
+            colorName: 'Red',
         },
         {
             name: 'Calidra the Blue Genie!',
-            color: Colors.BLUE,
+            colorName: 'Blue',
         },
         {
             name: 'Azarmis the Green Genie!',
-            color: Colors.GREEN,
+            colorName: 'Green',
         },
         {
             name: 'Faerithan the Yellow Genie!',
-            color: Colors.YELLOW,
+            colorName: 'Yellow',
         },
         {
             name: 'Jinnira the Magenta Genie!',
-            color: Colors.MAGENTA,
+            colorName: 'Magenta',
         }
     ];
-    static #createBubble(text) {
+    static createBubble(text) {
         if (typeof text !== 'string') {
             throw new Error('Text must be a string');
         }
@@ -58,7 +58,7 @@ class Genie {
 
         return `${bubbleTop}\n/${border}\\\n${bubbleMiddle}\n|${border}|\n${bubbleBottom}`;
     }
-    #color;//{get; private set}
+    #colorName;//{get; private set}
     #name;//{public with type check on assignment}
     constructor() {
         if (Genie.#instance) {
@@ -68,7 +68,7 @@ class Genie {
             const genieSeed = Math.floor(Math.random() * (Genie.#genie_pool.length - 1))
             this.missBehaviour = Number(Math.random().toFixed(2));
             this.#name = Genie.#genie_pool[genieSeed].name;
-            this.#color = Genie.#genie_pool[genieSeed].color;
+            this.#colorName = Genie.#genie_pool[genieSeed].colorName;
             Genie.#instance = this;
         }
     }
@@ -78,7 +78,7 @@ class Genie {
         }
         return Genie.#instance;
     }
-    #shortName() {
+    shortName() {
         return this.#name.substring(0, this.#name.indexOf(' '));
     }
     introduce() {
@@ -88,7 +88,7 @@ I am ${this.#name}
 Welcome to the Great ${CH.insert_color(Colors.YELLOW, "Console")} ${CH.insert_color(Colors.GREEN, "Adventure")}!`,
             [{
                 text: this.#name.substring(0, this.#name.indexOf(' ')),
-                color: this.#color
+                color: this.color
             }]
         );
     }
@@ -99,39 +99,35 @@ Welcome to the Great ${CH.insert_color(Colors.YELLOW, "Console")} ${CH.insert_co
     goodbye(name) {
         if (!name)
             name = "You";
-        const goodbye = ["Goodbye! I will miss you!", "Hasta la vista, baby!", `${name}, shall be missed!`, `Farewell, ${this.#shortName()} shall miss you!`, `Oh, never thought ${name} would quit so easily!`, `Ha, I knew ${name} could not make it!`];
+        const goodbye = ["Goodbye! I will miss you!", "Hasta la vista, baby!", `${name}, shall be missed!`, `Farewell, ${this.shortName()} shall miss you!`, `Oh, never thought ${name} would quit so easily!`, `Ha, I knew ${name} could not make it!`];
         const seed = Math.floor(Math.random() * goodbye.length);
         const width = process.stdout.columns;
         this.speak(CH.hcenter(goodbye[seed], width / 3),
             {
-                text: this.#shortName(),
-                color: this.#color
+                text: this.shortName(),
+                color: this.color
             }
         );
     }
     smirk(_class) {
         if (typeof (_class) !== 'string')
             this.speak(`Ha, That may be a class but may also be a structure!`);
-        else
-        {
+        else {
             // this.speak(`Oh, a ${_class}! How original!`,
             //     GameColors.class_colors);
             let phrase = "";
-                if (_class === "Mage")
-                {
-                    phrase = (`Oh, a ${_class}! pew pew Fireball, pew pew Alter Time.`)
-                }
-                else if (_class === "Warrior")
-                {
-                    phrase = (`Oh, a ${_class}! I shall speak as you: Zug, zug zug? zug zug zug zug.`)
-                }
-                else if (_class === "Rogue")
-                {
-                    phrase = (`A ${_class}? Where? now I see you, now I don't.`)
-
-                }
-                this.speak(CH.breakLine(phrase,CH.getWidth()),GameColors.class_colors)
+            if (_class === "Mage") {
+                phrase = (`Oh, a ${_class}! pew pew Fireball, pew pew Alter Time.`)
             }
+            else if (_class === "Warrior") {
+                phrase = (`Oh, a ${_class}! I shall speak as you: Zug, zug zug? zug zug zug zug.`)
+            }
+            else if (_class === "Rogue") {
+                phrase = (`A ${_class}? Where? now I see you, now I don't.`)
+
+            }
+            this.speak(CH.breakLine(phrase, CH.getWidth()), GameColors.class_colors)
+        }
     }
     explainGame() {
         CH.clear_screen();
@@ -181,7 +177,7 @@ and use Spacebar to select the option.`;
                 this.speak(CH.breakLine(responses[genieSeed], width / 2),
                     [{
                         text: this.#name.substring(0, this.#name.indexOf(' ')),
-                        color: this.#color
+                        color: this.color
                     },
                     {
                         text: 'Gre..',
@@ -209,9 +205,10 @@ and use Spacebar to select the option.`;
         var genieLines = Assets.GenieSprite.getSprite();
         const width = Math.max(...genieLines.split('\n').map(line => line.length));
         let final_sentence = sentence;
-        if (rightSprite)
+        if (rightSprite) {
             final_sentence = CH.breakLine(sentence, CH.getWidth() / 4);
-        let final_sprite = CH.merge(genieLines, Genie.#createBubble(final_sentence));
+        }
+        let final_sprite = CH.merge(genieLines, Genie.createBubble(final_sentence));
 
         if (rightSprite)
             final_sprite = CH.merge(final_sprite, rightSprite,
@@ -222,7 +219,7 @@ and use Spacebar to select the option.`;
                 });
         else
             final_sprite = CH.hcenter(final_sprite, CH.getWidth());
-        final_sprite = CH.paintSprite(final_sprite, width, this.#color);
+        final_sprite = CH.paintSprite(final_sprite, width, this.color);
 
         if (colors) {
             if (!Array.isArray(colors))
@@ -247,21 +244,27 @@ and use Spacebar to select the option.`;
         CH.print(final_sprite);
     }
 
-    get name()
-    {
+    get name() {
         return this.#name;
     }
 
-    set name(value)
-    {
+    set name(value) {
         if (!(typeof value === "string"))
             throw new TypeError("name must be a string");
         this.#name = value
     }
 
-    get color ()
-    {
-        return this.color;
+    get color() {
+        if (this.#colorName === "Red")
+            return Colors.RED;
+        else if (this.#colorName === "Blue")
+            return Colors.BLUE;
+        else if (this.#colorName === "Green")
+            return Colors.GREEN;
+        else if (this.#colorName === "Yellow")
+            return Colors.YELLOW;
+        else if (this.#colorName === "Magenta")
+            return Colors.MAGENTA
     }
 }
 
