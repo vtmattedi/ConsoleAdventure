@@ -315,8 +315,7 @@ class Game {
         const genieSentece = this.#genieSpeach === "" ? "What will you do?" : [
             `You are facing the ${this.currentEnemy.name}! `,
             `What will you do?`].join("");
-        genie.speak(
-            genieSentece,
+        genie.speak( this.#genieSpeach === "" ?genieSentece: this.#genieSpeach,
             {
                 text: this.currentEnemy.name,
                 color: Colors.RED
@@ -384,7 +383,14 @@ class Game {
         }
         return itemOptions;
     }
+    GenieTempSpeach(phrase, time = 5000) { 
+        this.#genieSpeach = phrase;
+        setTimeout(() => {
+            this.#genieSpeach = "";
+            GameStates.getInstance().currentState.rerender();  
+        }, time);
 
+    }
     playerCreation = new GameState(() => {
         if (!Game.introState.init) {
             Game.introState.init = true;
@@ -769,7 +775,7 @@ I shall call you ${CH.insert_format(
                     Game.battleMenu.current_menu = BattleStage.SelectAction;
                 }
                 else {
-                    const get_index =(name, array) =>
+                    const get_index = (name, array) =>
                     {
                         for (let i = 0; i < array.length; i++) {
                             if (array[i].name === name) {
@@ -778,13 +784,14 @@ I shall call you ${CH.insert_format(
                         }
 
                     }
-                    console.log(get_index(Game.inputState.index, this.player.consumables));
-                    const iu = this.player.useConsumable(get_index(Game.inputState.index, this.player.consumables));
-                    console.log(iu);
+                    const index = get_index(itemOptions[Game.inputState.index].name, this.player.consumables)
+                    const item = this.player.useConsumable(index);
+                    console.log(item);
                     
-                    this.#feedback = `${this.player.name} uses ${iu.name}!`;
-                    if (item instanceof HealthPotion) {
-                        this.#feedback += ` Recovering ${iu.value} HP!`;
+                    this.#feedback = `${CH.insert_color(this.player.getClassColor(),this.player.name)} uses ${CH.insert_color(item.getColor(), item.name)}!`;
+                    if (item instanceof HealthPotion && Math.random() > 0.3) {
+                        this.GenieTempSpeach("A potion you used, Hum...\n Smart you are!")
+                        this.#feedback += `\n Recovering ${CH.insert_color(item.getColor(), item.value)} HP!`;
                     }
 
                 }

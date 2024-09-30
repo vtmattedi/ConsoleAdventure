@@ -308,8 +308,9 @@ class Player extends Unit {
     }
 
     useConsumable(itemIndex) {
-        if (!(typeof itemIndex === "number"))
-            throw new TypeError("Item index must be a number");
+        if (!(typeof itemIndex === "number")){
+            CH.print(itemIndex);
+            throw new TypeError("Item index must be a number");}
         if (itemIndex < 0 || itemIndex >= this.consumables.length) {
             throw new Error("Invalid item index");
         }
