@@ -23,6 +23,9 @@ class Consumable {
         //Abstract Method
         throw new Error("Method not implemented.");
     }
+    getColor() {
+        return this.color;
+    }
 }
 
 /*

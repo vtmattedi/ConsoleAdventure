@@ -1,7 +1,7 @@
 
 //ANSI escape codes: https://en.wikipedia.org/wiki/ANSI_escape_code
 // Terminal Handling implementations
-const readline = require("readline-sync");
+
 const { DevMode } = require('./DevMode.js');
 
 // ANSI control sequences => color = CSI n m
@@ -113,46 +113,6 @@ class ConsoleImplementation {
     clear_last_line = (times) => {
         throw new ConsoleNotImplemented();
     }
-    
-    hide_cursor = () => {
-        throw new ConsoleNotImplemented();
-    }
-
-    SelectValue = (options, config, returnIndex, vertical = false) => {
-        throw new ConsoleNotImplemented();
-    }
-
-    hcenter = (input, size, char = " ", mode = 0) => {
-        throw new ConsoleNotImplemented();
-    }
-
-    vcenter = (input, verticalLength, horizontalLength, char = " ", mode = 0) => {
-        throw new ConsoleNotImplemented();
-    }
-
-    merge = (leftSprite, rightSprite, options = {}) => {
-        throw new ConsoleNotImplemented();
-    }
-
-    waitFor = (char = " ", time = -1) => {
-        throw new ConsoleNotImplemented();
-    }
-
-    paintSprite = (sprite, hcutoff, color) => {
-        throw new ConsoleNotImplemented();
-    }
-
-    getLineWidth = (text) => {
-        throw new ConsoleNotImplemented();
-    }
-
-    pressSpace = (phrase = "to continue") => {
-        throw new ConsoleNotImplemented();
-    }
-
-    breakLine = (text, width) => {
-        throw new ConsoleNotImplemented();
-    }
 
     getWidth = () => {
         throw new ConsoleNotImplemented();
@@ -162,19 +122,8 @@ class ConsoleImplementation {
         throw new ConsoleNotImplemented();
     }
 
-
-    question = (phrase) => {
-        throw new ConsoleNotImplemented();
-    }
-
     print = (text) => {
         throw new ConsoleNotImplemented();
-
-    }
-
-    gameStats = (text) => {
-        throw new ConsoleNotImplemented();
-
     }
 
     setTitle = (title) => {
@@ -182,29 +131,33 @@ class ConsoleImplementation {
     }
 }
 
+
 //Singleton for most VTI terminals and OS usage
-class ConsoleImplementation_x86 extends ConsoleImplementation {
+class BasicConsole extends ConsoleImplementation {
     static #instance = null; //Singleton instance
     constructor() {
-        if (ConsoleImplementation_x86.#instance) {
-            return ConsoleImplementation_x86.#instance;
+        if (BasicConsole.#instance) {
+            return BasicConsole.#instance;
         }
         else {
             super();
-            ConsoleImplementation_x86.#instance = this;
+            BasicConsole.#instance = this;
         }
 
     }
     /// Already done by the constructor
     /// but here for completeness sake.
     getInstance() {
-        return ConsoleImplementation_x86.#instance;
+        return BasicConsole.#instance;
     }
-    breakLine = (text, width) => {
-
+    breakLine = (text, width, ignorenl = false) => {
+        if (ignorenl) {
+            text = text.replaceAll('\n', ' ');
+        }
         let words = text.split(' ');
         let lines = [];
         let line = '';
+        
         words.forEach(word => {
             const lineLength = this.getLineWidth(line);
             const wordLength = this.getLineWidth(word);
@@ -218,18 +171,20 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
         return lines.join('\n');
     }
     clear_screen = () => {
-        //process.stdout.write(ControlSequences.CSI + `2J`)
+        // this.write(ControlSequences.CSI + `2J`)
         console.clear();
     }
-
+    write = (text) => {
+        process.stdout.write(text);
+    }
     clear_line = () => {
-        return ControlSequences.CSI + `2K`
+         this.write(ControlSequences.CSI + `2K`)
     }
 
     clear_last_line = (times) => {
         for (let i = 0; i < (times || 1); i++) {
-            process.stdout.write('\x1b[2K'); // Clear the entire line
-            process.stdout.write('\x1b[1A'); // Move cursor up one line
+            this.write('\x1b[1A'); // Move cursor up one line
+            this.clear_line(); // Clear the entire line
         }
     }
 
@@ -239,9 +194,9 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
 
     show_cursor = (value = true) => {
         if (value)
-            process.stdout.write('\u001B[?25h');
+           this.write('\u001B[?25h');
         else
-            process.stdout.write('\u001B[?25l');
+            this.write('\u001B[?25l');
     }
 
     insert_color = (color, text) => {
@@ -301,164 +256,89 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
 
     }
 
-    /**
-     * Displays a selection menu in the terminal and allows the user to navigate and select an option.
-     * 
-     * @param {string[]} options - An array of strings representing the options to display.
-     * @param {Object} [config] - Configuration object for the selection menu.
-     * @param {number} [config.start=0] - The starting index of the selection.
-     * @param {Object|Object[]} [config.colors] - An object or array of objects specifying text and color for highlighting.
-     * @param {string} config.colors[].text - The text to highlight.
-     * @param {number} config.colors[].color - The ANSI color code to use for highlighting.
-     * @param {boolean} [returnIndex=false] - If true, the function returns the index of the selected option. Otherwise, it returns the selected option text.
-     * @param {boolean} [vertical=false] - If true, the options are displayed vertically. Otherwise, they are displayed horizontally.
-     * @returns {string|number} - The selected option text or index, depending on the value of `returnIndex`.
-     */
-    SelectValue = (options, config, returnIndex = false, vertical = false) => {
-        let _current = 0;
-        if (!Array.isArray(options)) {
-            return 0;
-        };
-
-        if (config && config.start)
-            _current = config.start;
-        if (config && config.colors && !Array.isArray(config.colors)) {
-            config.colors = [config.colors];
+   
+    printOptions = (options, selectIndex = 0 , config, vertical = false) => {
+        let res = "";
+        const padChar = DevMode.getInstance().value ? '#' : ' ';
+        let padding = padChar.repeat(3);
+        if (config && config.padding) {
+            padding = padChar.repeat(config.padding);
         }
-        const printOptions = () => {
+        const width = this.getWidth();
+        const maxLength = Math.max(...options.map(item => item.length));
+        const totalLength = options.reduce((acc, item) => acc + item.length, 0) + padding.length * options.length;
+        if (totalLength > width) {
+            padding = " ".repeat(0);
+        }
+        for (let i = 0; i < options.length; i++) {
+            let line = `  ${options[i]}  `;
 
-            let res = "";
-            const padChar = DevMode.getInstance().value ? '#' : ' ';
-            let padding = padChar.repeat(3);
-            if (config && config.padding) {
-                padding = padChar.repeat(config.padding);
-            }
-            const width = this.getWidth();
-            const maxLength = Math.max(...options.map(item => item.length));
-            const totalLength = options.reduce((acc, item) => acc + item.length, 0) + padding.length * options.length;
-            if (totalLength > width) {
-                padding = " ".repeat(0);
-            }
-            for (let i = 0; i < options.length; i++) {
-                let line = `  ${options[i]}  `;
+            if (i === selectIndex)
+                line = `> ${options[i]} <`;
 
-                if (i === _current)
-                    line = `> ${options[i]} <`;
-
-                //line = `${line} :[${line.length}]`;
-                let char = ' ';
-                if (DevMode.getInstance().value) {
-                    char = '#';
-                }
-                if (vertical) {
-                    res += this.hcenter(line, width, char);
-                    res += '\n';
-                }
-                else {
-                    res += line;
-                    res += padding;
-                }
-            }
-            res = this.hcenter(res, width);
-            if (res.length > width && !vertical) {
-                res = res.substring(0, width);
-            }
-
-            //insert colors
-            res = res.replace(options[_current], this.insert_format({
-                decoration: Decorations.Underlined
-            }, options[_current]));
-            res = res.replaceAll('>', this.insert_color(DefaultColors.YELLOW, '>'));
-            res = res.replaceAll('<', this.insert_color(DefaultColors.YELLOW, '<'));
-            if (config && Array.isArray(config.colors)) {
-                config.colors.forEach(item => {
-                    res = res.replaceAll(item.text, this.insert_color(item.color, item.text));
-                });
-            }
-
-            this.print(res);
-        };
-        printOptions();
-        //hide cursor
-        this.show_cursor(false);
-        const devKeys = ["o", "p", "j", "k", "y"]
-        while (true) {
-            let key = readline.keyIn(" ", { hideEchoBack: true, mask: '' });
-            this.show_cursor(false);
-            this.clear_last_line();
-            //get arow keys (Linux only)
-            if (key === "[") {
-                const cmd = readline.keyIn(" ");
-                if (cmd === "D") key = "left";
-                else if (cmd === "C") key = "right";
-                else if (cmd === "A") key = "up";
-                else if (cmd === "B") key = "down";
-                this.clear_last_line();
-            }
-            key = key.toLowerCase();
+            //line = `${line} :[${line.length}]`;
+            // let char = ' ';
+            // if (DevMode.getInstance().value) {
+            //     char = '#';
+            // }
             if (vertical) {
-                if (key === "w" || key === "up") {
-                    _current = _current - 1 < 0 ? options.length - 1 : _current - 1;
-                } else if (key === "s" || key === "down") {
-                   _current = (_current + 1) % options.length;
-                }
+                res += this.hcenter(line, width, padChar);
+                res += '\n';
             }
             else {
-                if (key === "a" || key === "left") {
-                    _current = _current - 1 < 0 ? options.length - 1 : _current - 1;
-                }
-                else if (key === "d" || key === "right") {
-                    _current = (_current + 1) % options.length;
-                }
+                res += line;
+                res += padding;
             }
-            if (key === " ") {
-                this.clear_last_line();
-                if (returnIndex) return _current;
-                //show cursor
-
-                return options[_current];
-
-            }
-            if (devKeys.includes(key)) {
-                let opt = ""
-                if (key === "p")
-                    opt = this.gameStats('player')
-                else if (key == "o")
-                    opt = this.gameStats('enemy')
-                else if (key == "k")
-                    opt = this.gameStats('game')
-                else if (key == "y")
-                    opt = JSON.stringify(config, undefined, "\t")
-                else if (key == "j") {
-                    DevMode.getInstance().setValue()
-                    opt = `${this.insert_color(DefaultColors.YELLOW, "Developer Mode")} Toggled is now ${DevMode.getInstance().value}.`
-                }
-                const size = opt.split("\n").length
-                this.print(opt)
-                this.pressSpace();
-                this.clear_last_line(size + 1);
-            }
-            if (vertical) {
-                this.clear_last_line(options.length + 1); //clear all lines from the options
-            }
-            else
-                this.clear_last_line();
-            printOptions();
         }
+        res = this.hcenter(res, width);
+        if (res.length > width && !vertical) {
+            res = res.substring(0, width);
+        }
+
+        //insert colors
+        res = res.replace(options[selectIndex], this.insert_format({
+            decoration: Decorations.Underlined
+        }, options[selectIndex]));
+        res = res.replaceAll('>', this.insert_color(DefaultColors.YELLOW, '>'));
+        res = res.replaceAll('<', this.insert_color(DefaultColors.YELLOW, '<'));
+        if (config && Array.isArray(config.colors)) {
+            config.colors.forEach(item => {
+                res = res.replaceAll(item.text, this.insert_color(item.color, item.text));
+            });
+        }
+
+        this.print(res);
+        return res;
     }
 
     // Horizontal center a line, mode => 0 = center, 1 = left, 2 = right
-    hcenter = (input, size, char = " ", mode = 0) => {
-        //if (typeof input !== "string") return undefined;
-        let start = mode !== 1;
+    // MultiLine text is supported, each line will be centered
+    // if treatAsRaw is true, it will treat the input as a single line
+    hcenter = (input, size, char = " ", mode = 0, treatAsRaw = false) => {
+       
+        //Added support for multiline text
+        const centerLine = (text)=>
+        {
+             if (typeof text !== "string") return undefined;
+            let start = mode !== 1;
 
-        while (this.getLineWidth(input) < size) {
-            if (start) input = char + input;
-            else input += char;
-            if (mode === 0)
-                start = !start;
+            while (this.getLineWidth(text) < size) {
+                if (start) text = char + text;
+                else text += char;
+                if (mode === 0)
+                    start = !start;
+            }
+            return text;
         }
-        return input;
+        // const isMultiLine = input.includes('\n');
+
+        // if (isMultiLine && !treatAsRaw) {
+        //     let lines = input.split('\n');
+        //     lines = lines.map(line => centerLine(line));
+        //     return lines.join('\n');
+        // }
+        // else 
+            return centerLine(input);
     }
 
     // Vertical center a sprite, mode => 0 = center, 1 = top, 2 = bottom
@@ -531,15 +411,6 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
         return mergedLines;
     }
 
-    waitFor = (char = " ", time = -1) => {
-        const start = Date.now();
-        this.show_cursor(false);
-        while (true) {
-            if (Date.now() - start > time && time > 0) return false;
-            if (readline.keyIn(" ", { hideEchoBack: true, mask: '' }) === char) { this.clear_last_line(); return true; }
-            this.clear_last_line();
-        }
-    }
 
     paintSprite = (sprite, hcutoff, color) => {
         const sprite_array = sprite.split('\n');
@@ -566,60 +437,33 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
     }
 
     pressSpace = (phrase = "to continue") => {
-        const width = process.stdout.columns;
+        const width = this.getWidth();
         let final_phrase = `Press Spacebar ${phrase}.`;
         final_phrase = this.hcenter(final_phrase, width);
         final_phrase = final_phrase.replaceAll('Spacebar',
             this.insert_format({
                 color: DefaultColors.YELLOW,
-                decoration: [Decorations.Underlined]
+                decoration: [Decorations.Underlined, Decorations.Blink]
             }, "Space")
         );
         this.print(final_phrase);
-        this.waitFor(' ');
-        process.stdout.write(ControlSequences.Reset);
-    }
-
-    question = (phrase) => {
-        this.show_cursor(true)
-        const res = readline.question(phrase)
-        this.show_cursor(false)
-        return res;
+        //this.write(ControlSequences.Reset);
     }
 
     print = (text) => {
         if (typeof text === 'undefined') {
-            console.log();
+            this.write('\n');
         }
         else
-            console.log(text);
-    }
-
-    gameStats = (text) => {
-        let obj = "";
-        if (text === 'enemy') {
-            obj = this.insert_color(DefaultColors.YELLOW, "Enemy: \n")
-            obj += JSON.stringify(DevMode.getInstance().gameInstance.currentEnemy, undefined, "\t")
-        }
-        else if (text === 'player') {
-            obj = this.insert_color(DefaultColors.YELLOW, "Player: \n")
-            obj += JSON.stringify(DevMode.getInstance().gameInstance.player, undefined, "\t")
-        }
-        else if (text === game) {
-            obj = this.insert_color(DefaultColors.YELLOW, "Game: \n")
-            obj += JSON.stringify(DevMode.getInstance().gameInstance, undefined, "\t")
-        }
-        return obj
+            this.write(text + '\n');
     }
 
     setTitle = (title) => {
-        process.stdout.write('\x1b]2;' + title + '\x1b\x5c');
+       this.write('\x1b]2;' + title + '\x1b\x5c');
     }
-
 }
-
 module.exports = {
-    ConsoleImplementation_x86,
+    BasicConsole,
     DefaultColors,
     Decorations
 }

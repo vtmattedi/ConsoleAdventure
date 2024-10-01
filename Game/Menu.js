@@ -1,9 +1,10 @@
 const ConsoleImpl = require('./Base/ConsoleHelp.js')
-const CH = new ConsoleImpl.ConsoleImplementation_x86();
+const CH = new ConsoleImpl.BasicConsole();
 const Colors = ConsoleImpl.DefaultColors
 const Decorations = ConsoleImpl.Decorations
-const { DevMode } = require('./Base/DevMode.js');
+const { GameVersion, BuildDate } = require('./GameVersion.js');
 const Assets = require("./Assets/Assets.js");
+const { DevMode } = require("./Base/DevMode.js");
 const { Genie } = require("./Genie.js");
 
 /*
@@ -11,67 +12,21 @@ const { Genie } = require("./Genie.js");
 */
 
 class Menu {
-    static gameMenuOptions = ["Continue", "Main Menu...", "Save Game...", "Info", "Help", "Exit"];
+    static gameMenuOptions = ["Continue", "Go to Main Menu", "Save Game", "Info", "Help", "Exit"];
     static startMenuOptions = ["New Game", "Load Game!", "Info", "Exit"];
     static gameEndOptions = ["Play Again", "Exit"];
-    static battleMenuOptions = ['Attack', 'Flee', 'Equipament', 'Menu', 'Dev Button'];
-    static startMenu(startIndex = 0, returnindex = true) {
-        CH.clear_screen();
-        CH.print(Assets.Logos.paintedConsoleAdventure());
-        const options = Menu.startMenuOptions;
-        return CH.SelectValue(
-            options, {
-            start: startIndex,
-            colors: [{
-                text: options[options.length - 1],
-                color: Colors.RED
-            },
-            {
-                text: "Load Game!",
-                color: Colors.LIGHTBLACK_EX
-            }]
-        }, returnindex, true
-        );
-    }
-    static gameMenu(startIndex = 0) {
-        CH.clear_screen();
-        CH.print(Assets.Logos.paintedConsoleAdventure());
-        const options = Menu.gameMenuOptions;
-        return CH.SelectValue(
-            options, {
-            start: Math.max(startIndex, 0),
-            colors: [{
-                text: options[options.length - 1],
-                color: Colors.RED
-            },
-        {
-            text:"Continue",
-            color:ConsoleImpl.DefaultColors.LIGHTGREEN_EX
-        }]
-        }, true, true
-        );
-    }
-    static gameEnd() {
-        const options = Menu.gameEndOptions;
-        return CH.SelectValue(options, {
-            colors: [{
-                text: "Exit",
-                color: Colors.RED
-            }]
-            ,
-
-        }, true);
-    }
-    static infoMenu() {
+    static battleMenuOptions = ['Attack', 'Flee', 'Items', 'Menu'];
+    static gameModeOptions = ['Story Mode', 'Gauntlet', 'Back'];
+    static confirmOptions = ['Yes', 'No'];
+    static printInfo() {
         CH.clear_screen();
         CH.print(Assets.Logos.paintedMattediWorks());
-
         const devInfo =
             `
-        Designed and Developed by: ${CH.insert_format({
+    Designed and Developed by: ${CH.insert_format({
                 decoration: [Decorations.Bold, Decorations.Italic]
             }, "Vitor Mattedi")} - MattediWorks
-        `;
+    `;
         const info = [
             "Welcome to Console Adventure!",
             "This is a text-based adventure game",
@@ -91,28 +46,26 @@ class Menu {
                 text: "Adventure",
                 color: Colors.GREEN
             }
-        ]);
+        ], undefined, { hcenter: true });
 
 
         CH.print(devInfo.split("\n").map((line) => CH.hcenter(line, CH.getWidth())).join("\n"));
+        if (DevMode.getInstance().value) {
+            CH.print();
+            CH.print(CH.hcenter(`Game Version: ${CH.insert_format(
+                { decoration: [Decorations.Bold],
+                    color: Colors.GREEN
+                 },
+                GameVersion 
+            )} - Build Date: ${CH.insert_format(
+                { decoration: [Decorations.Bold],
+                    color: Colors.GREEN
+                 },
+                BuildDate 
+            )}`, CH.getWidth()));
+            CH.print();
+        }
         CH.pressSpace("to go back");
-    }
-    static battleMenu() {
-        const options = DevMode.getInstance().value ? Menu.battleMenuOptions : Menu.battleMenuOptions.slice(0, -1);
-        return CH.SelectValue(
-            options, {
-            start: 0,
-            padding: DevMode.getInstance().value ? 5 : 10,
-            colors: [{
-                text: "Menu",
-                color: Colors.LIGHTYELLOW_EX
-            },
-            {
-                text: "Dev Button",
-                color: Colors.BG_YELLOW
-            }]
-        }, true, false
-        );
     }
 }
 // static gameMenuOptions = ["Continue", "New Game", "Info", "Help", "Exit"];
@@ -149,4 +102,9 @@ class BattleMenuOptions {
     static get DevButton() { return 4; }
 }
 
-module.exports = { Menu, GameMenuOptions, StartMenuOptions, GameEndOptions, BattleMenuOptions };    
+class ConfirmOptions {
+    static get Yes() { return 0; }
+    static get No() { return 1; }
+}
+
+module.exports = { Menu, GameMenuOptions, StartMenuOptions, GameEndOptions, BattleMenuOptions, ConfirmOptions };    

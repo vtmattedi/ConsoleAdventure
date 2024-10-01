@@ -1,131 +1,219 @@
 // Purpose: Game class to handle the game logic.
 const ConsoleImpl = require('./Base/ConsoleHelp.js');
-const CH = new ConsoleImpl.ConsoleImplementation_x86();
+const CH = new ConsoleImpl.BasicConsole();
 const Colors = ConsoleImpl.DefaultColors;
+const Decorations = ConsoleImpl.Decorations;
 const { GameColors } = require('./Base/GameColors.js');
 const { PlayerFactory } = require('./Classes/GameClasses.js');
 const Enemy = require('./Enemies/Enemies.js');
-const { Menu, BattleMenuOptions, GameMenuOptions, GameEndOptions } = require('./Menu.js');
+const { Menu, BattleMenuOptions, GameMenuOptions, GameEndOptions, StartMenuOptions, ConfirmOptions } = require('./Menu.js');
 const { DamageType } = require('./Base/DamageTypes.js');
-const { Weapon } = require('./Base/Weapons.js');
+const { Weapon, WeaponUtils } = require('./Base/Weapons.js');
 const { DevMode } = require('./Base/DevMode.js');
 const { Genie } = require('./Genie.js');
 const { HealthPotion, Potion } = require('./Base/Consumables.js');
 const { EquipamentUtils, Equipament } = require('./Base/Equipament.js');
-const genie = new Genie()
+const { GameState } = require('./GameState.js');
+const Assets = require('./Assets/Assets.js');
+const genie = new Genie();
 
+class GameStates {
+    static #instance = null;
+    #currentState;
+    #lastState = [];
+
+    constructor() {
+        if (!GameStates.#instance) {
+            this.states = [];
+            this.#currentState = null;
+            GameStates.#instance = this;
+        }
+        else {
+            return this
+        }
+    }
+    set currentState(state) {
+        if (state instanceof GameState) {
+            this.#lastState.push(this.#currentState);
+            this.#currentState = state;
+            state.rerender();
+        }
+    }
+    get currentState() {
+        return this.#currentState;
+    }
+    static getInstance() {
+        if (!GameStates.#instance)
+            GameStates.#instance = new GameStates();
+        return GameStates.#instance;
+    }
+    static rerender() {
+        GameStates.#instance.currentState?.rerender();
+    }
+    addState() {
+
+    }
+    goBack() {
+        if (this.#lastState.length > 0) {
+            this.#currentState = this.#lastState.pop();
+            this.#currentState.rerender();
+        }
+    }
+
+}
+
+class BattleStage {
+    static Encounter = 0;
+    static SelectAction = 1;
+    static Attack = 2;
+    static Flee = 3;
+    static Items = 4;
+    static Menu = 5;
+    static GameOver = 6;
+    static Slain = 7;
+    static PreSlain = 8;
+    static GetLoot = 9;
+}
+
+class MainMenuStage {
+    static PreMenu = 0;
+    static MainMenu = 1;
+    static NewGame = 2;
+    static Continue = 3;
+    static Exit = 4;
+    static Info = 5;
+    static Help = 6;
+    static LoadGame = 7;
+    static GameModeSelection = 8;
+    static GameModeInvalid = 9;
+}
+
+class GameMenuStage {
+    static MainMenu = 0;
+    static LoadGame = 1;
+    static Info = 2;
+    static SaveGame = 3;
+    static Help = 4;
+    static Help_2 = 5;
+    static Help_3 = 6;
+    static ConfirmQuit = 7;
+}
 
 class Game {
-
-    #player = new PlayerFactory().createPlayer("Cheater", "Warrior"); // {get; private set}
-    #currentEnemy = new Enemy.Enemy(); // {get; private set}
-    #isRunning = false;//{get; private set}
-    #fleeAttempt = 0; //strictly private
-    #exitGame = false; // {get; private set} game exit flag
     #feedback = ""; // strictly private
+    #fleeAttempt = 0; //strictly private
+    #score = 0; //strictly private
+    #genieSpeech = ""; //strictly private
+    #genieSpeechHandle = null; //strictly private
+    #enemySeed = {
+        enemy_seed: new Enemy.Minion("Bob", 10, 1),
+        loc_seed: 0,
+        adverb_seed: 0,
+        phrase_seed: 0
+    }
+    static inputState = {
+        string: "",
+        index: 0,
+        maxIndex: 0,
+        vertical: false,
+        reset: () => {
+            this.string = "";
+            this.index = 0;
+        }
+    }
+    static battleMenu = {
+        current_menu: 0,
+        result: 0,
+    }
+    static introState = {
+        stage: 0,
+        pname: "",
+        pclass: "",
+        init: true
+    }
+    static MainMenuStage = {
+        current_menu: 0,
+    }
+    static gameMenu = {
+        current_menu: 0,
+    }
+    static geniephrase = "";
+    currentEnemy = new Enemy.Minion("Bob", 10, 1, {
+        strength: 5,
+        intelligence: 2,
+        dexterity: 3,
+    });
+    isRunning = false;
+    exitGame = false;
     constructor() {
-        this.#currentEnemy = new Enemy.Minion("Bob", 10, 1, {
+        this.currentEnemy = new Enemy.Minion("Bob", 10, 1, {
             strength: 5,
             intelligence: 2,
             dexterity: 3,
         });
+        this.player = new PlayerFactory().createPlayer("Cheater", "Warrior"); // {get; private set}
+        this.isRunning = false;
+        this.exitGame = false;
         new DevMode().gameInstance = this;
     }
-
-
-    get player() {
-        return this.#player;
+    get inputState() {
+        return Game.inputState;
     }
 
-    get currentEnemy() {
-        return this.#currentEnemy;
-    }
+    //Handle Input and makes the game function
+    //Call this on keypress or gamepad input
+    //treat the input to ' ' -> space
+    //'return' -> enter and Arrow Keys -> arrowup, arrowdown, arrowleft, arrowright
+    handleInput = (input) => {
+        if (typeof input === "undefined")
+            return;
+        if (GameStates.getInstance().currentState?.changeState(input))
+            return;
 
-    get isRunning() {
-        return this.#isRunning;
-    }
-
-    get exitGame() {
-        return this.#exitGame;
-    }
-
-    startGame() {
-        this.#feedback = "";
-        CH.clear_screen();
-        genie.speak('Hello again Adventurer!\nI didn\'t catch your name. What was it?');
-        const playerName = CH.question(CH.insert_color(Colors.YELLOW, '\tMy name is: '));
-        const nameSeed = Math.random();
-        let newName = playerName.trim();
-        CH.clear_screen();
-
-        if (genie.missBehaviour > nameSeed || playerName === "" || typeof playerName === "undefined") {
-            newName = genie.generateName();
-            let phrase = `I do not like the name: ${CH.insert_format(
-                {
-                    decoration: [ConsoleImpl.Decorations.Bold, ConsoleImpl.Decorations.Underlined]
-                }
-                , playerName)}!`;
-                if (playerName === "" || typeof playerName === "undefined")
-                    phrase = "Funny you are, but smart are not!"
-            genie.speak(`${phrase}
-I shall call you ${CH.insert_format(
-                    {
-                        decoration: [ConsoleImpl.Decorations.Bold, ConsoleImpl.Decorations.Underlined]
-                    }
-                    , newName)}.`);
+        if (input.length === 1) {
+            Game.inputState.string += input;
         }
-        else {
-            genie.speak(`Nice to meet you ${CH.insert_format(
-                {
-                    decoration: [ConsoleImpl.Decorations.Bold, ConsoleImpl.Decorations.Underlined]
-                }
-                , playerName)}!`);
+        else if (input === "backspace") {
+            if (Game.inputState.string.length > 0) {
+                Game.inputState.string = Game.inputState.string.slice(0, -1);
+            }
         }
-        CH.pressSpace();
-        CH.clear_screen();
-        genie.speak(`What Are You?`);
-        const class_options = ['Warrior', 'Mage', 'Rogue'];
-        const class_sel = CH.SelectValue(class_options.map(item => `I'm a ` + item), {
-            start: 0,
-            colors: GameColors.class_colors,
-            padding: 10
-        }, true, false);
-        CH.clear_screen();
-        genie.smirk(class_options[class_sel]);
-        CH.pressSpace();
-        this.#player = new PlayerFactory().createPlayer(newName, class_options[class_sel]);
-        CH.clear_screen();
+        else if (input === "enter" || input === "space") {
+            // CH.clear_screen();
+            // CH.print(Game.inputState.string);
+            GameStates.getInstance().currentState?.onSelect(input);
 
-        const intro = `Welcome to the Magical Lands, ${newName}. In this vast world of enchanted forests, towering mountains, and forgotten ruins, you stand on the edge of an epic journey. In an age when magic flows through the veins of the earth, and ancient beasts roam untamed, the realm is on the brink of collapse. The shadow of a long-forgotten evil stirs once more, threatening to shroud the land in darkness. The fate of the Magical Lands rests on your shoulders. Will you rise to the challenge, forging alliances, battling dark forces, and uncovering the secrets of a forgotten age? Your adventure begins now... But be aware of that sneaky grey gen... ... ... Wait who wrote this?.`;
-        genie.speak(CH.breakLine(intro, CH.getWidth() / 2),
-            [
-                {
-                    text: 'Magical Lands',
-                    color: Colors.GREEN
-                },
-                {
-                    text: 'grey gen',
-                    color: Colors.LIGHTBLACK_EX
-                },
-                {
-                    text: newName,
-                    color: GameColors.class_colors[class_sel].color
+        }
 
-                }
-            ]
-        );
-        CH.pressSpace();
-        this.#isRunning = true;
-        this.#encounterNewEnemy();
+        if (input === "arrowup") input = "w";
+        else if (input === "arrowdown") input = "s";
+        else if (input === "arrowleft") input = "a";
+        else if (input === "arrowright") input = "d";
+
+        if (input == "w" && Game.inputState.vertical || input == "a" && !Game.inputState.vertical) {
+
+            if (Game.inputState.index <= 0) {
+                Game.inputState.index = Game.inputState.maxIndex;
+            }
+            else
+                Game.inputState.index--;
+        }
+        else if (input == "s" && Game.inputState.vertical || input == "d" && !Game.inputState.vertical) {
+
+            if (Game.inputState.index >= Game.inputState.maxIndex) {
+                Game.inputState.index = 0;
+            }
+            else
+                Game.inputState.index++;
+        }
+
     }
 
     exitTheGame() {
-        this.#exitGame = true; // Exit game
-        this.#isRunning = false;// Stop game loop
+        this.isRunning = false;// Stop game loop
         //goodbye message
         CH.clear_screen();
-        genie.goodbye(this.#player.name);
-
+        genie.goodbye(this.player.name);
     }
     generateEnemy(level) {
         if (typeof level !== "number") {
@@ -149,50 +237,57 @@ I shall call you ${CH.insert_format(
         //generate loot
 
         const genLoot = (loot_level) => {
-
-            const seed = Math.random();
             let new_loot = [];
-            const EquipmentLoot = EquipamentUtils.genEquipament(50);
-
-            if (seed < 0.2 + loot_level * 0.01) {
-                const equip_seed = Math.random();
-                new_loot.push(EquipmentLoot[Math.floor((equip_seed * EquipmentLoot.length - 1))]);
+            //Loot chances
+            const armor_chance = 0.2 + loot_level * 0.01;
+            const weapon_chance = 0.1
+            const potion_chance = 0.2 + loot_level * 0.01;
+            //weapon + armor seed
+            const seed = Math.random();
+            if (seed < armor_chance) {
+                const EquipmentLoot = EquipamentUtils.genEquipament(50);
+                const equip_seed = Math.floor(Math.random() * (EquipmentLoot.length - 1));
+                const equip = EquipamentUtils.getEquipament(equip_seed);
+                new_loot.push(...equip);
             }
-            else if (seed > 0.9) {
-                let w = Weapon.genRandomWeapon(loot_level)
-                new_loot.push(w);
+            else if (seed > 1 - weapon_chance) {
+                new_loot.push(WeaponUtils.genRandomWeapon(loot_level));
             }
+            //poiton seed
             const potion_seed = Math.random();
-            if (potion_seed < 0.2 + loot_level * 0.01) {
+            if (potion_seed < potion_chance) {
                 const hp_seed = Math.random();
+                //Potion Chances
+                const small_pot_chance = 0.5;
+                const medium_pot_chance = 0.3;
+                //const large_pot_chance = 1 - medium_pot_chance - small_pot_chance;
                 let hp_pot = new HealthPotion('Large Hp Pot', 30);
-                if (hp_seed < 0.5) {
+                if (hp_seed < small_pot_chance) {
                     hp_pot = new HealthPotion('Small Hp Pot', 10);
                 }
-                else if (hp_seed < 0.8) {
+                else if (hp_seed < medium_pot_chance + small_pot_chance) {
                     hp_pot = new HealthPotion('Medium Hp Pot', 20);
                 }
                 new_loot.push(hp_pot);
             }
-
+           
             return new_loot;
-
         }
         const loot = genLoot(level);
         if (loot.length > 0) {
             new_enemy.loot = loot;
         }
+        new_enemy.generateEnemyInfo();
 
-        this.#currentEnemy = new_enemy;
-        return this.#currentEnemy
+        this.currentEnemy = new_enemy;
+        return this.currentEnemy
     }
-    
-    #encounterNewEnemy() {
-        this.#currentEnemy = this.generateEnemy(this.#player.level);
+    encounterNewEnemy() {
+
         CH.clear_screen();
         const locations = ['Dark Forest', 'Misty Mountains', 'Forgotten Ruins', 'Enchanted Lake', 'Cursed Swamp', 'Haunted Castle', 'Ancient Temple', 'Mystic Caverns', 'Shadowy Vale', 'Eerie Graveyard'];
         const phrases = [
-            `You find yourself in the #loc. Out of nowhere, a #enemy appears!`,
+            `You find yourself in the #loc, out of nowhere, a #enemy appears!`,
             `While attempting to cross the #loc, a #enemy emerges from the shadows!`,
             `As you explore the #loc, a #enemy suddenly attacks you!`,
             `You stumble upon the #enemy while wandering through the #loc!`,
@@ -207,28 +302,49 @@ I shall call you ${CH.insert_format(
             `A #enemy jumps out at you in the #loc!`,
             `You are ambushed by a #enemy in the #loc!`,
         ]
-        const loc = locations[Math.floor(Math.random() * locations.length)];
         const adverbs = ["Fighsty", "Fierce", "Savage", "Vicious", "Brutal", "Ferocious", "Deadly", "Savage", "Ruthless", "Merciless", "Savage", "Vicious", "Brutal", "Ferocious", "Deadly", "Savage", "Ruthless", "Merciless", "Savage"];
-        let phrase = phrases[Math.floor(Math.random() * phrases.length)]
+        if (this.currentEnemy.isDead()) {
+            this.currentEnemy = this.generateEnemy(this.player.level);
+            this.#enemySeed.enemy_seed = this.currentEnemy;
+            this.#enemySeed.loc_seed = Math.floor(Math.random() * (locations.length - 1));
+            this.#enemySeed.adverb_seed = Math.floor(Math.random() * (adverbs.length - 1));
+            this.#enemySeed.phrase_seed = Math.floor(Math.random() * (phrases.length - 1));
+        }
+
+        let phrase = phrases[this.#enemySeed.phrase_seed]
+        const loc = locations[this.#enemySeed.loc_seed];
+
+
         phrase = phrase.replace("#loc", loc)
-        phrase = phrase.replace("#enemy",`${adverbs[Math.floor(Math.random() * adverbs.length)]} ${CH.insert_color(Colors.RED, this.#currentEnemy.name)}`);
-        genie.speak(CH.breakLine(phrase,CH.getWidth() / 2));
+        phrase = phrase.replace("#enemy", `${adverbs[this.#enemySeed.adverb_seed]} ${CH.insert_color(Colors.RED, this.currentEnemy.name)}`);
+        genie.speak(CH.breakLine(phrase, CH.getWidth() / 2));
         CH.print();
-        CH.pressSpace();
         this.#feedback = "";
+        this.cancelgenieTempSpeech();
+
 
     }
-    #printBasicFrame() {
+
+    printBasicFrame() {
         //Clear Screen
         CH.clear_screen();
         //Print Genie + enemy info
-        genie.speak([
-            `You are facing the ${this.#currentEnemy.name}! `,
-            `What will you do?`].join(""),
+        const rightSprite = `${CH.insert_format(
             {
-                text: this.#currentEnemy.name,
+                color: Colors.YELLOW,
+                decoration: [ConsoleImpl.Decorations.Bold]
+            }, "Score")}: ${CH.hcenter(this.#score.toString(), 6, " ", 1)}`;
+        const enemy = this.currentEnemy.generateEnemyInfo();
+        const enemy_width = Math.max(...enemy.split("\n").map(item => CH.getLineWidth(item)))
+        const finalSprite = CH.hcenter(rightSprite, enemy_width) + "\n".repeat(3) + enemy;
+        const genieSentece = this.#genieSpeech === "" ? "What will you do?" : [
+            `You are facing the ${this.currentEnemy.name}! `,
+            `What will you do?`].join("");
+        genie.speak(this.#genieSpeech === "" ? genieSentece : this.#genieSpeech,
+            {
+                text: this.currentEnemy.name,
                 color: Colors.RED
-            }, this.#currentEnemy.generateEnemyInfo());
+            }, finalSprite, { hcenter: true });
         CH.print();
         //Print feedback (min 2 lines) from last action)
         const feedback_lines = this.#feedback.split("\n");
@@ -240,285 +356,1045 @@ I shall call you ${CH.insert_format(
         }
         CH.print();//ln
         //Print Player Info
-        CH.print(this.#player.playerInfo());
+        CH.print(this.player.playerInfo());
         //Let player choose action
         CH.print();//ln
+        CH.print();
     }
 
-    #checkForDeaths() {
-        if (this.#player.isDead()) {
-            this.#printBasicFrame();
-            CH.pressSpace();
-            this.#isRunning = false;
-            CH.clear_screen();
-            genie.speak("You have been slain by the enemy!");
-            const quit = Menu.gameEnd();
-            if (quit === GameEndOptions.Exit) {
-                this.exitTheGame();
-            }
-            else {
-                this.#isRunning = false;
-            }
-        }
-        else if (this.#currentEnemy.isDead()) {
-            this.#printBasicFrame();
-            CH.pressSpace();
-            CH.clear_screen();
-            let phrase = `You have slain ${CH.insert_color(Colors.RED, this.#currentEnemy.name)}!`;
-            phrase += `\nYou gain ${CH.insert_color(Colors.YELLOW, this.#currentEnemy.xp_drop)} XP!`;
-            if (this.#currentEnemy.loot.length > 0) {
-                phrase += `\nYou found: `;
-                for (const item of this.#currentEnemy.loot) {
-                    phrase += `\n`;
-                    if (item instanceof Weapon) {
-                        phrase += `The ${CH.insert_color(
-                            GameColors.weapon_colors.find(weapon => weapon.text === item.attackType).color, item.name
-                        )}.`;
-                    }
-                    else if (item instanceof Potion) {
-                        phrase += `A ${CH.insert_color(
-                            item.color, item.name)}.`;
-                    }
-                    else if (item instanceof Equipament) {
-                        phrase += `The ${CH.insert_color(
-                            GameColors.getEquipamentColor(item), item.name)}.`;
-                    }
+    checkForDeaths() {
 
-                }
+        if (this.player.isDead()) {
+
+            Game.battleMenu.current_menu = BattleStage.GameOver;
+
+        }
+        else if (this.currentEnemy.isDead()) {
+            this.player.recoverHealth(20 * this.player.level % 5);
+            this.player.gainXp(this.currentEnemy.xp_drop);
+            let scoreMulti = 1;
+            if (this.currentEnemy instanceof Enemy.Boss) {
+                scoreMulti = 5;
             }
-            genie.speak(phrase);
-            this.player.gainXp(this.#currentEnemy.xp_drop);
-            if (this.#currentEnemy.loot.length > 0) {
-                for (const item of this.#currentEnemy.loot) {
-                    if (item instanceof Weapon) {
-                        this.#player.findWeapon(item);
-                    }
-                    else if (item instanceof HealthPotion) {
-                        this.#player.findConsumable(item);
-                    }
-                    else if (item instanceof Equipament) {
-                        this.#player.findEquipament(item);
-                    }
-                }
+            else if (this.currentEnemy instanceof Enemy.Elite) {
+                scoreMulti = 3;
             }
-            CH.pressSpace();
-            this.#encounterNewEnemy();
-            this.player.recoverHealth(20 * this.player.level%5);
+            else if (this.currentEnemy instanceof Enemy.CommonEnemy) {
+                scoreMulti = 2;
+            }
+            this.#score += this.currentEnemy.level * 10 * scoreMulti;
+            Game.battleMenu.current_menu = BattleStage.PreSlain;
+
+
         }
     }
-    
-    loop() {
-        this.#printBasicFrame();
-        const action = Menu.battleMenu();
-        if (action === BattleMenuOptions.Attack) {
-            //Makes an attack name into a third person verb
-            const getThirdPerson = (name) => {
-                if (typeof name !== "string") {
-                    throw new Error("name must be a string");
+
+    printInitalStage() {
+
+    }
+
+    genCondencedItemsArray() {
+        let itemOptions = [];
+        for (const item of this.player.consumables) {
+            let multiple = false;
+            for (const option of itemOptions) {
+                if (option.name === item.name) {
+                    multiple = true;
                 }
-                if (name.endsWith('s')) {
-                    return name + "'";
-                }
-                else if (name.endsWith('y')) {
-                    return name.substring(0, name.length - 1) + 'ies';
-                }
-                else if (name.endsWith('x') || name.endsWith('z') || name.endsWith('ch') || name.endsWith('sh')) {
-                    return name + 'es';
-                }
-                else
-                    return name + 's';
             }
-            const attack_index = CH.SelectValue
-                (
-                    [...this.#player.attacks.map(item => item.name), 'Back'],
-                    {
-                        start: 0,
-                        colors: this.#player.attacks.map(item => {
-                            return {
-                                text: item.name,
-                                color: GameColors.weapon_colors.find(weapon => weapon.text === item.attackType).color
+            if (!multiple) {
+                itemOptions.push(item);
+            }
+        }
+        return itemOptions;
+    }
+    //Genie will speak and then timeout to the default speech
+    genieTempSpeech(phrase, time = 5000) {
+        this.#genieSpeech = phrase;
+        if (this.#genieSpeechHandle !== null) {
+            clearTimeout(this.#genieSpeechHandle);
+        }
+        this.#genieSpeechHandle = setTimeout(() => {
+            this.#genieSpeech = "";
+            GameStates.getInstance().currentState.rerender();
+        }, time);
+
+    }
+    ///Cancel the current Speech of the Genie
+    cancelgenieTempSpeech() {
+        this.#genieSpeech = "";
+        if (this.#genieSpeechHandle !== null) {
+            clearTimeout(this.#genieSpeechHandle);
+            this.#genieSpeechHandle = null;
+        }
+    }
+
+    ///Handle Player Cration
+    playerCreation = new GameState(
+        (onCreate) => {
+            if (!Game.introState.init) {
+                Game.introState.init = true;
+                Game.introState.pname = "";
+                Game.introState.pclass = "";
+                Game.introState.stage = 0;
+            }
+            const stage = Game.introState.stage;
+            if (stage === 0) {
+                CH.clear_screen();
+                genie.speak('Hello again Adventurer!\nI didn\'t catch your name. What was it?');
+                CH.show_cursor(true);
+                Game.inputState.vertical = false;
+            }
+            else if (stage === 1) {
+                Game.inputState.reset();
+                CH.show_cursor(false);
+                CH.clear_screen();
+                if (Game.introState.pname === "") {
+                    const name_seed = Math.random();
+                    let newName = Game.inputState.string.trim();
+                    if (genie.missBehaviour > name_seed || newName === "" || typeof newName === "undefined") {
+
+                        let phrase = `I do not like the name: ${CH.insert_format(
+                            {
+                                decoration: [ConsoleImpl.Decorations.Bold, ConsoleImpl.Decorations.Underlined]
                             }
-                        }
-                        ),
-                        padding: 5
-                    },
-                    true,
-                    false
-                );
-            // Attack != Back
-            if (attack_index !== this.#player.attacks.length) {
-                this.#fleeAttempt = 0;
-                //Player Attack
-                const attack_res = this.#player.attackTarget(attack_index, this.#currentEnemy);
-                const player_atk = this.#player.attacks[attack_index];
-                this.#feedback = CH.insert_color(GameColors.class_colors.find(item => item.text === this.#player.getClass()).color, this.#player.name);
-                if (player_atk.attackType === DamageType.Magic)
-                    this.#feedback += " casts" + CH.insert_color(GameColors.weapon_colors.find(item => item.text === player_atk.attackType).color, ` ${player_atk.name} `);
-                else 
-                 this.#feedback += CH.insert_color(GameColors.weapon_colors.find(item => item.text === player_atk.attackType).color, ` ${getThirdPerson(player_atk.name)} `);
-                this.#feedback += "it for " + CH.insert_color(Colors.RED, attack_res.damageTaken) + " damage! ";
-                if (attack_res.damageResisted > 0)
-                    this.#feedback += CH.insert_color(Colors.LIGHTBLACK_EX, `(${attack_res.damageResisted} resisted) `);
-                if (attack_res.crit) {
-                    this.#feedback += CH.insert_color(Colors.YELLOW, "(Critical Hit!) ");
-                }
-                if (attack_res.isDead) {
-                    this.#feedback += CH.insert_color(Colors.LIGHTRED_EX, `Killing it.`);
-                }
-                this.#feedback += "\n";
-
-                if (!attack_res.isDead) {
-                    //Enemy Attack
-                    const enemy_atk = this.#currentEnemy.randomAttack();
-                    const enemy_res = this.#player.takeDamage(enemy_atk.calculateDamage(this.#currentEnemy.getStats()));
-                    this.#feedback += "The " + CH.insert_color(Colors.RED, `${this.#currentEnemy.name}`);
-                    this.#feedback += " strikes back, it";
-                    if (enemy_atk.attackType === DamageType.Magic)
-                        this.#feedback += " casts" + CH.insert_color(GameColors.weapon_colors.find(item => item.text === enemy_atk.attackType).color, ` ${enemy_atk.name} `);
-                    else 
-                     this.#feedback += CH.insert_color(GameColors.weapon_colors.find(item => item.text === enemy_atk.attackType).color, ` ${getThirdPerson(enemy_atk.name)} `);
-                    
-                    this.#feedback += ` you dealing ${CH.insert_color(Colors.RED, enemy_res.damageTaken)} damage! `;
-                    if (enemy_atk.damageResisted > 0)
-                        this.#feedback += CH.insert_color(Colors.LIGHTBLACK_EX, `(${attack_res.damageResisted} resisted) `);
-                    if (enemy_atk.crit) {
-                        this.#feedback += CH.insert_color(Colors.YELLOW, "(Critical Hit!) ");
+                            , newName)}!`;
+                        if (newName === "" || typeof newName === "undefined")
+                            phrase = "Funny you are, but smart are not!"
+                        newName = genie.generateName();
+                        genie.speak(`${phrase}
+I shall call you ${CH.insert_format(
+                            {
+                                decoration: [ConsoleImpl.Decorations.Bold, ConsoleImpl.Decorations.Underlined]
+                            }
+                            , newName)}.`);
                     }
-                    if (enemy_atk.isDead) {
-                        this.#feedback += CH.insert_color(Colors.LIGHTRED_EX, `Killing you!`);
+                    else {
+                        genie.speak(`Nice to meet you ${CH.insert_format(
+                            {
+                                decoration: [ConsoleImpl.Decorations.Bold, ConsoleImpl.Decorations.Underlined]
+                            }
+                            , newName)}!`);
                     }
-                }
-                this.#checkForDeaths();
-            }
-
-            this.#fleeAttempt = 0;
-        }
-        else if (action == BattleMenuOptions.Flee) {
-            if (this.#fleeAttempt === 0) {
-                this.#fleeAttempt = 1 + Math.random();
-            }
-
-            if (this.#fleeAttempt > 0) {
-                this.#feedback = "You attempt to flee!";
-                if ( this.#fleeAttempt > 1.5) {
-                    this.#feedback += " and manage to escape!";
-                    this.#printBasicFrame();
-                    CH.pressSpace();
-                    this.#fleeAttempt === 0;
-                    this.player.recoverHealth(5 * this.player.level%5);
-                    this.#encounterNewEnemy();
+                    Game.introState.pname = newName;
                 }
                 else {
-                    this.#feedback += " but you fail to escape!";
+                    genie.speak(`Nice to meet you ${CH.insert_format(
+                        {
+                            decoration: [ConsoleImpl.Decorations.Bold, ConsoleImpl.Decorations.Underlined]
+                        }
+                        , Game.introState.pname)}!`);
                 }
+                CH.pressSpace();
             }
+            else if (stage === 2) {
+                CH.clear_screen();
+                Game.inputState.reset();
+                Game.inputState.maxIndex = 2;
+                genie.speak(`And... What Are You?`);
+            }
+            else if (stage === 3) {
+                CH.clear_screen();
+                genie.smirk(
+                    this.player.getClass(),
+                );
+                CH.print();
+                CH.pressSpace();
+
+            }
+            else if (stage === 4) {
+                CH.clear_screen();
+                const intro = `Welcome to the Magical Lands, ${this.player.name}. In this vast world of enchanted forests, towering mountains, and forgotten ruins, you stand on the edge of an epic journey. In an age when magic flows through the veins of the earth, and ancient beasts roam untamed, the realm is on the brink of collapse. The shadow of a long-forgotten evil stirs once more, threatening to shroud the land in darkness. The fate of the Magical Lands rests on your shoulders. Will you rise to the challenge, forging alliances, battling dark forces, and uncovering the secrets of a forgotten age? Your adventure begins now... But be aware of that sneaky grey gen... ... ... Wait who wrote this?.`;
+                genie.speak(CH.breakLine(intro, CH.getWidth() / 2),
+                    [
+                        {
+                            text: 'Magical Lands',
+                            color: Colors.GREEN
+                        },
+                        {
+                            text: 'grey gen',
+                            color: Colors.LIGHTBLACK_EX
+                        },
+                        {
+                            text: this.player.name,
+                            color: GameColors.class_colors[Game.inputState.index].color
+
+                        }
+                    ]
+                );
+                CH.pressSpace();
+            }
+        },
+        (onRender) => {
+            // process.stdout.write('\x1b[2K');
+            // CH.print(CH.insert_color(Colors.YELLOW, '\tMy name is: ') + Game.inputState.string);
+
+            if (Game.introState.stage === 0) {
+                CH.print();
+                CH.clear_last_line();
+                CH.write(CH.insert_color(Colors.YELLOW, '\tMy name is: ') + Game.inputState.string);
+            }
+            else if (Game.introState.stage === 2) {
+                CH.clear_last_line();
+                CH.printOptions(['Warrior', 'Mage', 'Rogue'].map(item => "I'm a " + item), Game.inputState.index, {
+                    colors: GameColors.class_colors
+                }, false);
+            }
+
+
+        },
+        (key) => {
+            const stage = Game.introState.stage;
+            if (stage === 0 && key === "space") {
+                Game.inputState.string += " ";
+                return true;
+            }
+
+        },
+        (onSelect) => {
+            const stage = Game.introState.stage;
+
+            if (stage === 2) {
+                const classes = ['Warrior', 'Mage', 'Rogue']
+                this.player = new PlayerFactory().createPlayer(Game.introState.pname, classes[Game.inputState.index]);
+            }
+            if (stage === 4) {
+                Game.introState.init = false;
+                Game.inputState.string = String(" ");
+                Game.inputState.index = 0;
+                Game.battleMenu.current_menu = BattleStage.Encounter;
+                GameStates.getInstance().currentState = this.gauntletGame;
+            }
+            else {
+                Game.introState.stage++;
+                GameStates.getInstance().currentState.rerender();
+            }
+
         }
-        else if (action == BattleMenuOptions.Items) {
-            let itemOptions = [];
-            this.#player.consumables.forEach(item => {
-                let multiple = false;
-                for (const option of itemOptions) {
-                    if (option.name === item.name) {
-                        multiple = true;
+    )
+
+    //Controls the game on the Gauntlet Mode
+    gauntletGame = new GameState(
+        (firstRender) => {
+            Game.inputState.vertical = false;
+            if (Game.battleMenu.current_menu === BattleStage.Encounter) {
+                this.encounterNewEnemy();
+                CH.pressSpace();
+            }
+            else if (Game.battleMenu.current_menu === BattleStage.SelectAction) {
+                Game.inputState.maxIndex = Menu.battleMenuOptions.length - 1;
+                if (Game.inputState.index > Game.inputState.maxIndex)
+                    Game.inputState.index = 0;
+                this.printBasicFrame();
+            }
+            else if (Game.battleMenu.current_menu === BattleStage.Attack) {
+                Game.inputState.maxIndex = this.player.attacks.length;
+                if (Game.inputState.index > Game.inputState.maxIndex)
+                    Game.inputState.index = 0;
+                this.printBasicFrame();
+            }
+            else if (Game.battleMenu.current_menu === BattleStage.Items) {
+                Game.inputState.index = 0;
+                let itemOptions = this.genCondencedItemsArray();
+                Game.inputState.maxIndex = Math.min(itemOptions.length, 1);
+                this.printBasicFrame();
+            }
+            else if (Game.battleMenu.current_menu === BattleStage.GameOver) {
+                CH.clear_screen();
+                this.printBasicFrame();
+                CH.clear_last_line();
+                CH.pressSpace();
+            }
+            else if (Game.battleMenu.current_menu === BattleStage.Slain) {
+                CH.clear_screen();
+                let phrase = `You have slain ${CH.insert_color(Colors.RED, this.currentEnemy.name)}!`;
+                phrase += `\nYou gain ${CH.insert_color(Colors.YELLOW, this.currentEnemy.xp_drop)} XP!`;
+                if (this.currentEnemy.loot.length > 0) {
+                    phrase += `\nYou Have found: `;
+                    for (const item of this.currentEnemy.loot) {
+                        phrase += `\n`;
+                        phrase += CH.insert_color(item.getColor(), item.name);
+
                     }
                 }
-                if (!multiple) {
-                    itemOptions.push(item);
+                genie.speak(phrase);
+                if (this.currentEnemy.loot.length > 0) {
+                    for (const item of this.currentEnemy.loot) {
+                        if (item instanceof HealthPotion) {
+                            this.player.findConsumable(item);
+                            this.currentEnemy.loot.splice(this.currentEnemy.loot.indexOf(item), 1);
+                        }
+                    }
                 }
-            });
+                CH.pressSpace();
 
-            let choice = CH.SelectValue(
-              [...itemOptions.map(item => item.name), 'Back'],
-                {
-                    start: 0,
-                    padding: 2,
-                    colors: this.#player.consumables.map(item => {
+            }
+            else if (Game.battleMenu.current_menu === BattleStage.GetLoot) {
+                CH.clear_screen();
+                if (this.currentEnemy.loot.length > 0) {
+                    const loot = this.currentEnemy.loot[0];
+                    if (loot)
+                        genie.speak(phrase);
+                    if (this.currentEnemy.loot.length > 0) {
+                        for (const item of this.currentEnemy.loot) {
+                            if (item instanceof Weapon) {
+                                this.player.findWeapon(item);
+                            }
+                            else if (item instanceof HealthPotion) {
+                                this.player.findConsumable(item);
+                            }
+                            else if (item instanceof Equipament) {
+                                this.player.findEquipament(item);
+                            }
+                        }
+                    }
+                    CH.pressSpace();
+                }
+                else {
+                    Game.battleMenu.current_menu = BattleStage.Encounter;
+                }
+
+            }
+
+            else if (Game.battleMenu.current_menu === BattleStage.PreSlain) {
+                CH.clear_screen();
+                this.printBasicFrame();
+                CH.pressSpace();
+            }
+            else if (Game.battleMenu.current_menu === BattleStage.Flee) {
+                CH.clear_screen();
+                this.printBasicFrame();
+                CH.pressSpace();
+            }
+        },
+        (onRender) => {
+            if (Game.battleMenu.current_menu === BattleStage.SelectAction) {
+                CH.clear_last_line();
+                CH.printOptions(Menu.battleMenuOptions, Game.inputState.index, {
+                    colors: [{
+                        text: Menu.battleMenuOptions[Menu.battleMenuOptions.length - 1],
+                        color: Colors.YELLOW
+                    }]
+                }, false)
+            }
+            else if (Game.battleMenu.current_menu === BattleStage.Attack) {
+                CH.clear_last_line();
+                let opts = this.player.attacks.map(item => item.name).concat('Back');
+                CH.printOptions(opts, Game.inputState.index, {
+                    colors: this.player.attacks.map(item => {
+                        return {
+                            text: item.name,
+                            color: GameColors.weapon_colors.find(weapon => weapon.text === item.attackType).color
+                        }
+                    }
+                    )
+                }, false)
+            }
+            else if (Game.battleMenu.current_menu === BattleStage.Items) {
+                CH.clear_last_line();
+                let itemOptions = this.genCondencedItemsArray();
+
+                CH.printOptions([...itemOptions.map(item => item.name), "Back"], Game.inputState.index, {
+                    colors: itemOptions.map(item => {
                         return {
                             text: item.name,
                             color: item.color
                         }
-                    })
-                },
-                true,
-                false
-            );
+                    }
+                    )
+                }, false)
+            }
+        },
+        (onKey) => {
 
-            while (choice !== itemOptions.length) {
-                
-                const consumable = this.#player.consumables.find(item => item.name === itemOptions[choice].name);
-                this.#feedback = `You use the ${CH.insert_color(consumable.color, consumable.name)}!`;
-                this.#player.useConsumable(choice);
-                
-                this.#printBasicFrame(); // Refresh frame to update stats
-                itemOptions = [];
-                this.#player.consumables.forEach(item => {
-                    let multiple = false;
-                    for (const option of itemOptions) {
-                        if (option.name === item.name) {
-                            multiple = true;
+        },
+        (onSelect) => {
+            if (Game.battleMenu.current_menu === BattleStage.Encounter) {
+                Game.battleMenu.current_menu = BattleStage.SelectAction;
+
+            }
+            else if (Game.battleMenu.current_menu === BattleStage.SelectAction) {
+                if (Game.inputState.index === BattleMenuOptions.Flee) {
+                    if (this.#fleeAttempt === 0) {
+                        this.#fleeAttempt = Math.random() + 1;
+                    }
+
+                    if (this.#fleeAttempt > 1.5) {
+                        this.#feedback = "You managed to escape!";
+                    }
+                    else {
+                        this.#feedback = "You failed to escape!";
+
+                        const seed = Math.round(Math.random() * 2);
+                        if (seed == 0)
+                            this.genieTempSpeech("You can't escape! You must fight!");
+                        else if (seed == 1)
+                            this.genieTempSpeech("Escape you tried,\nsucceed you did not!");
+                        else if (seed == 2)
+                            this.#genieSpeech = "Sometimes you can't flight, the only option is to fight!";
+                    }
+                }
+                if (Game.inputState.index === BattleMenuOptions.Menu)
+                    GameStates.getInstance().currentState = this.gameMenu;
+                else
+                    Game.battleMenu.current_menu = 2 + Game.inputState.index;
+                Game.inputState.index = 0;
+
+
+            }
+            else if (Game.battleMenu.current_menu === BattleStage.Attack) {
+                Game.battleMenu.current_menu = 1;
+
+                if (Game.inputState.index === this.player.attacks.length) {
+
+                }
+                else {
+                    this.#fleeAttempt = 0;
+                    const attack_index = Game.inputState.index;
+                    //Player Attack
+                    const attack_res = this.player.attackTarget(attack_index, this.currentEnemy);
+                    const player_atk = this.player.attacks[attack_index];
+                    this.#feedback = CH.insert_color(this.player.getClassColor(), this.player.name);
+                    if (player_atk.attackType === DamageType.Magic)
+                        this.#feedback += " casts" + CH.insert_color(player_atk.getColor(), ` ${player_atk.name} `);
+                    else
+                        this.#feedback += CH.insert_color(player_atk.getColor(), ` ${Game.getThirdPerson(player_atk.name)} `);
+                    this.#feedback += "it for " + CH.insert_color(Colors.RED, attack_res.damageTaken) + " damage! ";
+                    if (attack_res.damageResisted > 0)
+                        this.#feedback += CH.insert_color(Colors.LIGHTBLACK_EX, `(${attack_res.damageResisted} resisted) `);
+                    if (attack_res.crit) {
+                        {
+                            this.#feedback += CH.insert_color(Colors.YELLOW, "(Critical Hit!) ");
+                            this.genieTempSpeech("Critical Hit! Nice Shot!");
                         }
                     }
-                    if (!multiple) {
-                        itemOptions.push(item);
+                    if (attack_res.isDead) {
+                        this.#feedback += CH.insert_color(Colors.LIGHTRED_EX, `Killing it.`);
                     }
-                });
-    
-                choice = CH.SelectValue(
-                    [...itemOptions.map(item => item.name), 'Back'],
-                    {
-                        start: choice,
-                        padding: 2,
-                        colors: this.#player.consumables.map(item => {
-                            return {
-                                text: item.name,
-                                color: item.color
+                    if (DevMode.getInstance().value) {
+                        this.#feedback += `(a: ${attack_res.attackRoll}, d: ${attack_res.defenseRoll})`;
+                    }
+                    this.#feedback += "\n";
+
+                    if (!attack_res.isDead) {
+                        //Enemy Attack
+                        const enemy_atk = this.currentEnemy.randomAttack();
+                        const enemy_res = this.player.takeDamage(enemy_atk.calculateDamage(this.currentEnemy.getStats()));
+                        this.#feedback += "The " + CH.insert_color(Colors.RED, `${this.currentEnemy.name}`);
+                        this.#feedback += " strikes back, it";
+                        if (enemy_atk.attackType === DamageType.Magic)
+                            this.#feedback += " casts" + CH.insert_color(enemy_atk.getColor(), ` ${enemy_atk.name} `);
+                        else
+                            this.#feedback += CH.insert_color(enemy_atk.getColor(), ` ${Game.getThirdPerson(enemy_atk.name)} `);
+
+                        this.#feedback += `you dealing ${CH.insert_color(Colors.RED, enemy_res.damageTaken)} damage! `;
+                        if (enemy_res.damageResisted > 0)
+                            this.#feedback += CH.insert_color(Colors.LIGHTBLACK_EX, `(${attack_res.damageResisted} resisted) `);
+                        if (enemy_res.crit) {
+                            this.#feedback += CH.insert_color(Colors.YELLOW, "(Critical Hit!) ");
+                            this.genieTempSpeech("Critical Hit! Ouch that hurst!");
+                        }
+                        if (enemy_res.isDead) {
+                            this.#feedback += CH.insert_color(Colors.LIGHTRED_EX, `Killing you!`);
+                        }
+                        if (DevMode.getInstance().value) {
+                            this.#feedback += `(a: ${enemy_res.attackRoll}, d: ${enemy_res.defenseRoll})`;
+                        }
+                    }
+                    this.checkForDeaths();
+                }
+
+            }
+            else if (Game.battleMenu.current_menu === BattleStage.Flee) {
+                if (this.#fleeAttempt > 1.5) {
+                    Game.battleMenu.current_menu = BattleStage.Encounter;
+                    this.#fleeAttempt = 0;
+                }
+                else {
+                    Game.battleMenu.current_menu = BattleStage.SelectAction
+                }
+            }
+            else if (Game.battleMenu.current_menu === BattleStage.Items) {
+                let itemOptions = this.genCondencedItemsArray();
+                if (Game.inputState.index === itemOptions.length || itemOptions.length === 0) {
+                    Game.battleMenu.current_menu = BattleStage.SelectAction;
+                }
+                else {
+                    const get_index = (name, array) => {
+                        for (let i = 0; i < array.length; i++) {
+                            if (array[i].name === name) {
+                                return i;
                             }
-                        })
+                        }
+
+                    }
+                    const index = get_index(itemOptions[Game.inputState.index].name, this.player.consumables)
+                    const item = this.player.useConsumable(index);
+
+                    this.#feedback = `${CH.insert_color(this.player.getClassColor(), this.player.name)} uses ${CH.insert_color(item.getColor(), item.name)}!`;
+                    if (item instanceof HealthPotion && Math.random() > 0.3) {
+                        this.genieTempSpeech("A potion you used, Hum...\n Smart you are!")
+                        this.#feedback += `\n Recovering ${CH.insert_color(item.getColor(), item.value)} HP!`;
+                    }
+
+                }
+                Game.battleMenu.current_menu = BattleStage.SelectAction;
+            }
+            else if (Game.battleMenu.current_menu === BattleStage.PreSlain) {
+                Game.battleMenu.current_menu = BattleStage.Slain;
+
+            }
+            else if (Game.battleMenu.current_menu === BattleStage.Slain) {
+                if (this.currentEnemy.loot.length > 0) {
+                    GameStates.getInstance().currentState = this.getLoot;
+                }
+                else
+                    Game.battleMenu.current_menu = BattleStage.Encounter;
+            }
+            else if (Game.battleMenu.current_menu === BattleStage.GameOver) {
+                GameStates.getInstance().currentState = this.playerDead;
+            }
+
+            GameStates.getInstance().currentState.rerender();
+        });
+
+
+    /// Controls the inital menu
+    mainMenu = new GameState(
+        (onCreate) => {
+            if (Game.MainMenuStage.current_menu === MainMenuStage.PreMenu) {
+                CH.clear_screen();
+                CH.print(Assets.Logos.paintedConsoleAdventure())
+                CH.pressSpace();
+            }
+            else if (Game.MainMenuStage.current_menu === MainMenuStage.MainMenu) {
+                CH.clear_screen();
+                Game.inputState.maxIndex = Menu.startMenuOptions.length - 1;
+                Game.inputState.vertical = true;
+                CH.print(Assets.Logos.paintedConsoleAdventure())
+                CH.print();
+                CH.printOptions(Menu.startMenuOptions, Game.inputState.index, {
+                    colors: [{
+                        text: Menu.startMenuOptions[Menu.startMenuOptions.length - 1],
+                        color: Colors.RED
                     },
-                    true,
-                    false
-                );
+                    {
+                        text: "Load Game!",
+                        color: Colors.LIGHTBLACK_EX
+                    }]
+                }, true)
+
+
             }
-        }
-        else if (action == BattleMenuOptions.Menu) {
-            let finsih = false;
-            let menu_sel = 0;
-            while (!finsih) {
-                menu_sel = Menu.gameMenu(menu_sel);
-                if (menu_sel === GameMenuOptions.Continue) {
-                    finsih = true;
+            else if (Game.MainMenuStage.current_menu === MainMenuStage.LoadGame) {
+                CH.clear_screen();
+                genie.speak("Loading Game... Has not been implemented yet.\nMuahahahaha!");
+                CH.pressSpace();
+            }
+            else if (Game.MainMenuStage.current_menu === MainMenuStage.NewGame) {
+                CH.clear_screen();
+                Game.inputState.maxIndex = Menu.startMenuOptions.length - 1;
+                Game.inputState.vertical = true;
+                CH.print(Assets.Logos.paintedConsoleAdventure())
+
+                CH.printOptions(Menu.startMenuOptions, Game.inputState.index, {
+                    colors: [{
+                        text: Menu.startMenuOptions[Menu.startMenuOptions.length - 1],
+                        color: Colors.RED
+                    },
+                    {
+                        text: "Load Game!",
+                        color: Colors.LIGHTBLACK_EX
+                    }]
+                }, true)
+
+            }
+            else if (Game.MainMenuStage.current_menu === MainMenuStage.Info) {
+                Menu.printInfo();
+            }
+            else if (Game.MainMenuStage.current_menu === MainMenuStage.GameModeSelection) {
+                CH.clear_screen();
+                Game.inputState.maxIndex = Menu.gameModeOptions.length - 1;
+                Game.inputState.vertical = true;
+                CH.print(Assets.Logos.paintedConsoleAdventure())
+                CH.print();
+                CH.printOptions(Menu.gameModeOptions, Game.inputState.index, {
+                    colors: [
+                        {
+                            text: "Story Mode",
+                            color: Colors.LIGHTBLACK_EX
+                        }]
+                }, true)
+            }
+            else if (Game.MainMenuStage.current_menu === MainMenuStage.GameModeInvalid) {
+                CH.clear_screen();
+                CH.print(Assets.Logos.paintedConsoleAdventure())
+                CH.print();
+                genie.speak("Story mode is not available yet. Please select another mode.");
+                CH.print();
+                CH.pressSpace();
+
+            }
+
+        },
+        (onRender) => {
+            if (Game.MainMenuStage.current_menu === MainMenuStage.MainMenu) {
+                CH.clear_last_line(Menu.startMenuOptions.length  + 1);
+                CH.printOptions(Menu.startMenuOptions, Game.inputState.index, {
+                    colors: [{
+                        text: Menu.startMenuOptions[Menu.startMenuOptions.length - 1],
+                        color: Colors.RED
+                    },
+                    {
+                        text: "Load Game!",
+                        color: Colors.LIGHTBLACK_EX
+                    }]
+                }, true)
+                ///console.log(Game.MainMenuStage.current_menu)
+            }
+            if (Game.MainMenuStage.current_menu === MainMenuStage.GameModeSelection) {
+                CH.clear_last_line(Menu.gameModeOptions.length + 1);
+                CH.printOptions(Menu.gameModeOptions, Game.inputState.index, {
+                    colors: [
+                        {
+                            text: "Story Mode",
+                            color: Colors.LIGHTBLACK_EX
+                        }]
+                }, true)
+            }
+            //  console.log(Game.MainMenuStage.current_menu)
+
+        },
+        (onInput) => {
+        },
+        (onSelect) => {
+            const menu = Game.MainMenuStage.current_menu;
+            const sel = Game.inputState.index;
+            if (menu === MainMenuStage.PreMenu) {
+                Game.MainMenuStage.current_menu = MainMenuStage.MainMenu;
+                GameStates.rerender();
+
+            }
+            else if (menu === MainMenuStage.MainMenu) {
+                if (sel === StartMenuOptions.NewGame) {
+                    Game.MainMenuStage.current_menu = MainMenuStage.GameModeSelection;
                 }
-                else if (menu_sel === GameMenuOptions.MainMenu) {
-                    this.#isRunning = false;
-                    finsih = true
+                else if (sel === StartMenuOptions.LoadGame) {
+                    Game.MainMenuStage.current_menu = MainMenuStage.LoadGame;
                 }
-                else if (menu_sel === GameMenuOptions.SaveGame) {
-                    CH.clear_screen();
-                    genie.speak("Saving Game...");
-                    CH.pressSpace();
-                    CH.clear_screen();
-                    genie.speak("Saving Game... Has not been implemented yet.\nMuahahahaha!");
-                    CH.pressSpace();
+                else if (sel === StartMenuOptions.Info) {
+                    Game.MainMenuStage.current_menu = MainMenuStage.Info;
                 }
-                else if (menu_sel === GameMenuOptions.Info) {
-                    Menu.infoMenu();
-                }
-                else if (menu_sel === GameMenuOptions.Help) {
-                    genie.explainGame();
-                }
-                else if (menu_sel === GameMenuOptions.Exit) {
+                else if (sel === StartMenuOptions.Exit) {
                     this.exitTheGame();
-                    finsih = true
                 }
+                GameStates.rerender();
+            }
+            else if (menu === MainMenuStage.Info) {
+                Game.MainMenuStage.current_menu = MainMenuStage.MainMenu;
+                GameStates.rerender();
+            }
+            else if (menu === MainMenuStage.Exit) {
+
+            }
+            else if (menu === MainMenuStage.LoadGame) {
+                Game.MainMenuStage.current_menu = MainMenuStage.MainMenu;
+                GameStates.rerender();
+            }
+            else if (menu === MainMenuStage.GameModeSelection) {
+                if (sel === 0) {
+                    Game.MainMenuStage.current_menu = MainMenuStage.GameModeInvalid;
+                }
+                else if (sel === 1) {
+                    Game.inputState.string = "";
+                    GameStates.getInstance().currentState = this.playerCreation
+                    Game.inputState.index = 0;
+                }
+                else if (sel === 2) {
+                    Game.MainMenuStage.current_menu = MainMenuStage.MainMenu;
+                }
+                GameStates.rerender();
+            }
+            else if (menu === MainMenuStage.GameModeInvalid) {
+                Game.MainMenuStage.current_menu = MainMenuStage.GameModeSelection;
+                GameStates.rerender();
             }
         }
+    );
 
-        else if (action == BattleMenuOptions.DevButton) {
-            this.#currentEnemy = this.generateEnemy(this.player.level);
+    getLoot = new GameState(
+        (onCreate) => {
+
+            Game.inputState.vertical = false;
+            Game.inputState.index = 0;
+            CH.clear_screen();
+            let s = Math.random() > 0 ? `Oh look you have found:\nThe ` : "Wow is that a";
+            if (this.currentEnemy.loot.length === 0) {
+                GameStates.getInstance().goBack();
+                return;
+            }
+            /// this.currentEnemy.loot[0] > 0 strictly
+            const loot = this.currentEnemy.loot[0];
+            const genStats = (item) => {
+                let statsStr = "";
+                if (item instanceof Weapon) {
+                    const stats = item.stats;
+                    statsStr += CH.insert_color(item.getColor(), `(x${item.damage})`);
+                    statsStr += " [";
+                    statsStr += CH.insert_color(GameColors.stats_colors[0].color, `+${stats.strength}`);
+                    statsStr += ", "
+                    statsStr += CH.insert_color(GameColors.stats_colors[1].color, `+${stats.intelligence}`);
+                    statsStr += ", "
+                    statsStr += CH.insert_color(GameColors.stats_colors[2].color, `+${stats.dexterity}`);
+                    statsStr += "]";
+                    Game.inputState.maxIndex = 1;
+                }
+                else if (item instanceof Equipament) {
+                    const stats = item.getDefense();
+                    statsStr += " [";
+                    if (stats.armor > 0)
+                        statsStr += CH.insert_color(GameColors.equip_colors[0].color, `${stats.armor}`);
+                    if (stats.magic_resist > 0) {
+                        if (stats.armor > 0)
+                            statsStr += ", ";
+                        statsStr += CH.insert_color(GameColors.equip_colors[1].color, `${stats.magic_resist}`);
+                    }
+                    statsStr += "]";
+                }
+                return statsStr;
+            }
+            s += CH.insert_color(loot.getColor(), loot.name);
+            if (loot instanceof Weapon) {
+                const loot = this.currentEnemy.loot[0];
+                s += genStats(loot);
+                s += "\n How ever you can only carry one weapon!";
+
+
+            }
+            else if (loot instanceof Equipament) {
+
+                s += genStats(loot);
+                s += "\n";
+                if (this.player.equipaments.length >= this.player.MAX_EQUIPAMENT) {
+                    Game.inputState.maxIndex = 1;
+                    s += "but you already have enough equipament!";
+                }
+                else {
+                    s += "do you want to equip it?";
+                    Game.inputState.maxIndex = 2;
+                }
+            }
+            genie.speak(s);
+            CH.print("\n".repeat(3));
+
+        },
+        (onRender) => {
+            const loot = this.currentEnemy.loot[0];
+            let opts = [];
+            CH.clear_last_line();
+            if (loot instanceof Weapon) {
+
+                opts.push(`Equip: ${CH.insert_color(loot.getColor(), loot.name)}`);
+                opts.push("Toss it away.");
+
+
+            }
+            else if (loot instanceof Equipament) {
+                if (this.player.equipaments.length < this.player.MAX_EQUIPAMENT) {
+                    opts.push(`Equip: ${CH.insert_color(loot.getColor(), loot.name)}`);
+                    opts.push("Leave it behind.");
+                }
+                else {
+                    for (const item of this.player.equipaments) {
+                        opts.push(`Drop: ${CH.insert_color(item.getColor(), item.name)}`);
+                    }
+                    opts.push(`Leave  ${CH.insert_color(loot.getColor(), loot.name)} behind.`);
+                }
+
+            }
+            if (opts.length === 0) {
+                console.log("Generating Empty Loot")
+                console.log(this.currentEnemy.loot, opts, loot)
+                throw new Error("Empty Loot");
+            }
+            CH.printOptions(opts, Game.inputState.index)
+
+        },
+        (onKey) => {
+        },
+        (onSelect) => {
+            const sel = Game.inputState.index;
+            const cancelIndex = this.player.equipaments.length >= this.player.MAX_EQUIPAMENT ? this.player.equipaments.length : 1;
+            if (sel === cancelIndex) {
+            }
+            else if (this.currentEnemy.loot[0] instanceof Weapon) {
+                this.player.weapon = this.currentEnemy.loot[0];
+            }
+            else if (this.currentEnemy.loot[0] instanceof Equipament) {
+                if (this.player.equipaments.length < this.player.MAX_EQUIPAMENT) {
+                    this.player.equipaments.push(this.currentEnemy.loot[0]);
+                }
+                else {
+                    this.player.equipaments.splice(sel, 1);
+                    this.player.equipaments.push(this.currentEnemy.loot[0]);
+                }
+            }
+            this.currentEnemy.loot.splice(0, 1);
+            if (this.currentEnemy.loot.length === 0) {
+                Game.battleMenu.current_menu = BattleStage.Encounter;
+                GameStates.getInstance().goBack();
+            }
+            else
+                GameStates.rerender();
+        }
+    );
+
+
+    //Controls end of the game
+    playerDead = new GameState(
+        (onCreate) => {
+            Game.inputState.maxIndex = 1;
+            Game.inputState.vertical = false;
+            if (Game.inputState.index > 1)
+                Game.inputState.index = 0;
+            CH.clear_screen();
+            this.printBasicFrame();
+            CH.print();
+        },
+        (onRender) => {
+            CH.clear_last_line();
+            CH.printOptions(Menu.gameEndOptions, Game.inputState.index, {
+                colors: [{
+                    text: "Exit",
+                    color: Colors.RED
+                },
+                {
+                    text: "Load Game!",
+                    color: Colors.LIGHTBLACK_EX
+                }]
+            }, false)
+        },
+        (onKey) => {
+        },
+        (onSelect) => {
+            const sel = Game.inputState.index
+            if (sel === StartMenuOptions.NewGame) {
+                Game.inputState.string = "";
+                this.currentEnemy.suicide();
+                Game.MainMenuStage.current_menu = MainMenuStage.PreMenu
+                GameStates.getInstance().currentState = this.mainMenu
+            }
+
+            if (sel === StartMenuOptions.Exit) {
+                this.exitTheGame();
+            }
+
+
+        }
+    );
+
+    //Controls the game Menu
+    gameMenu = new GameState(
+        (onCreate) => {
+            //Main Menu
+            if (Game.gameMenu.current_menu === GameMenuStage.MainMenu) {
+                Game.inputState.vertical = true;
+                Game.inputState.maxIndex = Menu.gameMenuOptions.length - 1;
+                if (Game.inputState.index > Game.inputState.maxIndex - 1)
+                    Game.inputState.index = 0;
+                CH.clear_screen();
+                CH.print(Assets.Logos.paintedConsoleAdventure())
+                CH.print();
+                for (let i = 0; i < Menu.gameMenuOptions.length; i++) {
+                    CH.print();
+                }
+
+            }
+
+            else if (Game.gameMenu.current_menu === GameMenuStage.SaveGame) {
+                CH.clear_screen();
+                genie.speak("Saving Game... Has not been implemented yet.\nMuahahahaha!");
+                CH.pressSpace();
+            }
+
+            else if (Game.gameMenu.current_menu === GameMenuStage.Info) {
+                Menu.printInfo();
+            }
+
+            else if (Game.gameMenu.current_menu === GameMenuStage.ConfirmQuit) {
+                Game.inputState.maxIndex = 1;
+                Game.inputState.vertical = false;
+                CH.clear_screen();
+                genie.speak("Are you sure you want to quit?\nYou will lose all your progress!",
+                    {},
+                    undefined,
+                    {
+                        hcenter: true
+                    }
+                );
+                CH.print();
+            }
+
+            else if (Game.gameMenu.current_menu === GameMenuStage.Help) {
+                CH.clear_screen();
+                const speech = CH.breakLine(
+                    `You can use A and D or the arrow keys to navigate the menus and select options.
+Press the Spacebar or Enter to confirm your selection.`,
+                    CH.getWidth() / 2, true);
+                genie.speak(speech,
+                    [{
+                        text: [" A ", " D ", " arrow keys "],
+                        color: Colors.GREEN,
+                        decoration: ConsoleImpl.Decorations.Bold
+                    },
+                    {
+                        text: ["Spacebar", "Enter"],
+                        color: Colors.YELLOW,
+                        decoration: [ConsoleImpl.Decorations.Bold, ConsoleImpl.Decorations.Underlined]
+
+                    }],
+                    false,
+                    {
+                        hcenter: true
+                    });
+                CH.pressSpace();
+            }
+            else if (Game.gameMenu.current_menu === GameMenuStage.Help_2) {
+                CH.clear_screen();
+                const speech = CH.breakLine(`When you encounter an enemy,
+you can attack, use items, or flee.
+However, fleeing is not always successful and when 
+You attack, the enemy strikes back!`, CH.getWidth() / 2, true);
+                genie.speak(speech,
+                    [{
+                        text: [" A ", " D ", " arrow keys "],
+                        color: Colors.GREEN,
+                        decoration: ConsoleImpl.Decorations.Bold
+
+                    },
+                    {
+                        text: ["Spacebar", "Enter"],
+                        color: Colors.YELLOW,
+                        decoration: ConsoleImpl.Decorations.Bold
+
+                    }],
+                    false,
+                    {
+                        hcenter: true
+                    });
+                CH.pressSpace();
+            }
+            else if (Game.gameMenu.current_menu === GameMenuStage.Help_3) {
+                CH.clear_screen();
+                genie.speak(CH.breakLine(`When you defeat an enemy, you gain experience points and loot.
+And after a kill you rest for a little bit and restore health,
+If you fled you won't restore as much Health`, CH.getWidth() / 2, true),
+                    {},
+                    false,
+                    {
+                        hcenter: true
+                    });
+                CH.pressSpace();
+            }
+        },
+        (onRender) => {
+            if (Game.gameMenu.current_menu === GameMenuStage.MainMenu) {
+                CH.clear_last_line(Menu.gameMenuOptions.length + 1);
+                CH.printOptions(Menu.gameMenuOptions, Game.inputState.index, {
+                    colors: [{
+                        text: Menu.gameMenuOptions[Menu.gameMenuOptions.length - 1],
+                        color: Colors.RED
+                    },
+                    {
+                        text: "Load Game!",
+                        color: Colors.LIGHTBLACK_EX
+                    },
+                    {
+                        text: "Green",
+                        color: Colors.GREEN
+                    }]
+                }, true)
+            }
+            else if (Game.gameMenu.current_menu === GameMenuStage.ConfirmQuit) {
+                CH.clear_last_line();
+                CH.printOptions(["Yes", "No"], Game.inputState.index, {
+                    colors: [{
+                        text: "Yes",
+                        color: Colors.RED
+                    }]
+                }, false)
+            }
+
+        },
+        (onKey) => { },
+        (onSelect) => {
+            const menu = Game.gameMenu.current_menu;
+            if (menu === GameMenuStage.MainMenu) {
+                const sel = Game.inputState.index;
+                if (sel === GameMenuOptions.Continue) {
+                    GameStates.getInstance().goBack();
+                }
+                else if (sel === GameMenuOptions.MainMenu) {
+                    Game.gameMenu.current_menu = GameMenuStage.ConfirmQuit;
+
+                }
+                else if (sel === GameMenuOptions.SaveGame) {
+                    Game.gameMenu.current_menu = GameMenuStage.SaveGame;
+                }
+                else if (sel === GameMenuOptions.Help) {
+                    Game.gameMenu.current_menu = GameMenuStage.Help;
+                }
+                else if (sel === GameMenuOptions.Info) {
+                    Game.gameMenu.current_menu = GameMenuStage.Info;
+                }
+                else if (sel === GameMenuOptions.Exit) {
+                    this.exitTheGame();
+                }
+            }
+            else if (menu === GameMenuStage.Info || menu === GameMenuStage.SaveGame) {
+                Game.gameMenu.current_menu = GameMenuStage.MainMenu;
+            }
+            else if (menu === GameMenuStage.ConfirmQuit) {
+                const sel = Game.inputState.index;
+                if (sel === ConfirmOptions.Yes) {
+                    this.currentEnemy.suicide();
+                    this.player.health = 0;
+                    GameStates.getInstance().currentState = this.mainMenu;
+                }
+                else if (sel === ConfirmOptions.No) {
+                    Game.gameMenu.current_menu = GameMenuStage.MainMenu;
+                }
+            }
+            else if (menu === GameMenuStage.Help) {
+                Game.gameMenu.current_menu = GameMenuStage.Help_2;
+            }
+            else if (menu === GameMenuStage.Help_2) {
+                Game.gameMenu.current_menu = GameMenuStage.Help_3
+            }
+            else if (menu === GameMenuStage.Help_3) {
+                Game.gameMenu.current_menu = GameMenuStage.MainMenu
+            }
+            GameStates.getInstance().currentState.rerender();
+        }
+    );
+    //Makes an attack name into a third person verb
+    static getThirdPerson = (name) => {
+        if (typeof name !== "string") {
+            throw new Error("name must be a string");
         }
 
-
+        if (name.endsWith('s')) {
+            return name + "'";
+        }
+        else if (name.endsWith('y')) {
+            return name.substring(0, name.length - 1) + 'ies';
+        }
+        else if (name.endsWith('x') || name.endsWith('z') || name.endsWith('ch') || name.endsWith('sh')) {
+            return name + 'es';
+        }
+        else
+            return name + 's';
     }
 }
 
-module.exports = { Game };
+module.exports = { Game, GameStates, MainMenuStage };

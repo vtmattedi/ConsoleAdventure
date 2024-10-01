@@ -4,13 +4,17 @@ class DevMode {
     #gameInstance;
     constructor() {
         if (!DevMode.#instance) {
-            DevMode.#instance = this;
+            DevMode.#instance =  this;
+            return this
         }
         else
             return this
     }
 
     static getInstance() {
+        if (!DevMode.#instance) {
+            DevMode.#instance = new DevMode();
+        }
         return DevMode.#instance;
     }
 

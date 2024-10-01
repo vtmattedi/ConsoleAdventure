@@ -60,6 +60,8 @@ class Unit {
             physical_damage *= 2;
             magic_damage *= 2;
         }
+        const attackRoll = Math.floor(Math.random() * 20) + 1;
+        const defenseRoll = Math.floor(Math.random() * 20) + 1;
         const totalDamage = Math.round(physical_damage + magic_damage);
         //Damage calculation:
         //Physical Damage Taken is reduced by 1% per point of armor rounded
@@ -67,6 +69,7 @@ class Unit {
         //Damage Taken = Physical Damage Taken + Magic Damage Taken 
         let damageTaken = Math.max(Math.round(physical_damage * (1 - this.#armor / 100)), 0) + Math.max(Math.round(magic_damage * (1 - this.#magic_resist / 100), 0));
         let damageResisted = totalDamage - damageTaken;
+        damageTaken = Math.round(damageTaken * (1 + (attackRoll - defenseRoll) / 20));
         damageTaken = Number(damageTaken);
         damageResisted = Number(damageResisted);
         this.#health -= damageTaken;
@@ -75,6 +78,8 @@ class Unit {
             damageTaken: damageTaken,
             damageResisted: damageResisted,
             critical: critical,
+            attackRoll: attackRoll,
+            defenseRoll: defenseRoll,
             isDead: this.isDead()
         };
     }

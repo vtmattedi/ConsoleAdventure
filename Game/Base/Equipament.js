@@ -1,3 +1,5 @@
+const { DefaultColors } = require("./ConsoleHelp");
+const { GameColors } = require("./GameColors");
 
 
 class Equipament {
@@ -12,6 +14,9 @@ class Equipament {
     //Abstract Method
     getDefense() {
         throw new Error("Method not implemented.");
+    }
+    getColor() {
+        return DefaultColors.WHITE;
     }
 }
 
@@ -28,6 +33,9 @@ class Armor extends Equipament {
         };
 
     }
+    getColor() {
+        return GameColors.equip_colors[0].color;
+    }
 }
 
 class Amulet extends Equipament {
@@ -41,6 +49,9 @@ class Amulet extends Equipament {
             armor: 0,
             magic_resist: this.#magic_resist
         };
+    }
+    getColor() {
+        return GameColors.equip_colors[1].color;
     }
 }
 
@@ -64,6 +75,9 @@ class MagicalArmor extends Armor {
             armor: this.#armor,
             magic_resist: this.#magic_resist
         };
+    }
+    getColor() {
+        return GameColors.equip_colors[2].color;
     }
 }
 
@@ -92,6 +106,7 @@ class EquipamentUtils {
         "Dragonbone Armor", "Runic Plate", "Spectral Armor", "Sorcerer's Shield", "Eldritch Plate"
     ];
 
+    static equipaments = [];
     // Function to randomly select items from an array
     static getRandomItem(arr, used) {
         if (used.length >= arr.length) {
@@ -113,8 +128,10 @@ class EquipamentUtils {
 
     // Generating 50 equipment items with 45% armor, 45% amulet, and 10% magical armor
     static MagicArmorProbability = 0.1;
-
     static genEquipament(size) {
+        if (EquipamentUtils.equipaments.length > 0) {
+            return EquipamentUtils.equipaments;
+        }
         let equipaments = [];
         let used_armor = [];
         let used_amulet = [];
@@ -139,9 +156,19 @@ class EquipamentUtils {
                 equipaments.push(new Armor(name, armor));
             }
         }
+        EquipamentUtils.equipaments = equipaments;
         return equipaments;
     }
-
+    static getEquipament(seed)
+    {
+        if (!seed)
+            seed = Math.random();
+        if ( seed > 1)
+            seed = 1
+        const loc = Math.floor((EquipamentUtils.equipaments.length -1) * seed);
+        const equipament = EquipamentUtils.equipaments.splice(loc,1);
+        return equipament; 
+    }
     static getMaxEquipamentNameLength() {
         let max = 0;
         for (const name of EquipamentUtils.armorNames) {
