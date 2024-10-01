@@ -1,6 +1,6 @@
 const { Unit } = require('../Base/Unit.js');
 const ConsoleImpl = require('../Base/ConsoleHelp.js');
-const CH = new ConsoleImpl.ConsoleImplementation_x86();
+const CH = new ConsoleImpl.BasicConsole();
 const Colors = ConsoleImpl.DefaultColors;
 const { GameColors } = require('../Base/GameColors.js')
 const Weapons = require('../Base/Weapons');
@@ -290,7 +290,7 @@ class Player extends Unit {
         for (let i = 2; i < 4; i++) {
 
             if (this.equipaments[i - 2])
-                lines[i] = lines[i].replace(this.equipaments[i - 2].name, CH.insert_color(this.equipaments[i - 2], this.equipaments[i - 2].name));
+                lines[i] = lines[i].replace(this.equipaments[i - 2].name, CH.insert_color(this.equipaments[i - 2].getColor(), this.equipaments[i - 2].name));
             else
                 lines[i] = lines[i].replace("Armor Slot", CH.insert_color(GameColors.ArmorSlot, "Armor Slot"));
         }

@@ -1,7 +1,7 @@
 const { Unit } = require('../Base/Unit.js');
 const ConsoleImpl = require('../Base/ConsoleHelp.js');
 const { DevMode } = require('../Base/DevMode.js');
-const CH = new ConsoleImpl.ConsoleImplementation_x86();
+const CH = new ConsoleImpl.BasicConsole();
 const Colors = ConsoleImpl.DefaultColors;
 const { EnemyUtils } = require('./EnemyUtils.js');
 const { Potion } = require('../Base/Consumables.js');
@@ -82,7 +82,6 @@ class Enemy extends Unit {
             lines.push(line);
             if (this.loot.length > 0) {
                 for (const loot of this.loot) {
-                    console.log(this,loot,this.loot);
                     line = CH.insert_color(loot.getColor(), loot.name);
                     line = CH.hcenter(line, width, " ");
                     lines.push(line);

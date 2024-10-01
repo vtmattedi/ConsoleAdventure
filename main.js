@@ -1,19 +1,18 @@
-const { Game, GameStates, MainMenuStage } = require('./Game/GameAsync.js');
+const { Game, GameStates, MainMenuStage } = require('./Game/Game.js');
 const { Genie } = require('./Game/Genie.js');
 const Assets = require('./Game/Assets/Assets.js');
 const ConsoleImpl = require('./Game/Base/ConsoleHelp.js');
-const CH = new ConsoleImpl.ConsoleImplementation_x86();
+const CH = new ConsoleImpl.BasicConsole();
 const Colors = ConsoleImpl.DefaultColors;
-const { Menu, StartMenuOptions } = require('./Game/Menu.js');
 const { DevMode } = require('./Game/Base/DevMode.js');
-CH.setTitle(CH.insert_color(ConsoleImpl.DefaultColors.BLUE,'Console Adventure Game'));
-const { EquipamentUtils } = require('./Game/Base/Equipament.js');
+CH.setTitle(CH.insert_color(ConsoleImpl.DefaultColors.BLUE, 'Console Adventure Game'));
 
 const readline = require('readline');
 
 const game = new Game();
 process.stdin.setRawMode(true);
 readline.emitKeypressEvents(process.stdin);
+
 
 Assets.Logos.animate(
     Assets.Logos.ConsoleAdventure,
@@ -33,6 +32,10 @@ Assets.Logos.animate(
         }, 500);
     });
 GameStates.getInstance().currentState?.render();
+game.exitTheGame = () => {
+    Genie.getInstance().goodbye(game.player.name);
+    process.exit();
+}
 process.stdout.on('resize', () => {
     //console.clear();
 
@@ -79,9 +82,9 @@ process.stdin.on('keypress', (key, data) => {
         delCount = 1;
     }
     else if (data.ctrl && data.name == 'b') {
-        game.currentEnemy.suicide();
-        Game.battleMenu.current_menu = 0;
-        GameStates.getInstance().currentState?.rerender();
+        const s = DevMode.getInstance().log;
+        console.log("log: ", s);
+        delCount += s.split("\n").length + 1;
 
     }
     else {
@@ -90,9 +93,6 @@ process.stdin.on('keypress', (key, data) => {
 
     }
 
-    // console.log('Key:', Game.battleMenu.current_menu );
-    // delCount ++
-    //console.log(input);
 
     if (data && data.ctrl && data.name == 'c') {
         console.clear();

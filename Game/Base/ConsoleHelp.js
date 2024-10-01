@@ -114,46 +114,6 @@ class ConsoleImplementation {
         throw new ConsoleNotImplemented();
     }
 
-    hide_cursor = () => {
-        throw new ConsoleNotImplemented();
-    }
-
-    SelectValue = (options, config, returnIndex, vertical = false) => {
-        throw new ConsoleNotImplemented();
-    }
-
-    hcenter = (input, size, char = " ", mode = 0) => {
-        throw new ConsoleNotImplemented();
-    }
-
-    vcenter = (input, verticalLength, horizontalLength, char = " ", mode = 0) => {
-        throw new ConsoleNotImplemented();
-    }
-
-    merge = (leftSprite, rightSprite, options = {}) => {
-        throw new ConsoleNotImplemented();
-    }
-
-    waitFor = (char = " ", time = -1) => {
-        throw new ConsoleNotImplemented();
-    }
-
-    paintSprite = (sprite, hcutoff, color) => {
-        throw new ConsoleNotImplemented();
-    }
-
-    getLineWidth = (text) => {
-        throw new ConsoleNotImplemented();
-    }
-
-    pressSpace = (phrase = "to continue") => {
-        throw new ConsoleNotImplemented();
-    }
-
-    breakLine = (text, width) => {
-        throw new ConsoleNotImplemented();
-    }
-
     getWidth = () => {
         throw new ConsoleNotImplemented();
     }
@@ -162,19 +122,8 @@ class ConsoleImplementation {
         throw new ConsoleNotImplemented();
     }
 
-
-    question = (phrase) => {
-        throw new ConsoleNotImplemented();
-    }
-
     print = (text) => {
         throw new ConsoleNotImplemented();
-
-    }
-
-    gameStats = (text) => {
-        throw new ConsoleNotImplemented();
-
     }
 
     setTitle = (title) => {
@@ -184,28 +133,31 @@ class ConsoleImplementation {
 
 
 //Singleton for most VTI terminals and OS usage
-class ConsoleImplementation_x86 extends ConsoleImplementation {
+class BasicConsole extends ConsoleImplementation {
     static #instance = null; //Singleton instance
     constructor() {
-        if (ConsoleImplementation_x86.#instance) {
-            return ConsoleImplementation_x86.#instance;
+        if (BasicConsole.#instance) {
+            return BasicConsole.#instance;
         }
         else {
             super();
-            ConsoleImplementation_x86.#instance = this;
+            BasicConsole.#instance = this;
         }
 
     }
     /// Already done by the constructor
     /// but here for completeness sake.
     getInstance() {
-        return ConsoleImplementation_x86.#instance;
+        return BasicConsole.#instance;
     }
-    breakLine = (text, width) => {
-
+    breakLine = (text, width, ignorenl = false) => {
+        if (ignorenl) {
+            text = text.replaceAll('\n', ' ');
+        }
         let words = text.split(' ');
         let lines = [];
         let line = '';
+        
         words.forEach(word => {
             const lineLength = this.getLineWidth(line);
             const wordLength = this.getLineWidth(word);
@@ -494,40 +446,16 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
                 decoration: [Decorations.Underlined, Decorations.Blink]
             }, "Space")
         );
-        this.write(final_phrase);
+        this.print(final_phrase);
         //this.write(ControlSequences.Reset);
-    }
-
-    question = (phrase) => {
-        this.show_cursor(true)
-        const res = readline.question(phrase)
-        this.show_cursor(false)
-        return res;
     }
 
     print = (text) => {
         if (typeof text === 'undefined') {
-            console.log();
+            this.write('\n');
         }
         else
-            console.log(text);
-    }
-
-    gameStats = (text) => {
-        let obj = "";
-        if (text === 'enemy') {
-            obj = this.insert_color(DefaultColors.YELLOW, "Enemy: \n")
-            obj += JSON.stringify(DevMode.getInstance().gameInstance.currentEnemy, undefined, "\t")
-        }
-        else if (text === 'player') {
-            obj = this.insert_color(DefaultColors.YELLOW, "Player: \n")
-            obj += JSON.stringify(DevMode.getInstance().gameInstance.player, undefined, "\t")
-        }
-        else if (text === game) {
-            obj = this.insert_color(DefaultColors.YELLOW, "Game: \n")
-            obj += JSON.stringify(DevMode.getInstance().gameInstance, undefined, "\t")
-        }
-        return obj
+            this.write(text + '\n');
     }
 
     setTitle = (title) => {
@@ -535,7 +463,7 @@ class ConsoleImplementation_x86 extends ConsoleImplementation {
     }
 }
 module.exports = {
-    ConsoleImplementation_x86,
+    BasicConsole,
     DefaultColors,
     Decorations
 }

@@ -1,5 +1,5 @@
 const ConsoleImpl = require('../Base/ConsoleHelp.js');
-const CH = new ConsoleImpl.ConsoleImplementation_x86();
+const CH = new ConsoleImpl.BasicConsole();
 const Colors = ConsoleImpl.DefaultColors
 
 

@@ -1,5 +1,5 @@
 const ConsoleImpl = require('./Base/ConsoleHelp.js')
-const CH = new ConsoleImpl.ConsoleImplementation_x86();
+const CH = new ConsoleImpl.BasicConsole();
 const Colors = ConsoleImpl.DefaultColors
 const Decorations = ConsoleImpl.Decorations
 const Assets = require("./Assets/Assets.js");
@@ -96,9 +96,21 @@ Welcome to the Great ${CH.insert_color(Colors.YELLOW, "Console")} ${CH.insert_co
         const consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'z'];
         return consonants[Math.floor(Math.random() * consonants.length)].toUpperCase() + 'andy';
     }
-    goodbye(name) {
-        if (!name)
+    goodbye(player) {
+        CH.clear_screen();
+        let Color = Colors.WHITE;
+        if (!player)
+            player = { name: "You" };
+        let name;
+        try {
+            Color = player.getClassColo();
+            name = player.name;
+            
+        } catch (error) {
+            Color = Colors.WHITE;
             name = "You";
+        }
+        name = CH.insert_color(Color, name);
         const goodbye = ["Goodbye! I will miss you!", "Hasta la vista, baby!", `${name}, shall be missed!`, `Farewell, ${this.shortName()} shall miss you!`, `Oh, never thought ${name} would quit so easily!`, `Ha, I knew ${name} could not make it!`];
         const seed = Math.floor(Math.random() * goodbye.length);
         const width = process.stdout.columns;
@@ -201,7 +213,7 @@ and use Spacebar to select the option.`;
         CH.pressSpace();
 
     }
-    speak(sentence, colors = {}, rightSprite) {
+    speak(sentence, colors = {}, rightSprite, options) {
         var genieLines = Assets.GenieSprite.getSprite();
         const width = Math.max(...genieLines.split('\n').map(line => line.length));
         let final_sentence = sentence;
@@ -240,6 +252,10 @@ and use Spacebar to select the option.`;
                 textArray.forEach(text => final_sprite = final_sprite.replaceAll(text, CH.insert_format(format, text)));
 
             });
+        }
+        if (options) {
+            if (options.hcenter)
+                final_sprite = final_sprite.split('\n').map(line => CH.hcenter(line, CH.getWidth())).join('\n');
         }
         CH.print(final_sprite);
     }
