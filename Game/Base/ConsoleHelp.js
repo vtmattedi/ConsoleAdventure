@@ -200,7 +200,7 @@ class BasicConsole extends ConsoleImplementation {
     }
 
     insert_color = (color, text) => {
-        return ControlSequences.CSI + color + `m` + text + ControlSequences.Reset
+        return ControlSequences.CSI + color + `m` + text + ControlSequences.Reset;
     }
 
     insert_format = (format = {
@@ -208,6 +208,11 @@ class BasicConsole extends ConsoleImplementation {
         background: DefaultColors.BLACK,
         decoration: Decorations.None
     }, text) => {
+        if (!text) return '';
+        if (text.includes(ControlSequences.Reset)) {
+            const color = format.color || DefaultColors.WHITE;
+            text = text.replaceAll(ControlSequences.Reset, ControlSequences.CSI + color + `m`);
+        }
         let fmt = '';
         let addSemi = false;
         if (format.color) {
@@ -291,7 +296,7 @@ class BasicConsole extends ConsoleImplementation {
             }
         }
         res = this.hcenter(res, width);
-        if (res.length > width && !vertical) {
+        if (this.getLineWidth(res) > width && !vertical) {
             res = res.substring(0, width);
         }
 

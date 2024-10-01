@@ -239,7 +239,7 @@ class Game {
         const genLoot = (loot_level) => {
             let new_loot = [];
             //Loot chances
-            const armor_chance = 0.2 + loot_level * 0.01;
+            const armor_chance = 1 + loot_level * 0.01;
             const weapon_chance = 0.1
             const potion_chance = 0.2 + loot_level * 0.01;
             //weapon + armor seed
@@ -332,7 +332,7 @@ class Game {
         const rightSprite = `${CH.insert_format(
             {
                 color: Colors.YELLOW,
-                decoration: [ConsoleImpl.Decorations.Bold]
+                decoration: [Decorations.Bold]
             }, "Score")}: ${CH.hcenter(this.#score.toString(), 6, " ", 1)}`;
         const enemy = this.currentEnemy.generateEnemyInfo();
         const enemy_width = Math.max(...enemy.split("\n").map(item => CH.getLineWidth(item)))
@@ -456,7 +456,7 @@ class Game {
 
                         let phrase = `I do not like the name: ${CH.insert_format(
                             {
-                                decoration: [ConsoleImpl.Decorations.Bold, ConsoleImpl.Decorations.Underlined]
+                                decoration: [Decorations.Bold, Decorations.Underlined]
                             }
                             , newName)}!`;
                         if (newName === "" || typeof newName === "undefined")
@@ -465,14 +465,14 @@ class Game {
                         genie.speak(`${phrase}
 I shall call you ${CH.insert_format(
                             {
-                                decoration: [ConsoleImpl.Decorations.Bold, ConsoleImpl.Decorations.Underlined]
+                                decoration: [Decorations.Bold, Decorations.Underlined]
                             }
                             , newName)}.`);
                     }
                     else {
                         genie.speak(`Nice to meet you ${CH.insert_format(
                             {
-                                decoration: [ConsoleImpl.Decorations.Bold, ConsoleImpl.Decorations.Underlined]
+                                decoration: [Decorations.Bold, Decorations.Underlined]
                             }
                             , newName)}!`);
                     }
@@ -481,7 +481,7 @@ I shall call you ${CH.insert_format(
                 else {
                     genie.speak(`Nice to meet you ${CH.insert_format(
                         {
-                            decoration: [ConsoleImpl.Decorations.Bold, ConsoleImpl.Decorations.Underlined]
+                            decoration: [Decorations.Bold, Decorations.Underlined]
                         }
                         , Game.introState.pname)}!`);
                 }
@@ -1024,7 +1024,6 @@ I shall call you ${CH.insert_format(
 
     getLoot = new GameState(
         (onCreate) => {
-
             Game.inputState.vertical = false;
             Game.inputState.index = 0;
             CH.clear_screen();
@@ -1069,19 +1068,17 @@ I shall call you ${CH.insert_format(
                 s += genStats(loot);
                 s += "\n How ever you can only carry one weapon!";
 
-
             }
             else if (loot instanceof Equipament) {
-
                 s += genStats(loot);
                 s += "\n";
                 if (this.player.equipaments.length >= this.player.MAX_EQUIPAMENT) {
-                    Game.inputState.maxIndex = 1;
+                    Game.inputState.maxIndex = 2;
                     s += "but you already have enough equipament!";
                 }
                 else {
                     s += "do you want to equip it?";
-                    Game.inputState.maxIndex = 2;
+                    Game.inputState.maxIndex = 1;
                 }
             }
             genie.speak(s);
@@ -1102,13 +1099,13 @@ I shall call you ${CH.insert_format(
             else if (loot instanceof Equipament) {
                 if (this.player.equipaments.length < this.player.MAX_EQUIPAMENT) {
                     opts.push(`Equip: ${CH.insert_color(loot.getColor(), loot.name)}`);
-                    opts.push("Leave it behind.");
+                    opts.push("Toss it away.");
                 }
                 else {
                     for (const item of this.player.equipaments) {
                         opts.push(`Drop: ${CH.insert_color(item.getColor(), item.name)}`);
                     }
-                    opts.push(`Leave  ${CH.insert_color(loot.getColor(), loot.name)} behind.`);
+                    opts.push(`Leave ${CH.insert_color(loot.getColor(), loot.name)} behind.`);
                 }
 
             }
@@ -1245,12 +1242,12 @@ Press the Spacebar or Enter to confirm your selection.`,
                     [{
                         text: [" A ", " D ", " arrow keys "],
                         color: Colors.GREEN,
-                        decoration: ConsoleImpl.Decorations.Bold
+                        decoration: Decorations.Bold
                     },
                     {
                         text: ["Spacebar", "Enter"],
                         color: Colors.YELLOW,
-                        decoration: [ConsoleImpl.Decorations.Bold, ConsoleImpl.Decorations.Underlined]
+                        decoration: [Decorations.Bold, Decorations.Underlined]
 
                     }],
                     false,
@@ -1269,13 +1266,13 @@ You attack, the enemy strikes back!`, CH.getWidth() / 2, true);
                     [{
                         text: [" A ", " D ", " arrow keys "],
                         color: Colors.GREEN,
-                        decoration: ConsoleImpl.Decorations.Bold
+                        decoration: Decorations.Bold
 
                     },
                     {
                         text: ["Spacebar", "Enter"],
                         color: Colors.YELLOW,
-                        decoration: ConsoleImpl.Decorations.Bold
+                        decoration: Decorations.Bold
 
                     }],
                     false,

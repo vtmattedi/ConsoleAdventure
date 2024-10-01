@@ -161,7 +161,7 @@ class Player extends Unit {
             return CH.hcenter(`${name}: ${value}`, value, '-') + ' '.repeat(pad ? padding : 0);;
         }
         const final = slot("Weap/Armor", 27) + slot("Health", 15) + slot("Stats", 15) + slot("bag", 15, false)
-        const slot_sizes = [27, 17, 18, 17];
+        const slot_sizes = [32, 17, 18, 17];
         const size = [...slot_sizes, padding * 3].reduce((a, b) => a + b, 0);
 
         const chars = ['-', '*', '=', '+'];
