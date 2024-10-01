@@ -239,7 +239,7 @@ class Game {
         const genLoot = (loot_level) => {
             let new_loot = [];
             //Loot chances
-            const armor_chance = 1 + loot_level * 0.01;
+            const armor_chance = 0.2 + loot_level * 0.01;
             const weapon_chance = 0.1
             const potion_chance = 0.2 + loot_level * 0.01;
             //weapon + armor seed

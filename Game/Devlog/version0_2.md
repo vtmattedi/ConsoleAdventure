@@ -6,3 +6,5 @@
 * Added .gitignore to node_modules and the testing folder
 * Changed some strutural stuff with weapon generation (static class WeaponUtils now)
 
+### 0.2.1
+* insert_format now resets only foreground color if it encounters a text with color already
