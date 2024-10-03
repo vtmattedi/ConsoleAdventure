@@ -1165,7 +1165,7 @@ I shall call you ${CH.insert_format(
                 GameStates.getInstance().currentState = this.mainMenu
             }
 
-            if (sel === StartMenuOptions.Exit) {
+            else  {
                 this.exitTheGame();
             }
 
