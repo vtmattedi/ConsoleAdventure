@@ -9,9 +9,11 @@ class GameState {
         if (onSelect)
             this.onSelect = onSelect;
     }
+    
     onCreate = () => {
 
     }
+    
     changeState = (input) => {
 
     }
@@ -19,6 +21,7 @@ class GameState {
     render = (current_option) => {
 
     }
+    
     onSelect(key) {
     }
 

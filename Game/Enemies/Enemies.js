@@ -1,9 +1,9 @@
 import { Unit } from '../Base/Unit.js';
 import * as ConsoleImpl from '../Base/ConsoleHelp.js';
 import { DevMode } from '../Base/DevMode.js';
+import { EnemyUtils } from './EnemyUtils.js';
 const CH = new ConsoleImpl.BasicConsole();
 const Colors = ConsoleImpl.DefaultColors;
-import { EnemyUtils } from './EnemyUtils.js';
 
 
 class Enemy extends Unit {

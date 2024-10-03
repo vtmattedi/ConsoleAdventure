@@ -1,11 +1,12 @@
 import * as ConsoleImpl from  './Base/ConsoleHelp.js';
-const CH = new ConsoleImpl.BasicConsole();
-const Colors = ConsoleImpl.DefaultColors;
-const Decorations = ConsoleImpl.Decorations;
 import { GameVersion, BuildDate } from './GameVersion.js';
 import Assets from "./Assets/Assets.js";
 import { DevMode } from "./Base/DevMode.js";
 import { Genie } from "./Genie.js";
+
+const CH = new ConsoleImpl.BasicConsole();
+const Colors = ConsoleImpl.DefaultColors;
+const Decorations = ConsoleImpl.Decorations;
 
 /*
    static Menu class for handling game menus

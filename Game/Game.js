@@ -1,8 +1,5 @@
 // Purpose: Game class to handle the game logic.
 import * as ConsoleImpl from  './Base/ConsoleHelp.js';
-const CH = new ConsoleImpl.BasicConsole();
-const Colors = ConsoleImpl.DefaultColors;
-const Decorations = ConsoleImpl.Decorations;
 import { GameColors } from './Base/GameColors.js';
 import { PlayerFactory } from './Classes/GameClasses.js';
 import * as Enemy from './Enemies/Enemies.js';
@@ -15,6 +12,10 @@ import { HealthPotion } from './Base/Consumables.js';
 import { EquipamentUtils, Equipament } from './Base/Equipament.js';
 import { GameState } from './GameState.js';
 import Assets from './Assets/Assets.js';
+
+const CH = new ConsoleImpl.BasicConsole();
+const Colors = ConsoleImpl.DefaultColors;
+const Decorations = ConsoleImpl.Decorations;
 const genie = new Genie();
 
 class GameStates {
@@ -1376,4 +1377,4 @@ If you fled you won't restore as much Health`, CH.getWidth() / 2, true),
     }
 }
 
-export{ Game, GameStates, MainMenuStage };
+export{ Game, GameStates, MainMenuStage, genie, GameState };

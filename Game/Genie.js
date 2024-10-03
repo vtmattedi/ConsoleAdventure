@@ -1,13 +1,15 @@
 import * as ConsoleImpl from  './Base/ConsoleHelp.js';
+import Assets from "./Assets/Assets.js";
+import { GameColors } from './Base/GameColors.js';
 const CH = new ConsoleImpl.BasicConsole();
 const Colors = ConsoleImpl.DefaultColors;
 const Decorations = ConsoleImpl.Decorations;
-import Assets from "./Assets/Assets.js";
-import { GameColors } from './Base/GameColors.js';
+
 
 /*
 * Once create the Genie instance, it will be the same instance for the whole session.
 */
+
 class Genie {
     static #instance = null; //private
     // strictly private

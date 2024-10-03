@@ -1,12 +1,12 @@
 import { Unit } from '../Base/Unit.js';
 import * as ConsoleImpl from '../Base/ConsoleHelp.js';
-const CH = new ConsoleImpl.BasicConsole();
-const Colors = ConsoleImpl.DefaultColors;
 import { GameColors } from '../Base/GameColors.js';
 import * as Weapons from '../Base/Weapons.js';
 import * as Consumables from '../Base/Consumables.js';
 import { DamageType } from '../Base/DamageTypes.js';
 import { DevMode } from '../Base/DevMode.js';
+const CH = new ConsoleImpl.BasicConsole();
+const Colors = ConsoleImpl.DefaultColors;
 
 class Player extends Unit {
     static #MAX_EQUIPAMENT = 2 //{get; private set;}
