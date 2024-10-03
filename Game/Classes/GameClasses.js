@@ -1,7 +1,6 @@
-const {Mage} = require('./Mage');
-const {Warrior} = require('./Warrior');
-const {Rogue} = require('./Rogue');
-const {Player} = require('./Player');
+import { Mage } from './Mage.js';
+import { Warrior } from './Warrior.js';
+import { Rogue } from './Rogue.js';
 
 class PlayerFactory {
     createPlayer(name, classType) {
@@ -18,7 +17,7 @@ class PlayerFactory {
     }
 }
 
-module.exports = {
+export{
     PlayerFactory
 };
 

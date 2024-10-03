@@ -1,20 +1,20 @@
 // Purpose: Game class to handle the game logic.
-const ConsoleImpl = require('./Base/ConsoleHelp.js');
+import * as ConsoleImpl from  './Base/ConsoleHelp.js';
 const CH = new ConsoleImpl.BasicConsole();
 const Colors = ConsoleImpl.DefaultColors;
 const Decorations = ConsoleImpl.Decorations;
-const { GameColors } = require('./Base/GameColors.js');
-const { PlayerFactory } = require('./Classes/GameClasses.js');
-const Enemy = require('./Enemies/Enemies.js');
-const { Menu, BattleMenuOptions, GameMenuOptions, GameEndOptions, StartMenuOptions, ConfirmOptions } = require('./Menu.js');
-const { DamageType } = require('./Base/DamageTypes.js');
-const { Weapon, WeaponUtils } = require('./Base/Weapons.js');
-const { DevMode } = require('./Base/DevMode.js');
-const { Genie } = require('./Genie.js');
-const { HealthPotion, Potion } = require('./Base/Consumables.js');
-const { EquipamentUtils, Equipament } = require('./Base/Equipament.js');
-const { GameState } = require('./GameState.js');
-const Assets = require('./Assets/Assets.js');
+import { GameColors } from './Base/GameColors.js';
+import { PlayerFactory } from './Classes/GameClasses.js';
+import * as Enemy from './Enemies/Enemies.js';
+import { Menu, BattleMenuOptions, GameMenuOptions, StartMenuOptions, ConfirmOptions } from './Menu.js';
+import { DamageType } from './Base/DamageTypes.js';
+import { Weapon, WeaponUtils } from './Base/Weapons.js';
+import { DevMode } from './Base/DevMode.js';
+import { Genie } from './Genie.js';
+import { HealthPotion } from './Base/Consumables.js';
+import { EquipamentUtils, Equipament } from './Base/Equipament.js';
+import { GameState } from './GameState.js';
+import Assets from './Assets/Assets.js';
 const genie = new Genie();
 
 class GameStates {
@@ -36,7 +36,6 @@ class GameStates {
         if (state instanceof GameState) {
             this.#lastState.push(this.#currentState);
             this.#currentState = state;
-            state.rerender();
         }
     }
     get currentState() {
@@ -56,7 +55,6 @@ class GameStates {
     goBack() {
         if (this.#lastState.length > 0) {
             this.#currentState = this.#lastState.pop();
-            this.#currentState.rerender();
         }
     }
 
@@ -165,13 +163,22 @@ class Game {
     //treat the input to ' ' -> space
     //'return' -> enter and Arrow Keys -> arrowup, arrowdown, arrowleft, arrowright
     handleInput = (input) => {
+        const MaxNameLength = 25;
         if (typeof input === "undefined")
             return;
         if (GameStates.getInstance().currentState?.changeState(input))
             return;
 
         if (input.length === 1) {
-            Game.inputState.string += input;
+            if (Game.inputState.string === "")
+                input = input.toUpperCase();
+            if (Game.inputState.string.length < MaxNameLength) {
+                Game.inputState.string += input;
+                this.cancelgenieTempSpeech();
+            }
+            else
+                this.genieTempSpeech("That is a long name that you have there!");
+            input = input.toLowerCase();
         }
         else if (input === "backspace") {
             if (Game.inputState.string.length > 0) {
@@ -190,7 +197,7 @@ class Game {
         else if (input === "arrowleft") input = "a";
         else if (input === "arrowright") input = "d";
 
-        if (input == "w" && Game.inputState.vertical || input == "a" && !Game.inputState.vertical) {
+        if ((input === "w" && Game.inputState.vertical) || (input === "a" && !Game.inputState.vertical)) {
 
             if (Game.inputState.index <= 0) {
                 Game.inputState.index = Game.inputState.maxIndex;
@@ -198,7 +205,7 @@ class Game {
             else
                 Game.inputState.index--;
         }
-        else if (input == "s" && Game.inputState.vertical || input == "d" && !Game.inputState.vertical) {
+        else if ((input === "s" && Game.inputState.vertical) || (input === "d" && !Game.inputState.vertical)) {
 
             if (Game.inputState.index >= Game.inputState.maxIndex) {
                 Game.inputState.index = 0;
@@ -212,8 +219,7 @@ class Game {
     exitTheGame() {
         this.isRunning = false;// Stop game loop
         //goodbye message
-        CH.clear_screen();
-        genie.goodbye(this.player.name);
+        CH.show_cursor(true);
     }
     generateEnemy(level) {
         if (typeof level !== "number") {
@@ -270,7 +276,7 @@ class Game {
                 }
                 new_loot.push(hp_pot);
             }
-           
+
             return new_loot;
         }
         const loot = genLoot(level);
@@ -431,7 +437,8 @@ class Game {
 
     ///Handle Player Cration
     playerCreation = new GameState(
-        (onCreate) => {
+        //on create
+        () => {
             if (!Game.introState.init) {
                 Game.introState.init = true;
                 Game.introState.pname = "";
@@ -441,7 +448,10 @@ class Game {
             const stage = Game.introState.stage;
             if (stage === 0) {
                 CH.clear_screen();
-                genie.speak('Hello again Adventurer!\nI didn\'t catch your name. What was it?');
+                genie.speak(
+                    this.#genieSpeech === "" ?
+                        'Hello again Adventurer!\nI didn\'t catch your name. What was it?' :
+                        this.#genieSpeech);
                 CH.show_cursor(true);
                 Game.inputState.vertical = false;
             }
@@ -525,14 +535,19 @@ I shall call you ${CH.insert_format(
                 CH.pressSpace();
             }
         },
-        (onRender) => {
+        //on render
+        () => {
             // process.stdout.write('\x1b[2K');
             // CH.print(CH.insert_color(Colors.YELLOW, '\tMy name is: ') + Game.inputState.string);
-
             if (Game.introState.stage === 0) {
+                if (this.#genieSpeech !== "") {
+                    GameStates.getInstance().currentState.onCreate();
+                }
+                CH.show_cursor(false);
                 CH.print();
-                CH.clear_last_line();
+                CH.clear_last_line(1);
                 CH.write(CH.insert_color(Colors.YELLOW, '\tMy name is: ') + Game.inputState.string);
+                CH.show_cursor(true);
             }
             else if (Game.introState.stage === 2) {
                 CH.clear_last_line();
@@ -540,7 +555,6 @@ I shall call you ${CH.insert_format(
                     colors: GameColors.class_colors
                 }, false);
             }
-
 
         },
         (key) => {
@@ -551,9 +565,13 @@ I shall call you ${CH.insert_format(
             }
 
         },
-        (onSelect) => {
+        //On Select
+        () => {
             const stage = Game.introState.stage;
-
+            if (stage === 0) {
+                CH.print();
+                CH.show_cursor(false);  
+            }
             if (stage === 2) {
                 const classes = ['Warrior', 'Mage', 'Rogue']
                 this.player = new PlayerFactory().createPlayer(Game.introState.pname, classes[Game.inputState.index]);
@@ -567,15 +585,15 @@ I shall call you ${CH.insert_format(
             }
             else {
                 Game.introState.stage++;
-                GameStates.getInstance().currentState.rerender();
             }
+            GameStates.getInstance().currentState.rerender();
 
         }
     )
 
     //Controls the game on the Gauntlet Mode
     gauntletGame = new GameState(
-        (firstRender) => {
+        () => {
             Game.inputState.vertical = false;
             if (Game.battleMenu.current_menu === BattleStage.Encounter) {
                 this.encounterNewEnemy();
@@ -596,7 +614,7 @@ I shall call you ${CH.insert_format(
             else if (Game.battleMenu.current_menu === BattleStage.Items) {
                 Game.inputState.index = 0;
                 let itemOptions = this.genCondencedItemsArray();
-                Game.inputState.maxIndex = Math.min(itemOptions.length, 1);
+                Game.inputState.maxIndex = Math.max(itemOptions.length, 1);
                 this.printBasicFrame();
             }
             else if (Game.battleMenu.current_menu === BattleStage.GameOver) {
@@ -629,33 +647,6 @@ I shall call you ${CH.insert_format(
                 CH.pressSpace();
 
             }
-            else if (Game.battleMenu.current_menu === BattleStage.GetLoot) {
-                CH.clear_screen();
-                if (this.currentEnemy.loot.length > 0) {
-                    const loot = this.currentEnemy.loot[0];
-                    if (loot)
-                        genie.speak(phrase);
-                    if (this.currentEnemy.loot.length > 0) {
-                        for (const item of this.currentEnemy.loot) {
-                            if (item instanceof Weapon) {
-                                this.player.findWeapon(item);
-                            }
-                            else if (item instanceof HealthPotion) {
-                                this.player.findConsumable(item);
-                            }
-                            else if (item instanceof Equipament) {
-                                this.player.findEquipament(item);
-                            }
-                        }
-                    }
-                    CH.pressSpace();
-                }
-                else {
-                    Game.battleMenu.current_menu = BattleStage.Encounter;
-                }
-
-            }
-
             else if (Game.battleMenu.current_menu === BattleStage.PreSlain) {
                 CH.clear_screen();
                 this.printBasicFrame();
@@ -667,7 +658,7 @@ I shall call you ${CH.insert_format(
                 CH.pressSpace();
             }
         },
-        (onRender) => {
+        () => {
             if (Game.battleMenu.current_menu === BattleStage.SelectAction) {
                 CH.clear_last_line();
                 CH.printOptions(Menu.battleMenuOptions, Game.inputState.index, {
@@ -705,10 +696,10 @@ I shall call you ${CH.insert_format(
                 }, false)
             }
         },
-        (onKey) => {
+        () => {
 
         },
-        (onSelect) => {
+        () => {
             if (Game.battleMenu.current_menu === BattleStage.Encounter) {
                 Game.battleMenu.current_menu = BattleStage.SelectAction;
 
@@ -726,11 +717,11 @@ I shall call you ${CH.insert_format(
                         this.#feedback = "You failed to escape!";
 
                         const seed = Math.round(Math.random() * 2);
-                        if (seed == 0)
+                        if (seed === 0)
                             this.genieTempSpeech("You can't escape! You must fight!");
-                        else if (seed == 1)
+                        else if (seed === 1)
                             this.genieTempSpeech("Escape you tried,\nsucceed you did not!");
-                        else if (seed == 2)
+                        else if (seed === 2)
                             this.#genieSpeech = "Sometimes you can't flight, the only option is to fight!";
                     }
                 }
@@ -745,10 +736,7 @@ I shall call you ${CH.insert_format(
             else if (Game.battleMenu.current_menu === BattleStage.Attack) {
                 Game.battleMenu.current_menu = 1;
 
-                if (Game.inputState.index === this.player.attacks.length) {
-
-                }
-                else {
+                if (Game.inputState.index !== this.player.attacks.length) {
                     this.#fleeAttempt = 0;
                     const attack_index = Game.inputState.index;
                     //Player Attack
@@ -861,11 +849,11 @@ I shall call you ${CH.insert_format(
 
     /// Controls the inital menu
     mainMenu = new GameState(
-        (onCreate) => {
+        () => {
             if (Game.MainMenuStage.current_menu === MainMenuStage.PreMenu) {
                 CH.clear_screen();
                 CH.print(Assets.Logos.paintedConsoleAdventure())
-                CH.pressSpace();
+                CH.pressSpace("to Start");
             }
             else if (Game.MainMenuStage.current_menu === MainMenuStage.MainMenu) {
                 CH.clear_screen();
@@ -937,9 +925,9 @@ I shall call you ${CH.insert_format(
             }
 
         },
-        (onRender) => {
+        () => {
             if (Game.MainMenuStage.current_menu === MainMenuStage.MainMenu) {
-                CH.clear_last_line(Menu.startMenuOptions.length  + 1);
+                CH.clear_last_line(Menu.startMenuOptions.length + 1);
                 CH.printOptions(Menu.startMenuOptions, Game.inputState.index, {
                     colors: [{
                         text: Menu.startMenuOptions[Menu.startMenuOptions.length - 1],
@@ -965,9 +953,9 @@ I shall call you ${CH.insert_format(
             //  console.log(Game.MainMenuStage.current_menu)
 
         },
-        (onInput) => {
+        () => {
         },
-        (onSelect) => {
+        () => {
             const menu = Game.MainMenuStage.current_menu;
             const sel = Game.inputState.index;
             if (menu === MainMenuStage.PreMenu) {
@@ -993,9 +981,6 @@ I shall call you ${CH.insert_format(
             else if (menu === MainMenuStage.Info) {
                 Game.MainMenuStage.current_menu = MainMenuStage.MainMenu;
                 GameStates.rerender();
-            }
-            else if (menu === MainMenuStage.Exit) {
-
             }
             else if (menu === MainMenuStage.LoadGame) {
                 Game.MainMenuStage.current_menu = MainMenuStage.MainMenu;
@@ -1023,7 +1008,7 @@ I shall call you ${CH.insert_format(
     );
 
     getLoot = new GameState(
-        (onCreate) => {
+        () => {
             Game.inputState.vertical = false;
             Game.inputState.index = 0;
             CH.clear_screen();
@@ -1085,7 +1070,7 @@ I shall call you ${CH.insert_format(
             CH.print("\n".repeat(3));
 
         },
-        (onRender) => {
+        () => {
             const loot = this.currentEnemy.loot[0];
             let opts = [];
             CH.clear_last_line();
@@ -1110,20 +1095,17 @@ I shall call you ${CH.insert_format(
 
             }
             if (opts.length === 0) {
-                console.log("Generating Empty Loot")
-                console.log(this.currentEnemy.loot, opts, loot)
                 throw new Error("Empty Loot");
             }
             CH.printOptions(opts, Game.inputState.index)
 
         },
-        (onKey) => {
+        () => {
         },
-        (onSelect) => {
+        () => {
             const sel = Game.inputState.index;
             const cancelIndex = this.player.equipaments.length >= this.player.MAX_EQUIPAMENT ? this.player.equipaments.length : 1;
-            if (sel === cancelIndex) {
-            }
+            if (sel === cancelIndex);
             else if (this.currentEnemy.loot[0] instanceof Weapon) {
                 this.player.weapon = this.currentEnemy.loot[0];
             }
@@ -1141,15 +1123,15 @@ I shall call you ${CH.insert_format(
                 Game.battleMenu.current_menu = BattleStage.Encounter;
                 GameStates.getInstance().goBack();
             }
-            else
-                GameStates.rerender();
+
+            GameStates.rerender();
         }
     );
 
 
     //Controls end of the game
     playerDead = new GameState(
-        (onCreate) => {
+        () => {
             Game.inputState.maxIndex = 1;
             Game.inputState.vertical = false;
             if (Game.inputState.index > 1)
@@ -1158,7 +1140,7 @@ I shall call you ${CH.insert_format(
             this.printBasicFrame();
             CH.print();
         },
-        (onRender) => {
+        () => {
             CH.clear_last_line();
             CH.printOptions(Menu.gameEndOptions, Game.inputState.index, {
                 colors: [{
@@ -1171,9 +1153,9 @@ I shall call you ${CH.insert_format(
                 }]
             }, false)
         },
-        (onKey) => {
+        () => {
         },
-        (onSelect) => {
+        () => {
             const sel = Game.inputState.index
             if (sel === StartMenuOptions.NewGame) {
                 Game.inputState.string = "";
@@ -1192,7 +1174,7 @@ I shall call you ${CH.insert_format(
 
     //Controls the game Menu
     gameMenu = new GameState(
-        (onCreate) => {
+        () => {
             //Main Menu
             if (Game.gameMenu.current_menu === GameMenuStage.MainMenu) {
                 Game.inputState.vertical = true;
@@ -1294,7 +1276,7 @@ If you fled you won't restore as much Health`, CH.getWidth() / 2, true),
                 CH.pressSpace();
             }
         },
-        (onRender) => {
+        () => {
             if (Game.gameMenu.current_menu === GameMenuStage.MainMenu) {
                 CH.clear_last_line(Menu.gameMenuOptions.length + 1);
                 CH.printOptions(Menu.gameMenuOptions, Game.inputState.index, {
@@ -1323,8 +1305,8 @@ If you fled you won't restore as much Health`, CH.getWidth() / 2, true),
             }
 
         },
-        (onKey) => { },
-        (onSelect) => {
+        () => { },
+        () => {
             const menu = Game.gameMenu.current_menu;
             if (menu === GameMenuStage.MainMenu) {
                 const sel = Game.inputState.index;
@@ -1394,4 +1376,4 @@ If you fled you won't restore as much Health`, CH.getWidth() / 2, true),
     }
 }
 
-module.exports = { Game, GameStates, MainMenuStage };
+export{ Game, GameStates, MainMenuStage };

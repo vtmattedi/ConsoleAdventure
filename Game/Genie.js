@@ -1,9 +1,9 @@
-const ConsoleImpl = require('./Base/ConsoleHelp.js')
+import * as ConsoleImpl from  './Base/ConsoleHelp.js';
 const CH = new ConsoleImpl.BasicConsole();
-const Colors = ConsoleImpl.DefaultColors
-const Decorations = ConsoleImpl.Decorations
-const Assets = require("./Assets/Assets.js");
-const { GameColors } = require('./Base/GameColors.js');
+const Colors = ConsoleImpl.DefaultColors;
+const Decorations = ConsoleImpl.Decorations;
+import Assets from "./Assets/Assets.js";
+import { GameColors } from './Base/GameColors.js';
 
 /*
 * Once create the Genie instance, it will be the same instance for the whole session.
@@ -60,6 +60,7 @@ class Genie {
     }
     #colorName;//{get; private set}
     #name;//{public with type check on assignment}
+    #genieSeed
     constructor() {
         if (Genie.#instance) {
             return Genie.#instance;
@@ -69,6 +70,7 @@ class Genie {
             this.missBehaviour = Number(Math.random().toFixed(2));
             this.#name = Genie.#genie_pool[genieSeed].name;
             this.#colorName = Genie.#genie_pool[genieSeed].colorName;
+            this.#genieSeed = genieSeed;
             Genie.#instance = this;
         }
     }
@@ -77,6 +79,17 @@ class Genie {
             Genie.#instance = new Genie();
         }
         return Genie.#instance;
+    }
+    setSeed(seed) {
+        if (typeof seed !== 'number')
+            throw new TypeError("Seed must be a number"); 
+        this.#genieSeed = Math.floor(seed);
+        this.missBehaviour = Number((seed%1).toFixed(2));
+        this.#name = Genie.#genie_pool[this.#genieSeed].name;
+        this.#colorName = Genie.#genie_pool[this.#genieSeed].colorName;
+    }
+    getSeed() {
+        return this.#genieSeed + this.missBehaviour;
     }
     shortName() {
         return this.#name.substring(0, this.#name.indexOf(' '));
@@ -97,7 +110,6 @@ Welcome to the Great ${CH.insert_color(Colors.YELLOW, "Console")} ${CH.insert_co
         return consonants[Math.floor(Math.random() * consonants.length)].toUpperCase() + 'andy';
     }
     goodbye(player) {
-        CH.clear_screen();
         let Color = Colors.WHITE;
         if (!player)
             player = { name: "You" };
@@ -113,7 +125,7 @@ Welcome to the Great ${CH.insert_color(Colors.YELLOW, "Console")} ${CH.insert_co
         name = CH.insert_color(Color, name);
         const goodbye = ["Goodbye! I will miss you!", "Hasta la vista, baby!", `${name}, shall be missed!`, `Farewell, ${this.shortName()} shall miss you!`, `Oh, never thought ${name} would quit so easily!`, `Ha, I knew ${name} could not make it!`];
         const seed = Math.floor(Math.random() * goodbye.length);
-        const width = process.stdout.columns;
+        const width = CH.getWidth();
         this.speak(CH.hcenter(goodbye[seed], width / 3),
             {
                 text: this.shortName(),
@@ -162,7 +174,7 @@ and use Spacebar to select the option.`;
             ]
         );
         let choice = -1;
-        while (choice != 0 && choice != 1) {
+        while (choice !== 0 && choice !== 1) {
             choice = CH.SelectValue(['Continue', 'Go on', `I don't like you`, 'Exit'], {
                 start: Math.max(0, choice),
                 colors: [{
@@ -170,11 +182,11 @@ and use Spacebar to select the option.`;
                     color: Colors.RED
                 }]
             }, true);
-            if (choice == 0 || choice == 1) {
+            if (choice === 0 || choice === 1) {
                 CH.clear_screen();
                 this.speak('Great! Let\'s embark on this jurney!');
             }
-            else if (choice == 2) {
+            else if (choice === 2) {
                 const responses = [
                     `Oh, you don’t like me? How unfortunate... for you. I’m ${this.#name} Like it or not, I’m all you’ve got!`,
                     `Tsk tsk, feelings aren’t mutual. I am ${this.#name.substring(0, this.#name.length - 1)} after all. Shall we get on with it?`,
@@ -201,7 +213,7 @@ and use Spacebar to select the option.`;
                     }]
                 );
             }
-            else if (choice == 3) {
+            else if (choice === 3) {
                 CH.clear_screen();
                 this.goodbye();
                 process.exit();
@@ -284,4 +296,4 @@ and use Spacebar to select the option.`;
     }
 }
 
-module.exports = { Genie };
+export{ Genie };

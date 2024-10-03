@@ -2,43 +2,93 @@
 //ANSI escape codes: https://en.wikipedia.org/wiki/ANSI_escape_code
 // Terminal Handling implementations
 
-const { DevMode } = require('./DevMode.js');
+import { DevMode } from './DevMode.js';
 
 // ANSI control sequences => color = CSI n m
 class ControlSequences {
     static get CSI() { return '\x1b['; }
     static get OSC() { return '\x1b]'; }
-    static get BEL() { return '\a'; }
     static get Reset() { return '\x1b[0m'; }
 }
 
 //n number for colors and 8/24bit color constructor
 class DefaultColors {
-    static get BLACK() { return 30; }
-    static get RED() { return 31; }
-    static get GREEN() { return 32; }
-    static get YELLOW() { return 33; }
-    static get BLUE() { return 34; }
-    static get MAGENTA() { return 35; }
-    static get CYAN() { return 36; }
-    static get WHITE() { return 37; }
-    static get LIGHTBLACK_EX() { return 90; }
-    static get LIGHTRED_EX() { return 91; }
-    static get LIGHTGREEN_EX() { return 92; }
-    static get LIGHTYELLOW_EX() { return 93; }
-    static get LIGHTBLUE_EX() { return 94; }
-    static get LIGHTMAGENTA_EX() { return 95; }
-    static get LIGHTCYAN_EX() { return 96; }
-    static get LIGHTWHITE_EX() { return 97; }
-    static get BG_BLACK() { return 40; }
-    static get BG_RED() { return 41; }
-    static get BG_GREEN() { return 42; }
-    static get BG_YELLOW() { return 43; }
-    static get BG_BLUE() { return 44; }
-    static get BG_MAGENTA() { return 45; }
-    static get BG_CYAN() { return 46; }
-    static get BG_WHITE() { return 47; }
-    static get BG_RESET() { return 49; }
+    static #BLACK = 30;
+    static #RED = 31;
+    static #GREEN = 32;
+    static #YELLOW = 33;
+    static #BLUE = 34;
+    static #MAGENTA = 35;
+    static #CYAN = 36;
+    static #WHITE = 37;
+    static #LIGHTBLACK_EX = 90;
+    static #LIGHTRED_EX = 91;
+    static #LIGHTGREEN_EX = 92;
+    static #LIGHTYELLOW_EX = 93;
+    static #LIGHTBLUE_EX = 94;
+    static #LIGHTMAGENTA_EX = 95;
+    static #LIGHTCYAN_EX = 96;
+    static #LIGHTWHITE_EX = 97;
+    static #BG_BLACK = 40;
+    static #BG_RED = 41;
+    static #BG_GREEN = 42;
+    static #BG_YELLOW = 43;
+    static #BG_BLUE = 44;
+    static #BG_MAGENTA = 45;
+    static #BG_CYAN = 46;
+    static #BG_WHITE = 47;
+    static #BG_RESET = 49;
+
+    static get BLACK() { return this.#BLACK; }
+    static set BLACK(value) { this.#BLACK = value; }
+    static get RED() { return this.#RED; }
+    static set RED(value) { this.#RED = value; }
+    static get GREEN() { return this.#GREEN; }
+    static set GREEN(value) { this.#GREEN = value; }
+    static get YELLOW() { return this.#YELLOW; }
+    static set YELLOW(value) { this.#YELLOW = value; }
+    static get BLUE() { return this.#BLUE; }
+    static set BLUE(value) { this.#BLUE = value; }
+    static get MAGENTA() { return this.#MAGENTA; }
+    static set MAGENTA(value) { this.#MAGENTA = value; }
+    static get CYAN() { return this.#CYAN; }
+    static set CYAN(value) { this.#CYAN = value; }
+    static get WHITE() { return this.#WHITE; }
+    static set WHITE(value) { this.#WHITE = value; }
+    static get LIGHTBLACK_EX() { return this.#LIGHTBLACK_EX; }
+    static set LIGHTBLACK_EX(value) { this.#LIGHTBLACK_EX = value; }
+    static get LIGHTRED_EX() { return this.#LIGHTRED_EX; }
+    static set LIGHTRED_EX(value) { this.#LIGHTRED_EX = value; }
+    static get LIGHTGREEN_EX() { return this.#LIGHTGREEN_EX; }
+    static set LIGHTGREEN_EX(value) { this.#LIGHTGREEN_EX = value; }
+    static get LIGHTYELLOW_EX() { return this.#LIGHTYELLOW_EX; }
+    static set LIGHTYELLOW_EX(value) { this.#LIGHTYELLOW_EX = value; }
+    static get LIGHTBLUE_EX() { return this.#LIGHTBLUE_EX; }
+    static set LIGHTBLUE_EX(value) { this.#LIGHTBLUE_EX = value; }
+    static get LIGHTMAGENTA_EX() { return this.#LIGHTMAGENTA_EX; }
+    static set LIGHTMAGENTA_EX(value) { this.#LIGHTMAGENTA_EX = value; }
+    static get LIGHTCYAN_EX() { return this.#LIGHTCYAN_EX; }
+    static set LIGHTCYAN_EX(value) { this.#LIGHTCYAN_EX = value; }
+    static get LIGHTWHITE_EX() { return this.#LIGHTWHITE_EX; }
+    static set LIGHTWHITE_EX(value) { this.#LIGHTWHITE_EX = value; }
+    static get BG_BLACK() { return this.#BG_BLACK; }
+    static set BG_BLACK(value) { this.#BG_BLACK = value; }
+    static get BG_RED() { return this.#BG_RED; }
+    static set BG_RED(value) { this.#BG_RED = value; }
+    static get BG_GREEN() { return this.#BG_GREEN; }
+    static set BG_GREEN(value) { this.#BG_GREEN = value; }
+    static get BG_YELLOW() { return this.#BG_YELLOW; }
+    static set BG_YELLOW(value) { this.#BG_YELLOW = value; }
+    static get BG_BLUE() { return this.#BG_BLUE; }
+    static set BG_BLUE(value) { this.#BG_BLUE = value; }
+    static get BG_MAGENTA() { return this.#BG_MAGENTA; }
+    static set BG_MAGENTA(value) { this.#BG_MAGENTA = value; }
+    static get BG_CYAN() { return this.#BG_CYAN; }
+    static set BG_CYAN(value) { this.#BG_CYAN = value; }
+    static get BG_WHITE() { return this.#BG_WHITE; }
+    static set BG_WHITE(value) { this.#BG_WHITE = value; }
+    static get BG_RESET() { return this.#BG_RESET; }
+    static set BG_RESET(value) { this.#BG_RESET = value; }
 
 
     /// Custom colors 8 bit
@@ -91,14 +141,14 @@ class ConsoleImplementation {
     // Strictly Abstract 
     //
     // Should only throw error if a not implement NESCESSARY feature is tryng to be used
-    fillBar = (percent, size, char) => {
+    fillBar = () => {
         throw new ConsoleNotImplemented();
     }
-    insert_color = (color, text) => {
+    insert_color = () => {
         throw new ConsoleNotImplemented();
     }
 
-    insert_format = (format, text) => {
+    insert_format = () => {
         throw new ConsoleNotImplemented();
     }
 
@@ -110,7 +160,7 @@ class ConsoleImplementation {
         throw new ConsoleNotImplemented();
     }
 
-    clear_last_line = (times) => {
+    clear_last_line = () => {
         throw new ConsoleNotImplemented();
     }
 
@@ -118,15 +168,15 @@ class ConsoleImplementation {
         throw new ConsoleNotImplemented();
     }
 
-    show_cursor = (value = true) => {
+    show_cursor = () => {
         throw new ConsoleNotImplemented();
     }
 
-    print = (text) => {
+    print = () => {
         throw new ConsoleNotImplemented();
     }
 
-    setTitle = (title) => {
+    setTitle = () => {
         throw new ConsoleNotImplemented();
     }
 }
@@ -157,7 +207,7 @@ class BasicConsole extends ConsoleImplementation {
         let words = text.split(' ');
         let lines = [];
         let line = '';
-        
+
         words.forEach(word => {
             const lineLength = this.getLineWidth(line);
             const wordLength = this.getLineWidth(word);
@@ -178,7 +228,7 @@ class BasicConsole extends ConsoleImplementation {
         process.stdout.write(text);
     }
     clear_line = () => {
-         this.write(ControlSequences.CSI + `2K`)
+        this.write(ControlSequences.CSI + `2K`)
     }
 
     clear_last_line = (times) => {
@@ -194,7 +244,7 @@ class BasicConsole extends ConsoleImplementation {
 
     show_cursor = (value = true) => {
         if (value)
-           this.write('\u001B[?25h');
+            this.write('\u001B[?25h');
         else
             this.write('\u001B[?25l');
     }
@@ -261,8 +311,8 @@ class BasicConsole extends ConsoleImplementation {
 
     }
 
-   
-    printOptions = (options, selectIndex = 0 , config, vertical = false) => {
+
+    printOptions = (options, selectIndex = 0, config, vertical = false) => {
         let res = "";
         const padChar = DevMode.getInstance().value ? '#' : ' ';
         let padding = padChar.repeat(3);
@@ -270,7 +320,7 @@ class BasicConsole extends ConsoleImplementation {
             padding = padChar.repeat(config.padding);
         }
         const width = this.getWidth();
-        const maxLength = Math.max(...options.map(item => item.length));
+        //const maxLength = Math.max(...options.map(item => item.length));
         const totalLength = options.reduce((acc, item) => acc + item.length, 0) + padding.length * options.length;
         if (totalLength > width) {
             padding = " ".repeat(0);
@@ -319,12 +369,11 @@ class BasicConsole extends ConsoleImplementation {
     // Horizontal center a line, mode => 0 = center, 1 = left, 2 = right
     // MultiLine text is supported, each line will be centered
     // if treatAsRaw is true, it will treat the input as a single line
-    hcenter = (input, size, char = " ", mode = 0, treatAsRaw = false) => {
-       
+    hcenter = (input, size, char = " ", mode = 0) => {
+
         //Added support for multiline text
-        const centerLine = (text)=>
-        {
-             if (typeof text !== "string") return undefined;
+        const centerLine = (text) => {
+            if (typeof text !== "string") return undefined;
             let start = mode !== 1;
 
             while (this.getLineWidth(text) < size) {
@@ -335,29 +384,22 @@ class BasicConsole extends ConsoleImplementation {
             }
             return text;
         }
-        // const isMultiLine = input.includes('\n');
 
-        // if (isMultiLine && !treatAsRaw) {
-        //     let lines = input.split('\n');
-        //     lines = lines.map(line => centerLine(line));
-        //     return lines.join('\n');
-        // }
-        // else 
-            return centerLine(input);
+        return centerLine(input);
     }
 
     // Vertical center a sprite, mode => 0 = center, 1 = top, 2 = bottom
     // input should be an array of strings
     vcenter = (input, verticalLength, horizontalLength, char = " ", mode = 0) => {
         const diff = verticalLength - input.length;
-        let center = mode == 2;
+        let center = mode === 2;
         for (let i = 0; i < diff; i++) {
             //Keep centered
             if (center)
                 input.push(char.repeat(horizontalLength));
             else
                 input.unshift(char.repeat(horizontalLength));
-            if (mode == 0)
+            if (mode === 0)
                 center = !center;
         }
         return input;
@@ -464,10 +506,10 @@ class BasicConsole extends ConsoleImplementation {
     }
 
     setTitle = (title) => {
-       this.write('\x1b]2;' + title + '\x1b\x5c');
+        this.write('\x1b]2;' + title + '\x1b\x5c');
     }
 }
-module.exports = {
+export{
     BasicConsole,
     DefaultColors,
     Decorations

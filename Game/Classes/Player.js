@@ -1,14 +1,12 @@
-const { Unit } = require('../Base/Unit.js');
-const ConsoleImpl = require('../Base/ConsoleHelp.js');
+import { Unit } from '../Base/Unit.js';
+import * as ConsoleImpl from '../Base/ConsoleHelp.js';
 const CH = new ConsoleImpl.BasicConsole();
 const Colors = ConsoleImpl.DefaultColors;
-const { GameColors } = require('../Base/GameColors.js')
-const Weapons = require('../Base/Weapons');
-const Equipament = require('../Base/Equipament');
-const Consumables = require('../Base/Consumables');
-const Attacks = require('../Base/Attack');
-const { DamageType } = require('../Base/DamageTypes.js');
-const { DevMode } = require('../Base/DevMode.js');
+import { GameColors } from '../Base/GameColors.js';
+import * as Weapons from '../Base/Weapons.js';
+import * as Consumables from '../Base/Consumables.js';
+import { DamageType } from '../Base/DamageTypes.js';
+import { DevMode } from '../Base/DevMode.js';
 
 class Player extends Unit {
     static #MAX_EQUIPAMENT = 2 //{get; private set;}
@@ -31,7 +29,7 @@ class Player extends Unit {
         this.#name = name;
         this.#level = 1;
         this.#xp = 0;
-        this.#xp_to_next_level = 100;
+        this.#xp_to_next_level = 40;
         this.#weapon = new Weapons.WeaponBuilder()
             .withName('Fists')
             .withDamage(1)
@@ -142,7 +140,7 @@ class Player extends Unit {
     //new attacks in the subclasses
     levelUp() {
         this.#level++;
-        this.#xp_to_next_level += 100;
+        this.#xp_to_next_level += 40 + this.#level * 5;
         this.maxHealth += 20;
         this.health = this.maxHealth;
     }
@@ -157,10 +155,6 @@ class Player extends Unit {
     playerInfo(player_class) {
 
         const padding = 3;
-        const slot = (name, value, pad = true) => {
-            return CH.hcenter(`${name}: ${value}`, value, '-') + ' '.repeat(pad ? padding : 0);;
-        }
-        const final = slot("Weap/Armor", 27) + slot("Health", 15) + slot("Stats", 15) + slot("bag", 15, false)
         const slot_sizes = [32, 17, 18, 17];
         const size = [...slot_sizes, padding * 3].reduce((a, b) => a + b, 0);
 
@@ -259,12 +253,11 @@ class Player extends Unit {
         const getBag = (index) => {
             if (index === 0)
                 return bags[0];
-        
-            else if (index  - 1 < this.consumables.length)
-            {
+
+            else if (index - 1 < this.consumables.length) {
                 return CH.insert_color(this.consumables[index - 1].color, this.consumables[index - 1].name);
             }
-            else 
+            else
                 return "";
         }
         lines.push(CH.hcenter(` ${this.#name} (${player_class}) lv: ${this.#level} `, size, '-'));
@@ -281,7 +274,12 @@ class Player extends Unit {
         //Class Color
         lines[0] = lines[0].replace(player_class, CH.insert_color(this.getClassColor(), player_class));
         //Hp Color
-        const hp_color = hp > 50 ? GameColors.hp_colors[2].color : GameColors.hp_colors[0].color;
+        let hp_color = GameColors.hp_colors[0].color;
+        if (hp > 50) {
+            hp_color = GameColors.hp_colors[2].color;
+        }
+        else if (hp > 20) {
+        }
         lines[1] = lines[1].replace(hp_str, CH.insert_color(hp_color, hp_str));
         //Weapon Color
         lines[1] = lines[1].replace(this.#weapon.name, CH.insert_color(this.weapon.getColor(), this.#weapon.name));
@@ -302,15 +300,16 @@ class Player extends Unit {
             }
         }
 
-     
+
         return lines.join('\n');
 
     }
 
     useConsumable(itemIndex) {
-        if (!(typeof itemIndex === "number")){
+        if (!(typeof itemIndex === "number")) {
             CH.print(itemIndex);
-            throw new TypeError("Item index must be a number");}
+            throw new TypeError("Item index must be a number");
+        }
         if (itemIndex < 0 || itemIndex >= this.consumables.length) {
             throw new Error("Invalid item index");
         }
@@ -328,65 +327,6 @@ class Player extends Unit {
         if (this.consumables.length < this.MAX_CONSUMABLES) {
             this.consumables.push(consumable);
         }
-    }
-
-    findWeapon(weapon) {
-        return;
-        if (!(weapon instanceof Weapons.Weapon))
-            throw new Error("Weapon must be an instance of Weapon");
-        CH.print(CH.hcenter("You found a " + CH.insert_color(weapon.getColor(), weapon.name) + "!", CH.getWidth()));
-        CH.print(CH.hcenter("You can only carry one weapon at a time", CH.getWidth()));
-        CH.print();//ln
-        const choice = CH.SelectValue(["Equip: " + weapon.name, "Toss it away"], {
-            start: 0,
-            colors: [{ text: weapon.name, color: weapon.getColor() }]
-        }, true, false);
-        if (choice === 0)
-            this.#weapon = weapon;
-        CH.clear_last_line(3);
-    }
-
-    findEquipament(equipament) {
-        return;
-        const phrase = "You found a " + CH.insert_color(equipament.getColor(), equipament.name) + "!";
-        CH.print(CH.hcenter(phrase, CH.getWidth()));
-        const max_equip = CH.hcenter("You can only have carry 2 equipament:", CH.getWidth());
-        if (this.equipaments.length >= this.MAX_EQUIPAMENT)
-            CH.print(CH.hcenter(max_equip, CH.getWidth()));
-        CH.print();//ln
-        const opts = ["Equip: " + equipament.name, "Toss it away"];
-
-        const colors = [...this.equipaments, equipament].map(item => {
-            return {
-                text: item.name,
-                color: item.getColor()
-            }
-        }
-        );
-
-
-        if (this.equipaments.length >= this.MAX_EQUIPAMENT) {
-            const max_opts = [...this.equipaments.map(item => "Drop: " + item.name), "Leave " + equipament.name + " There"];
-            const choice = CH.SelectValue(max_opts, {
-                start: 0,
-                colors: colors
-            }, true, false);
-            if (choice < 2) {
-                this.equipaments[choice] = equipament;
-            }
-        }
-        else {
-            const choice = CH.SelectValue(opts, {
-                start: 0,
-                colors: colors
-            }, true, false);
-            if (choice === 0) {
-                this.equipaments.push(equipament);
-            }
-        }
-
-        //Clear 3 lines if max equipament is reached else we only printed 2 lines
-        CH.clear_last_line(this.equipaments.length >= this.MAX_EQUIPAMENT ? 3 : 2);
     }
 
     selectAttack() {
@@ -412,4 +352,4 @@ class Player extends Unit {
 }
 
 
-module.exports = { Player };
+export { Player };

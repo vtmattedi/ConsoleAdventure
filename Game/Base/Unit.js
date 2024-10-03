@@ -1,5 +1,5 @@
 // This file contains the basic classes and functions that are used in the game
-const { Damage } = require('./DamageTypes.js');
+import {Damage} from './DamageTypes.js';
 
 class Unit {
     //All Fake Public
@@ -55,7 +55,7 @@ class Unit {
         let physical_damage = damage.physical_damage;
         let magic_damage = damage.magic_damage;
 
-        let critical = Math.floor(Math.random() * 20) + 1 == 20;
+        let critical = Math.floor(Math.random() * 20) + 1 === 20;
         if (critical) {
             physical_damage *= 2;
             magic_damage *= 2;
@@ -194,4 +194,4 @@ class Unit {
     }
 }
 
-module.exports = { Unit };
+export{ Unit };

@@ -1,4 +1,4 @@
-const { DefaultColors } = require("./ConsoleHelp");
+import { DefaultColors } from "./ConsoleHelp.js";
 
 class Consumable {
     #name;
@@ -109,7 +109,7 @@ class HealthPotion extends Potion {
 //     return Math.max(...ConsumablesNames.map(name => name.length));
 // }
 
-module.exports = 
+export
 {
     Consumable,
     Potion,

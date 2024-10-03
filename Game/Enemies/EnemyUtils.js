@@ -1,6 +1,5 @@
 // Objective: Provide utility functions for generating enemies
-const Attacks = require('../Base/Attack.js');
-const { DamageTypes } = require('../Base/DamageTypes.js');
+import * as Attacks from '../Base/Attack.js';
 
 
 class EnemyUtils {
@@ -142,4 +141,4 @@ class EnemyUtils {
     }
 }
 
-module.exports = { EnemyUtils };
+export{ EnemyUtils };

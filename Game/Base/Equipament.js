@@ -1,5 +1,5 @@
-const { DefaultColors } = require("./ConsoleHelp");
-const { GameColors } = require("./GameColors");
+import { DefaultColors } from "./ConsoleHelp.js";
+import { GameColors } from "./GameColors.js";
 
 
 class Equipament {
@@ -127,7 +127,7 @@ class EquipamentUtils {
     }
 
     // Generating 50 equipment items with 45% armor, 45% amulet, and 10% magical armor
-    static MagicArmorProbability = 0.1;
+    static MagicArmorProbability = 1;
     static genEquipament(size) {
         if (EquipamentUtils.equipaments.length > 0) {
             return EquipamentUtils.equipaments;
@@ -192,4 +192,4 @@ class EquipamentUtils {
 
 
 
-module.exports = { Armor, Amulet, MagicalArmor,Equipament, EquipamentUtils };
+export{ Armor, Amulet, MagicalArmor,Equipament, EquipamentUtils };

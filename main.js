@@ -1,13 +1,14 @@
-const { Game, GameStates, MainMenuStage } = require('./Game/Game.js');
-const { Genie } = require('./Game/Genie.js');
-const Assets = require('./Game/Assets/Assets.js');
-const ConsoleImpl = require('./Game/Base/ConsoleHelp.js');
+import { Game, GameStates, MainMenuStage } from './Game/Game.js';
+import { Genie } from './Game/Genie.js';
+import Assets from './Game/Assets/Assets.js';
+import * as ConsoleImpl from  './Game/Base/ConsoleHelp.js';
 const CH = new ConsoleImpl.BasicConsole();
 const Colors = ConsoleImpl.DefaultColors;
-const { DevMode } = require('./Game/Base/DevMode.js');
-CH.setTitle(CH.insert_color(ConsoleImpl.DefaultColors.BLUE, 'Console Adventure Game'));
+import { DevMode } from './Game/Base/DevMode.js';
+import process from 'process';
+CH.setTitle('Console Adventure Game');
+import readline from 'readline';
 
-const readline = require('readline');
 
 const game = new Game();
 process.stdin.setRawMode(true);
@@ -47,6 +48,7 @@ process.stdout.on('resize', () => {
 
 });
 let delCount = 0;
+
 process.stdin.on('keypress', (key, data) => {
 
     //console.log(key, data);
@@ -63,38 +65,30 @@ process.stdin.on('keypress', (key, data) => {
     else if (data.name === "down") input = "arrowdown";
     else if (data.name === "left") input = "arrowleft";
     else if (data.name === "right") input = "arrowright";
-    else if (data.name === "space") {
-        input = "space";
-    }
+    else if (data.name === "space") input = "space";
     else if (data.name === "return") input = "enter";
     else if (data.name === "escape") input = "esc";
     else if (data.name === "backspace") input = "backspace";
     else input = data.name;
 
-    if (data.ctrl && data.name == 'd') {
+    if (data.ctrl && data.name === 'd') {
         CH.print("Width: " + CH.getWidth());
         delCount = 1;
     }
-    else if (data.ctrl && data.name == 'a') {
+    else if (data.ctrl && data.name === 'b') {
         DevMode.getInstance().setValue();
         GameStates.getInstance().currentState?.rerender();
         CH.print("Dev Mode: " + DevMode.getInstance().value);
         delCount = 1;
     }
-    else if (data.ctrl && data.name == 'b') {
-        const s = DevMode.getInstance().log;
-        console.log("log: ", s);
-        delCount += s.split("\n").length + 1;
 
-    }
     else {
         game.handleInput(input);
         GameStates.getInstance().currentState?.render();
-
     }
 
 
-    if (data && data.ctrl && data.name == 'c') {
+    if (data && data.ctrl && data.name === 'c') {
         console.clear();
         new Genie().goodbye(game.player.name);
         process.exit();

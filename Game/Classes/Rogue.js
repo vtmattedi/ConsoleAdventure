@@ -1,8 +1,7 @@
-const { Weapon, WeaponBuilder } = require('../Base/Weapons.js');
-const {Player} = require('./Player.js');
-const Attacks = require('../Base/Attack.js');
-const { DamageType } = require('../Base/DamageTypes.js');
-
+import { WeaponBuilder } from '../Base/Weapons.js';
+import { Player } from './Player.js';
+import * as Attacks from '../Base/Attack.js';
+import { DamageType } from '../Base/DamageTypes.js';
 
 
 class Rogue extends Player {
@@ -61,5 +60,5 @@ class Rogue extends Player {
 
 }
 
-module.exports = {Rogue};
+export{Rogue};
 

@@ -1,8 +1,7 @@
-const { Weapon, WeaponBuilder } = require('../Base/Weapons.js');
-const Attacks = require('../Base/Attack.js');
-const {Player} = require('./Player.js');
-const { DamageType } = require('../Base/DamageTypes.js');
-    
+import { WeaponBuilder } from '../Base/Weapons.js';
+import * as Attacks from '../Base/Attack.js';
+import { Player } from './Player.js';
+import { DamageType } from '../Base/DamageTypes.js';
 
 
 
@@ -62,4 +61,4 @@ const { DamageType } = require('../Base/DamageTypes.js');
         }
     }
 
-    module.exports = {Mage};
+    export{Mage};

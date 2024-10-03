@@ -1,13 +1,10 @@
-const { Unit } = require('../Base/Unit.js');
-const ConsoleImpl = require('../Base/ConsoleHelp.js');
-const { DevMode } = require('../Base/DevMode.js');
+import { Unit } from '../Base/Unit.js';
+import * as ConsoleImpl from '../Base/ConsoleHelp.js';
+import { DevMode } from '../Base/DevMode.js';
 const CH = new ConsoleImpl.BasicConsole();
 const Colors = ConsoleImpl.DefaultColors;
-const { EnemyUtils } = require('./EnemyUtils.js');
-const { Potion } = require('../Base/Consumables.js');
-const { GameColors } = require('../Base/GameColors.js');
-const { Equipament } = require('../Base/Equipament.js');
-const { Weapon } = require('../Base/Weapons.js');
+import { EnemyUtils } from './EnemyUtils.js';
+
 
 class Enemy extends Unit {
     // Should not be  created without a type
@@ -30,7 +27,7 @@ class Enemy extends Unit {
         this.health = 0;
     }
     randomAttack() {
-        if (this.attacks.length == 0)
+        if (this.attacks.length === 0)
             throw new Error("No attacks available");
         let seed = Math.floor(Math.random() * (this.attacks.length - 1));
         return this.attacks[seed];
@@ -63,11 +60,10 @@ class Enemy extends Unit {
         line = this.isDead() ? `Dead` : `HP: ${this.health}/${this.maxHealth}`;
         line = CH.hcenter(line, width, " ");
         lines.push(line);
-        const hp_percent = Math.round(this.health / this.maxHealth * 100);
-        const hp_health = Math.ceil(hp_percent * 0.01 * (width - 2));
-        const missing_hp = (width - 2) - hp_health;
 
-        line = `[${CH.insert_color(Colors.RED, "=".repeat(Math.min(missing_hp, width - 2)))}${CH.insert_color(Colors.GREEN, "=".repeat(Math.max(hp_health, 0)))}]`;
+
+        line = `${CH.fillBar(1 - this.health / this.maxHealth, width , " ",
+            Colors.BG_RED, Colors.BG_GREEN)}`;
         lines.push(line);
 
         line = `Str: ${this.strength} Int: ${this.intelligence} Dex: ${this.dexterity}`;
@@ -87,8 +83,7 @@ class Enemy extends Unit {
                     lines.push(line);
                 }
             }
-            else 
-            {
+            else {
                 line = "<No loot>";
                 line = CH.hcenter(line, width, " ");
                 lines.push(line);
@@ -96,7 +91,7 @@ class Enemy extends Unit {
             line = CH.insert_color(Colors.LIGHTMAGENTA_EX, "Xp Drop: ") + this.xp_drop
             line = CH.hcenter(line, width, " ");
             lines.push(line);
-           
+
         }
         lines.push("-".repeat(width + 2))
 
@@ -109,18 +104,16 @@ class Enemy extends Unit {
         }).join('\n');
     }
 
-    get name () { return this.#name}
-    get level() { return this.#level}
-    get xp_drop () {return this.#xp_drop}
-    set xp_drop(value)
-    {
+    get name() { return this.#name }
+    get level() { return this.#level }
+    get xp_drop() { return this.#xp_drop }
+    set xp_drop(value) {
         if (!(typeof value === "number"))
             throw new TypeError("xp must be a number!")
-         this.#xp_drop = value;
+        this.#xp_drop = value;
     }
-    get loot() { return this.#loot}
-    set loot(value)
-    {
+    get loot() { return this.#loot }
+    set loot(value) {
         if (!Array.isArray(value))
             throw new TypeError("loot must be an Array, even empty.")
         this.#loot = value
@@ -176,8 +169,7 @@ class Minion extends Enemy {
     }
 }
 
-module.exports =
-{
+export {
     Enemy,
     CommonEnemy,
     Boss,

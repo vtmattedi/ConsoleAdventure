@@ -30,4 +30,4 @@ class Damage {
     // }
 }
 
-module.exports = {DamageType, Damage};
+export{DamageType, Damage};

@@ -1,11 +1,11 @@
-const ConsoleImpl = require('./Base/ConsoleHelp.js')
+import * as ConsoleImpl from  './Base/ConsoleHelp.js';
 const CH = new ConsoleImpl.BasicConsole();
-const Colors = ConsoleImpl.DefaultColors
-const Decorations = ConsoleImpl.Decorations
-const { GameVersion, BuildDate } = require('./GameVersion.js');
-const Assets = require("./Assets/Assets.js");
-const { DevMode } = require("./Base/DevMode.js");
-const { Genie } = require("./Genie.js");
+const Colors = ConsoleImpl.DefaultColors;
+const Decorations = ConsoleImpl.Decorations;
+import { GameVersion, BuildDate } from './GameVersion.js';
+import Assets from "./Assets/Assets.js";
+import { DevMode } from "./Base/DevMode.js";
+import { Genie } from "./Genie.js";
 
 /*
    static Menu class for handling game menus
@@ -29,7 +29,7 @@ class Menu {
     `;
         const info = [
             "Welcome to Console Adventure!",
-            "This is a text-based adventure game",
+            "This is a console game",
             "where you can explore a world",
             "filled with magic and mystery.",
             "You can interact with characters,",
@@ -107,4 +107,4 @@ class ConfirmOptions {
     static get No() { return 1; }
 }
 
-module.exports = { Menu, GameMenuOptions, StartMenuOptions, GameEndOptions, BattleMenuOptions, ConfirmOptions };    
+export{ Menu, GameMenuOptions, StartMenuOptions, GameEndOptions, BattleMenuOptions, ConfirmOptions };    

@@ -1,6 +1,6 @@
 // Static class to generate weapons
-const { DamageType } = require('./DamageTypes');
-const { GameColors } = require('./GameColors');
+import { DamageType } from './DamageTypes.js';
+import { GameColors } from './GameColors.js';
 
 class Weapon {
 
@@ -167,7 +167,7 @@ class WeaponUtils {
             full = full && WeaponUtils.usedWeaponsNames.includes(element);
         });
         if (full) {
-            WeaponUtils.getNames(attackType).forEach(element => {
+            WeaponUtils.getNames(attackType).forEach(() => {
                 WeaponUtils.usedWeaponsNames.pop();
             });
         }
@@ -195,4 +195,4 @@ class WeaponUtils {
     }
 }
 
-module.exports = { Weapon, WeaponBuilder, WeaponUtils };
+export{ Weapon, WeaponBuilder, WeaponUtils };

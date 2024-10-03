@@ -1,5 +1,5 @@
-const { DamageType, Damage } = require('./DamageTypes.js');
-const { GameColors } = require('./GameColors.js');
+import { DamageType, Damage } from './DamageTypes.js';
+import { GameColors } from './GameColors.js';
 
 class Attack {
     #damage;     //Should be protected but ES6 so... {get; private set}
@@ -128,4 +128,4 @@ class HybridAttack extends Attack {
 
 
 
-module.exports = { Attack, MagicAttack, PhysicalAttack, HybridAttack };
+export{ Attack, MagicAttack, PhysicalAttack, HybridAttack };

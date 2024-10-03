@@ -1,6 +1,6 @@
-const ConsoleImpl = require('../Base/ConsoleHelp.js');
+import * as ConsoleImpl from  '../Base/ConsoleHelp.js';
 const CH = new ConsoleImpl.BasicConsole();
-const Colors = ConsoleImpl.DefaultColors
+const Colors = ConsoleImpl.DefaultColors;
 
 
 class Logos {
@@ -199,7 +199,7 @@ class GenieSprite {
 }
 
 
-module.exports =
+export default
 {
     Logos,
     GenieSprite,

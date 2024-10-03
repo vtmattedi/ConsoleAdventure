@@ -348,7 +348,7 @@ I shall call you ${CH.insert_format(
                     true,
                     false
                 );
-            // Attack != Back
+            // Attack !== Back
             if (attack_index !== this.#player.attacks.length) {
                 this.#fleeAttempt = 0;
                 //Player Attack
@@ -396,7 +396,7 @@ I shall call you ${CH.insert_format(
 
             this.#fleeAttempt = 0;
         }
-        else if (action == BattleMenuOptions.Flee) {
+        else if (action === BattleMenuOptions.Flee) {
             if (this.#fleeAttempt === 0) {
                 this.#fleeAttempt = 1 + Math.random();
             }
@@ -416,7 +416,7 @@ I shall call you ${CH.insert_format(
                 }
             }
         }
-        else if (action == BattleMenuOptions.Items) {
+        else if (action === BattleMenuOptions.Items) {
             let itemOptions = [];
             this.#player.consumables.forEach(item => {
                 let multiple = false;
@@ -483,7 +483,7 @@ I shall call you ${CH.insert_format(
                 );
             }
         }
-        else if (action == BattleMenuOptions.Menu) {
+        else if (action === BattleMenuOptions.Menu) {
             let finsih = false;
             let menu_sel = 0;
             while (!finsih) {
@@ -516,7 +516,7 @@ I shall call you ${CH.insert_format(
             }
         }
 
-        else if (action == BattleMenuOptions.DevButton) {
+        else if (action === BattleMenuOptions.DevButton) {
             this.#currentEnemy = this.generateEnemy(this.player.level);
         }
 
@@ -524,4 +524,4 @@ I shall call you ${CH.insert_format(
     }
 }
 
-module.exports = { Game };
+module.exports ={ Game };

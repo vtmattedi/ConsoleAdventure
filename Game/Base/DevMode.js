@@ -41,4 +41,4 @@ class DevMode {
 
 }
 
-module.exports = { DevMode };
+export{ DevMode };
