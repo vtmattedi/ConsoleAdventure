@@ -127,7 +127,7 @@ class EquipamentUtils {
     }
 
     // Generating 50 equipment items with 45% armor, 45% amulet, and 10% magical armor
-    static MagicArmorProbability = 1;
+    static MagicArmorProbability = 0.1;
     static genEquipament(size) {
         if (EquipamentUtils.equipaments.length > 0) {
             return EquipamentUtils.equipaments;

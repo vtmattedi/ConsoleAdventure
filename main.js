@@ -34,6 +34,8 @@ Assets.Logos.animate(
     });
 GameStates.getInstance().currentState?.render();
 game.exitTheGame = () => {
+    CH.write("\x1b[3J");
+    CH.clear_screen();
     Genie.getInstance().goodbye(game.player.name);
     process.exit();
 }

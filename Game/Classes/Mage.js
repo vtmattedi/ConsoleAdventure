@@ -30,7 +30,7 @@ import { DamageType } from '../Base/DamageTypes.js';
             this.dexterity = 3;
             this.strength = 1;
             this.weapon = new WeaponBuilder()
-                .withName('Old Stick')
+                .withName('Old Stick'.repeat(4))
                 .withDamage(1)
                 .withAttackType(DamageType.Magic)
                 .build();

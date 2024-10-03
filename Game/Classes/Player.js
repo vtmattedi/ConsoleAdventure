@@ -209,7 +209,7 @@ class Player extends Unit {
 
             if (line < stats_names.length) {
                 const stats_val = CH.hcenter(String(current_stats[line]), 3, " ", 2);
-                const bonus = bonusStats[line] > 0 ? " +" + bonusStats[line].toString().padEnd(3) : " ".repeat(2 + 3);
+                const bonus = bonusStats[line] > 0 ? " +" + CH.insert_color(GameColors.stats_colors[line].color,bonusStats[line].toString().padEnd(3)) : " ".repeat(2 + 3);
                 return `${CH.hcenter(stats_names[line], 5, " ", 2)}:${stats_val}${bonus}`; /*Str, int, Dex, Armor, MR*/
             }
             else
@@ -219,15 +219,22 @@ class Player extends Unit {
         }
         const getEquip = (index) => {
             if (index === 0) {
+                let weaponstr = this.#weapon.name;
                 if (DevMode.getInstance().value) {
                     let stats = "";
                     for (const key in this.#weapon.stats) {
                         stats += this.#weapon.stats[key] + ",";
                     }
                     stats = stats.substring(0, stats.length - 1);
-                    return this.#weapon.name + stats;
+                    weaponstr = this.#weapon.name + stats;
                 }
-                return `${this.#weapon.name} (${this.#weapon.damage})`;
+                weaponstr = `${CH.insert_color(this.weapon.getColor(), this.#weapon.name)} (${this.#weapon.damage})`;
+                if (CH.getLineWidth(weaponstr) > slot_sizes[0]) {
+                    const first = Math.floor((slot_sizes[0] - 3) / 2);
+                    const last = CH.getLineWidth(weaponstr) - first;
+                    weaponstr = weaponstr.substring(0, first) + "..." + weaponstr.substring(last);
+                }
+                return weaponstr;
             }
             else if (index < this.MAX_EQUIPAMENT + 1)
                 if (this.equipaments[index - 1]) {
@@ -251,6 +258,7 @@ class Player extends Unit {
         //console. log (CH.hcenter(`${this.#name} (${player_class}) lv: ${this.#level}`,size,'-'));
         const bags = ["Bag:", ...this.consumables.map(item => item.name)];
         const getBag = (index) => {
+
             if (index === 0)
                 return bags[0];
 
@@ -282,7 +290,7 @@ class Player extends Unit {
         }
         lines[1] = lines[1].replace(hp_str, CH.insert_color(hp_color, hp_str));
         //Weapon Color
-        lines[1] = lines[1].replace(this.#weapon.name, CH.insert_color(this.weapon.getColor(), this.#weapon.name));
+        //lines[1] = lines[1].replace(this.#weapon.name, CH.insert_color(this.weapon.getColor(), this.#weapon.name));
 
         //Equipament Color
         for (let i = 2; i < 4; i++) {
@@ -293,12 +301,7 @@ class Player extends Unit {
                 lines[i] = lines[i].replace("Armor Slot", CH.insert_color(GameColors.ArmorSlot, "Armor Slot"));
         }
 
-        //Stats Color
-        for (let i = 0; i < 5; i++) {
-            if (bonusStats[i] > 0) {
-                lines[i + 1] = lines[i + 1].replace("+" + bonusStats[i], CH.insert_color(GameColors.stats_colors[i].color, "+" + bonusStats[i]));
-            }
-        }
+
 
 
         return lines.join('\n');

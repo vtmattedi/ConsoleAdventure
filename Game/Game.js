@@ -221,6 +221,9 @@ class Game {
         this.isRunning = false;// Stop game loop
         //goodbye message
         CH.show_cursor(true);
+        CH.clear_screen();
+        genie.goodbye(this.player.name);
+        
     }
     generateEnemy(level) {
         if (typeof level !== "number") {
