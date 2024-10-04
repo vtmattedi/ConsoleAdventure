@@ -389,7 +389,7 @@ class Game {
 
         if (this.player.isDead()) {
 
-            Game.battleMenu.current_menu = BattleStage.GameOver;
+            Game.battleState = BattleStage.GameOver;
 
         }
         else if (this.currentEnemy.isDead()) {
@@ -406,7 +406,7 @@ class Game {
                 scoreMulti = 2;
             }
             this.#score += this.currentEnemy.level * 10 * scoreMulti;
-            Game.battleMenu.current_menu = BattleStage.PreSlain;
+            Game.battleState = BattleStage.PreSlain;
 
 
         }
@@ -598,7 +598,7 @@ I shall call you ${CH.insert_format(
                 Game.introState.init = false;
                 Game.inputState.string = String(" ");
                 Game.inputState.index = 0;
-                Game.battleMenu.current_menu = BattleStage.Encounter;
+                Game.battleState = BattleStage.Encounter;
                 GameStates.getInstance().currentState = this.gauntletGame;
             }
             else {
@@ -615,35 +615,35 @@ I shall call you ${CH.insert_format(
             Game.inputState.vertical = false;
             Game.inputState.index = 0;
 
-            if (Game.battleMenu.current_menu === BattleStage.Encounter) {
+            if (Game.battleState === BattleStage.Encounter) {
                 this.encounterNewEnemy();
                 CH.pressSpace();
             }
-            else if (Game.battleMenu.current_menu === BattleStage.SelectAction) {
+            else if (Game.battleState === BattleStage.SelectAction) {
                 Game.inputState.maxIndex = Menu.battleMenuOptions.length - 1;
                 if (Game.inputState.index > Game.inputState.maxIndex)
                     Game.inputState.index = 0;
                 this.printBasicFrame();
             }
-            else if (Game.battleMenu.current_menu === BattleStage.Attack) {
+            else if (Game.battleState === BattleStage.Attack) {
                 Game.inputState.maxIndex = this.player.attacks.length;
                 if (Game.inputState.index > Game.inputState.maxIndex)
                     Game.inputState.index = 0;
                 this.printBasicFrame();
             }
-            else if (Game.battleMenu.current_menu === BattleStage.Items) {
+            else if (Game.battleState === BattleStage.Items) {
                 Game.inputState.index = 0;
                 let itemOptions = this.genCondencedItemsArray();
                 Game.inputState.maxIndex = Math.max(itemOptions.length, 1);
                 this.printBasicFrame();
             }
-            else if (Game.battleMenu.current_menu === BattleStage.GameOver) {
+            else if (Game.battleState === BattleStage.GameOver) {
                 CH.clear_screen();
                 this.printBasicFrame();
                 CH.clear_last_line();
                 CH.pressSpace();
             }
-            else if (Game.battleMenu.current_menu === BattleStage.Slain) {
+            else if (Game.battleState === BattleStage.Slain) {
                 CH.clear_screen();
                 let phrase = `You have slain ${CH.insert_color(Colors.RED, this.currentEnemy.name)}!`;
                 phrase += `\nYou gain ${CH.insert_color(Colors.YELLOW, this.currentEnemy.xp_drop)} XP!`;
@@ -667,19 +667,19 @@ I shall call you ${CH.insert_format(
                 CH.pressSpace();
 
             }
-            else if (Game.battleMenu.current_menu === BattleStage.PreSlain) {
+            else if (Game.battleState === BattleStage.PreSlain) {
                 CH.clear_screen();
                 this.printBasicFrame();
                 CH.pressSpace();
             }
-            else if (Game.battleMenu.current_menu === BattleStage.Flee) {
+            else if (Game.battleState === BattleStage.Flee) {
                 CH.clear_screen();
                 this.printBasicFrame();
                 CH.pressSpace();
             }
         },
         () => {
-            if (Game.battleMenu.current_menu === BattleStage.SelectAction) {
+            if (Game.battleState === BattleStage.SelectAction) {
                 CH.clear_last_line();
                 CH.printOptions(Menu.battleMenuOptions, Game.inputState.index, {
                     colors: [{
@@ -688,7 +688,7 @@ I shall call you ${CH.insert_format(
                     }]
                 }, false)
             }
-            else if (Game.battleMenu.current_menu === BattleStage.Attack) {
+            else if (Game.battleState === BattleStage.Attack) {
                 CH.clear_last_line();
                 let opts = this.player.attacks.map(item => item.name).concat('Back');
                 CH.printOptions(opts, Game.inputState.index, {
@@ -701,7 +701,7 @@ I shall call you ${CH.insert_format(
                     )
                 }, false)
             }
-            else if (Game.battleMenu.current_menu === BattleStage.Items) {
+            else if (Game.battleState === BattleStage.Items) {
                 CH.clear_last_line();
                 let itemOptions = this.genCondencedItemsArray();
 
@@ -720,11 +720,11 @@ I shall call you ${CH.insert_format(
 
         },
         () => {
-            if (Game.battleMenu.current_menu === BattleStage.Encounter) {
-                Game.battleMenu.current_menu = BattleStage.SelectAction;
+            if (Game.battleState === BattleStage.Encounter) {
+                Game.battleState = BattleStage.SelectAction;
 
             }
-            else if (Game.battleMenu.current_menu === BattleStage.SelectAction) {
+            else if (Game.battleState === BattleStage.SelectAction) {
                 if (Game.inputState.index === BattleMenuOptions.Flee) {
                     if (this.#fleeAttempt === 0) {
                         this.#fleeAttempt = Math.random() + 1;
@@ -748,13 +748,13 @@ I shall call you ${CH.insert_format(
                 if (Game.inputState.index === BattleMenuOptions.Menu)
                     GameStates.getInstance().currentState = this.gameMenu;
                 else
-                    Game.battleMenu.current_menu = 2 + Game.inputState.index;
+                    Game.battleState = 2 + Game.inputState.index;
                 Game.inputState.index = 0;
 
 
             }
-            else if (Game.battleMenu.current_menu === BattleStage.Attack) {
-                Game.battleMenu.current_menu = 1;
+            else if (Game.battleState === BattleStage.Attack) {
+                Game.battleState = 1;
 
                 if (Game.inputState.index !== this.player.attacks.length) {
                     this.#fleeAttempt = 0;
@@ -813,19 +813,19 @@ I shall call you ${CH.insert_format(
                 }
 
             }
-            else if (Game.battleMenu.current_menu === BattleStage.Flee) {
+            else if (Game.battleState === BattleStage.Flee) {
                 if (this.#fleeAttempt > 1.5) {
-                    Game.battleMenu.current_menu = BattleStage.Encounter;
+                    Game.battleState = BattleStage.Encounter;
                     this.#fleeAttempt = 0;
                 }
                 else {
-                    Game.battleMenu.current_menu = BattleStage.SelectAction
+                    Game.battleState = BattleStage.SelectAction
                 }
             }
-            else if (Game.battleMenu.current_menu === BattleStage.Items) {
+            else if (Game.battleState === BattleStage.Items) {
                 let itemOptions = this.genCondencedItemsArray();
                 if (Game.inputState.index === itemOptions.length || itemOptions.length === 0) {
-                    Game.battleMenu.current_menu = BattleStage.SelectAction;
+                    Game.battleState = BattleStage.SelectAction;
                 }
                 else {
                     const get_index = (name, array) => {
@@ -846,20 +846,20 @@ I shall call you ${CH.insert_format(
                     }
 
                 }
-                Game.battleMenu.current_menu = BattleStage.SelectAction;
+                Game.battleState = BattleStage.SelectAction;
             }
-            else if (Game.battleMenu.current_menu === BattleStage.PreSlain) {
-                Game.battleMenu.current_menu = BattleStage.Slain;
+            else if (Game.battleState === BattleStage.PreSlain) {
+                Game.battleState = BattleStage.Slain;
 
             }
-            else if (Game.battleMenu.current_menu === BattleStage.Slain) {
+            else if (Game.battleState === BattleStage.Slain) {
                 if (this.currentEnemy.loot.length > 0) {
                     GameStates.getInstance().currentState = this.getLoot;
                 }
                 else
-                    Game.battleMenu.current_menu = BattleStage.Encounter;
+                    Game.battleState = BattleStage.Encounter;
             }
-            else if (Game.battleMenu.current_menu === BattleStage.GameOver) {
+            else if (Game.battleState === BattleStage.GameOver) {
                 GameStates.getInstance().currentState = this.playerDead;
             }
 
@@ -871,12 +871,12 @@ I shall call you ${CH.insert_format(
     mainMenu = new GameState(
         () => {
             Game.inputState.index = 0
-            if (Game.MainMenuStage.current_menu === MainMenuStage.PreMenu) {
+            if (Game.mainMenuState === MainMenuStage.PreMenu) {
                 CH.clear_screen();
                 CH.print(Assets.Logos.paintedConsoleAdventure())
                 CH.pressSpace("to Start");
             }
-            else if (Game.MainMenuStage.current_menu === MainMenuStage.MainMenu) {
+            else if (Game.mainMenuState === MainMenuStage.MainMenu) {
                 CH.clear_screen();
                 Game.inputState.maxIndex = Menu.startMenuOptions.length - 1;
                 Game.inputState.vertical = true;
@@ -895,12 +895,12 @@ I shall call you ${CH.insert_format(
 
 
             }
-            else if (Game.MainMenuStage.current_menu === MainMenuStage.LoadGame) {
+            else if (Game.mainMenuState === MainMenuStage.LoadGame) {
                 CH.clear_screen();
                 genie.speak("Loading Game... Has not been implemented yet.\nMuahahahaha!");
                 CH.pressSpace();
             }
-            else if (Game.MainMenuStage.current_menu === MainMenuStage.NewGame) {
+            else if (Game.mainMenuState === MainMenuStage.NewGame) {
                 CH.clear_screen();
                 Game.inputState.maxIndex = Menu.startMenuOptions.length - 1;
                 Game.inputState.vertical = true;
@@ -918,10 +918,10 @@ I shall call you ${CH.insert_format(
                 }, true)
 
             }
-            else if (Game.MainMenuStage.current_menu === MainMenuStage.Info) {
+            else if (Game.mainMenuState === MainMenuStage.Info) {
                 Menu.printInfo();
             }
-            else if (Game.MainMenuStage.current_menu === MainMenuStage.GameModeSelection) {
+            else if (Game.mainMenuState === MainMenuStage.GameModeSelection) {
                 CH.clear_screen();
                 Game.inputState.maxIndex = Menu.gameModeOptions.length - 1;
                 Game.inputState.vertical = true;
@@ -935,7 +935,7 @@ I shall call you ${CH.insert_format(
                         }]
                 }, true)
             }
-            else if (Game.MainMenuStage.current_menu === MainMenuStage.GameModeInvalid) {
+            else if (Game.mainMenuState === MainMenuStage.GameModeInvalid) {
                 CH.clear_screen();
                 CH.print(Assets.Logos.paintedConsoleAdventure())
                 CH.print();
@@ -947,7 +947,7 @@ I shall call you ${CH.insert_format(
 
         },
         () => {
-            if (Game.MainMenuStage.current_menu === MainMenuStage.MainMenu) {
+            if (Game.mainMenuState === MainMenuStage.MainMenu) {
                 CH.clear_last_line(Menu.startMenuOptions.length + 1);
                 CH.printOptions(Menu.startMenuOptions, Game.inputState.index, {
                     colors: [{
@@ -959,9 +959,9 @@ I shall call you ${CH.insert_format(
                         color: Colors.LIGHTBLACK_EX
                     }]
                 }, true)
-                ///console.log(Game.MainMenuStage.current_menu)
+                ///console.log(Game.mainMenuState)
             }
-            if (Game.MainMenuStage.current_menu === MainMenuStage.GameModeSelection) {
+            if (Game.mainMenuState === MainMenuStage.GameModeSelection) {
                 CH.clear_last_line(Menu.gameModeOptions.length + 1);
                 CH.printOptions(Menu.gameModeOptions, Game.inputState.index, {
                     colors: [
@@ -971,28 +971,28 @@ I shall call you ${CH.insert_format(
                         }]
                 }, true)
             }
-            //  console.log(Game.MainMenuStage.current_menu)
+            //  console.log(Game.mainMenuState)
 
         },
         () => {
         },
         () => {
-            const menu = Game.MainMenuStage.current_menu;
+            const menu = Game.mainMenuState;
             const sel = Game.inputState.index;
             if (menu === MainMenuStage.PreMenu) {
-                Game.MainMenuStage.current_menu = MainMenuStage.MainMenu;
+                Game.mainMenuState = MainMenuStage.MainMenu;
                 GameStates.rerender();
 
             }
             else if (menu === MainMenuStage.MainMenu) {
                 if (sel === StartMenuOptions.NewGame) {
-                    Game.MainMenuStage.current_menu = MainMenuStage.GameModeSelection;
+                    Game.mainMenuState = MainMenuStage.GameModeSelection;
                 }
                 else if (sel === StartMenuOptions.LoadGame) {
-                    Game.MainMenuStage.current_menu = MainMenuStage.LoadGame;
+                    Game.mainMenuState = MainMenuStage.LoadGame;
                 }
                 else if (sel === StartMenuOptions.Info) {
-                    Game.MainMenuStage.current_menu = MainMenuStage.Info;
+                    Game.mainMenuState = MainMenuStage.Info;
                 }
                 else if (sel === StartMenuOptions.Exit) {
                     this.exitTheGame();
@@ -1000,16 +1000,16 @@ I shall call you ${CH.insert_format(
                 GameStates.rerender();
             }
             else if (menu === MainMenuStage.Info) {
-                Game.MainMenuStage.current_menu = MainMenuStage.MainMenu;
+                Game.mainMenuState = MainMenuStage.MainMenu;
                 GameStates.rerender();
             }
             else if (menu === MainMenuStage.LoadGame) {
-                Game.MainMenuStage.current_menu = MainMenuStage.MainMenu;
+                Game.mainMenuState = MainMenuStage.MainMenu;
                 GameStates.rerender();
             }
             else if (menu === MainMenuStage.GameModeSelection) {
                 if (sel === 0) {
-                    Game.MainMenuStage.current_menu = MainMenuStage.GameModeInvalid;
+                    Game.mainMenuState = MainMenuStage.GameModeInvalid;
                 }
                 else if (sel === 1) {
                     Game.inputState.string = "";
@@ -1017,12 +1017,12 @@ I shall call you ${CH.insert_format(
                     Game.inputState.index = 0;
                 }
                 else if (sel === 2) {
-                    Game.MainMenuStage.current_menu = MainMenuStage.MainMenu;
+                    Game.mainMenuState = MainMenuStage.MainMenu;
                 }
                 GameStates.rerender();
             }
             else if (menu === MainMenuStage.GameModeInvalid) {
-                Game.MainMenuStage.current_menu = MainMenuStage.GameModeSelection;
+                Game.mainMenuState = MainMenuStage.GameModeSelection;
                 GameStates.rerender();
             }
         }
@@ -1141,7 +1141,7 @@ I shall call you ${CH.insert_format(
             }
             this.currentEnemy.loot.splice(0, 1);
             if (this.currentEnemy.loot.length === 0) {
-                Game.battleMenu.current_menu = BattleStage.Encounter;
+                Game.battleState = BattleStage.Encounter;
                 GameStates.getInstance().goBack();
             }
 
@@ -1181,7 +1181,7 @@ I shall call you ${CH.insert_format(
             if (sel === StartMenuOptions.NewGame) {
                 Game.inputState.string = "";
                 this.currentEnemy.suicide();
-                Game.MainMenuStage.current_menu = MainMenuStage.PreMenu
+                Game.mainMenuState = MainMenuStage.PreMenu
                 GameStates.getInstance().currentState = this.mainMenu
             }
 
@@ -1198,7 +1198,7 @@ I shall call you ${CH.insert_format(
         () => {
             Game.inputState.index = 0;
             //Main Menu
-            if (Game.gameMenu.current_menu === GameMenuStage.MainMenu) {
+            if (Game.gameMenuState === GameMenuStage.MainMenu) {
                 Game.inputState.vertical = true;
                 Game.inputState.maxIndex = Menu.gameMenuOptions.length - 1;
                 if (Game.inputState.index > Game.inputState.maxIndex - 1)
@@ -1212,17 +1212,17 @@ I shall call you ${CH.insert_format(
 
             }
 
-            else if (Game.gameMenu.current_menu === GameMenuStage.SaveGame) {
+            else if (Game.gameMenuState === GameMenuStage.SaveGame) {
                 CH.clear_screen();
                 genie.speak("Saving Game... Has not been implemented yet.\nMuahahahaha!");
                 CH.pressSpace();
             }
 
-            else if (Game.gameMenu.current_menu === GameMenuStage.Info) {
+            else if (Game.gameMenuState === GameMenuStage.Info) {
                 Menu.printInfo();
             }
 
-            else if (Game.gameMenu.current_menu === GameMenuStage.ConfirmQuit) {
+            else if (Game.gameMenuState === GameMenuStage.ConfirmQuit) {
                 Game.inputState.maxIndex = 1;
                 Game.inputState.vertical = false;
                 CH.clear_screen();
@@ -1236,7 +1236,7 @@ I shall call you ${CH.insert_format(
                 CH.print();
             }
 
-            else if (Game.gameMenu.current_menu === GameMenuStage.Help) {
+            else if (Game.gameMenuState === GameMenuStage.Help) {
                 CH.clear_screen();
                 const speech = CH.breakLine(
                     `You can use A and D or the arrow keys to navigate the menus and select options.
@@ -1260,7 +1260,7 @@ Press the Spacebar or Enter to confirm your selection.`,
                     });
                 CH.pressSpace();
             }
-            else if (Game.gameMenu.current_menu === GameMenuStage.Help_2) {
+            else if (Game.gameMenuState === GameMenuStage.Help_2) {
                 CH.clear_screen();
                 const speech = CH.breakLine(`When you encounter an enemy,
 you can attack, use items, or flee.
@@ -1285,7 +1285,7 @@ You attack, the enemy strikes back!`, CH.getWidth() / 2, true);
                     });
                 CH.pressSpace();
             }
-            else if (Game.gameMenu.current_menu === GameMenuStage.Help_3) {
+            else if (Game.gameMenuState === GameMenuStage.Help_3) {
                 CH.clear_screen();
                 genie.speak(CH.breakLine(`When you defeat an enemy, you gain experience points and loot.
 And after a kill you rest for a little bit and restore health,
@@ -1299,7 +1299,7 @@ If you fled you won't restore as much Health`, CH.getWidth() / 2, true),
             }
         },
         () => {
-            if (Game.gameMenu.current_menu === GameMenuStage.MainMenu) {
+            if (Game.gameMenuState === GameMenuStage.MainMenu) {
                 CH.clear_last_line(Menu.gameMenuOptions.length + 1);
                 CH.printOptions(Menu.gameMenuOptions, Game.inputState.index, {
                     colors: [{
@@ -1316,7 +1316,7 @@ If you fled you won't restore as much Health`, CH.getWidth() / 2, true),
                     }]
                 }, true)
             }
-            else if (Game.gameMenu.current_menu === GameMenuStage.ConfirmQuit) {
+            else if (Game.gameMenuState === GameMenuStage.ConfirmQuit) {
                 CH.clear_last_line();
                 CH.printOptions(["Yes", "No"], Game.inputState.index, {
                     colors: [{
@@ -1329,31 +1329,31 @@ If you fled you won't restore as much Health`, CH.getWidth() / 2, true),
         },
         () => { },
         () => {
-            const menu = Game.gameMenu.current_menu;
+            const menu = Game.gameMenuState;
             if (menu === GameMenuStage.MainMenu) {
                 const sel = Game.inputState.index;
                 if (sel === GameMenuOptions.Continue) {
                     GameStates.getInstance().goBack();
                 }
                 else if (sel === GameMenuOptions.MainMenu) {
-                    Game.gameMenu.current_menu = GameMenuStage.ConfirmQuit;
+                    Game.gameMenuState = GameMenuStage.ConfirmQuit;
 
                 }
                 else if (sel === GameMenuOptions.SaveGame) {
-                    Game.gameMenu.current_menu = GameMenuStage.SaveGame;
+                    Game.gameMenuState = GameMenuStage.SaveGame;
                 }
                 else if (sel === GameMenuOptions.Help) {
-                    Game.gameMenu.current_menu = GameMenuStage.Help;
+                    Game.gameMenuState = GameMenuStage.Help;
                 }
                 else if (sel === GameMenuOptions.Info) {
-                    Game.gameMenu.current_menu = GameMenuStage.Info;
+                    Game.gameMenuState = GameMenuStage.Info;
                 }
                 else if (sel === GameMenuOptions.Exit) {
                     this.exitTheGame();
                 }
             }
             else if (menu === GameMenuStage.Info || menu === GameMenuStage.SaveGame) {
-                Game.gameMenu.current_menu = GameMenuStage.MainMenu;
+                Game.gameMenuState = GameMenuStage.MainMenu;
             }
             else if (menu === GameMenuStage.ConfirmQuit) {
                 const sel = Game.inputState.index;
@@ -1363,17 +1363,17 @@ If you fled you won't restore as much Health`, CH.getWidth() / 2, true),
                     GameStates.getInstance().currentState = this.mainMenu;
                 }
                 else if (sel === ConfirmOptions.No) {
-                    Game.gameMenu.current_menu = GameMenuStage.MainMenu;
+                    Game.gameMenuState = GameMenuStage.MainMenu;
                 }
             }
             else if (menu === GameMenuStage.Help) {
-                Game.gameMenu.current_menu = GameMenuStage.Help_2;
+                Game.gameMenuState = GameMenuStage.Help_2;
             }
             else if (menu === GameMenuStage.Help_2) {
-                Game.gameMenu.current_menu = GameMenuStage.Help_3
+                Game.gameMenuState = GameMenuStage.Help_3
             }
             else if (menu === GameMenuStage.Help_3) {
-                Game.gameMenu.current_menu = GameMenuStage.MainMenu
+                Game.gameMenuState = GameMenuStage.MainMenu
             }
             GameStates.getInstance().currentState.rerender();
         }
