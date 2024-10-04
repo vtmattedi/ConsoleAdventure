@@ -1,5 +1,5 @@
 // Purpose: Game class to handle the game logic.
-import * as ConsoleImpl from  './Base/ConsoleHelp.js';
+import * as ConsoleImpl from './Base/ConsoleHelp.js';
 import { GameColors } from './Base/GameColors.js';
 import { PlayerFactory } from './Classes/GameClasses.js';
 import * as Enemy from './Enemies/Enemies.js';
@@ -35,6 +35,7 @@ const CH = new ConsoleImpl.BasicConsole();
 const Colors = ConsoleImpl.DefaultColors;
 const Decorations = ConsoleImpl.Decorations;
 const genie = new Genie();
+const MaxNameLength = 25;
 
 
 //Static Classes for improved Readability
@@ -177,7 +178,6 @@ class Game {
     //treat the input to ' ' -> space
     //'return' -> enter and Arrow Keys -> arrowup, arrowdown, arrowleft, arrowright
     handleInput = (input) => {
-        const MaxNameLength = 25;
         if (typeof input === "undefined")
             return;
         if (GameStates.getInstance().currentState?.changeState(input))
@@ -236,7 +236,7 @@ class Game {
         CH.show_cursor(true);
         CH.clear_screen();
         genie.goodbye(this.player.name);
-        
+
     }
     generateEnemy(level) {
         if (typeof level !== "number") {
@@ -578,7 +578,9 @@ I shall call you ${CH.insert_format(
         (key) => {
             const stage = Game.introState.stage;
             if (stage === 0 && key === "space") {
-                Game.inputState.string += " ";
+                // Name Input
+                if (Game.inputState.string.length < MaxNameLength) // Max Name Length
+                    Game.inputState.string += " ";
                 return true;
             }
 
@@ -588,7 +590,7 @@ I shall call you ${CH.insert_format(
             const stage = Game.introState.stage;
             if (stage === 0) {
                 CH.print();
-                CH.show_cursor(false);  
+                CH.show_cursor(false);
             }
             if (stage === 2) {
                 const classes = ['Warrior', 'Mage', 'Rogue']
@@ -1185,7 +1187,7 @@ I shall call you ${CH.insert_format(
                 GameStates.getInstance().currentState = this.mainMenu
             }
 
-            else  {
+            else {
                 this.exitTheGame();
             }
 
@@ -1398,4 +1400,4 @@ If you fled you won't restore as much Health`, CH.getWidth() / 2, true),
     }
 }
 
-export{ Game, GameStates, MainMenuStage, genie, GameState };
+export { Game, GameStates, MainMenuStage, genie, GameState };
