@@ -456,6 +456,7 @@ class Game {
     playerCreation = new GameState(
         //on create
         () => {
+            
             Game.inputState.index = 0;
             if (!Game.introState.init) {
                 Game.introState.init = true;
@@ -465,6 +466,11 @@ class Game {
             }
             const stage = Game.introState.stage;
             if (stage === 0) {
+                 /// Xterm Rendering issues -> rendering last line with the rest of the screen
+                 CH.show_cursor(false);
+                 CH.print();
+                 CH.clear_last_line(1);
+                 /// Normal Rendering
                 CH.clear_screen();
                 genie.speak(
                     this.#genieSpeech === "" ?
