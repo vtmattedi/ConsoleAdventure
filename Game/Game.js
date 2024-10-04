@@ -13,11 +13,31 @@ import { EquipamentUtils, Equipament } from './Base/Equipament.js';
 import { GameState } from './GameState.js';
 import Assets from './Assets/Assets.js';
 
+//The Game is controlled by GameStates (Singleton)
+//A GameState representes a state of the game and it has
+//Basically four methods: onCreate, onRender, onInput, onSelect
+// - onCreate: Called when the state is created or rerender usually 
+//should clear the screen and print the basic state.
+// - onRender: Is called each time the state needs to be rendered,
+//usually it deletes the options and re-prints them, reflecting the changes
+//of the current state. Usually it renders the options.
+// - onInput: Is called when the input is received, if the game state needs to
+// do something with the input, it should be done here. If it returns true, the
+// the input is consumed and is not processed by the general input handler.
+// - onSelect: Is called when the user selects an option, it should change the state
+// or do something with the selected option. It is usually called when either 'enter' or 'space'
+// is pressed.
+// Static Classes can be used for better readability and to avoid magic numbers
+// Static variables can be used to agglomerate multiple states in a single object,
+// this is useful to avoid creating multiple states for similar states.
+
 const CH = new ConsoleImpl.BasicConsole();
 const Colors = ConsoleImpl.DefaultColors;
 const Decorations = ConsoleImpl.Decorations;
 const genie = new Genie();
 
+
+//Static Classes for improved Readability
 class GameStates {
     static #instance = null;
     #currentState;
@@ -120,22 +140,15 @@ class Game {
             this.index = 0;
         }
     }
-    static battleMenu = {
-        current_menu: 0,
-        result: 0,
-    }
+    static battleState = 0;
     static introState = {
         stage: 0,
         pname: "",
         pclass: "",
         init: true
     }
-    static MainMenuStage = {
-        current_menu: 0,
-    }
-    static gameMenu = {
-        current_menu: 0,
-    }
+    static mainMenuState = 0
+    static gameMenuState = 0;
     static geniephrase = "";
     currentEnemy = new Enemy.Minion("Bob", 10, 1, {
         strength: 5,
