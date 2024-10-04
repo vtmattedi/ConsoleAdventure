@@ -34,7 +34,7 @@ You can check out the development logs you can check here [Devlogs](/Game/Devlog
 
 # Web Version
 
-You can try it now on the web [here](www.consoleadventure.com).
+You can try it now on the web [here](http://www.consoleadventure.com).
 
 # Porting
 * One of the powerful things about not using node packages such as Chalk is that it makes way easier for me to change and implement stuff  for each plataform more easily (in this case if I use Chalk and I have to change how the output handles color i'm ducked)
@@ -102,12 +102,13 @@ For the website I made it compatible with Xterm.js and React by using the follow
 # Future Features
 
 Some features that are still not implemented but are coming soon:
-
+0. Make the ConsoleBasic class more easily extandable (instead of the current function overload) for the xterm and other ports and force such inheritances for the ports.
 1. Save and load Game
 3. Story mode: Right now the only game mode available is Gauntlet Mode (no choice auto goes into it in the new game) but a story mode is coming soon
 4. Maps: players will be set in a location and will be able to choose where to go, see where they are etc.
 5. Final boss: class that will be part of the story mode.
 6. Gamepad support
+
 
 # Preview
 
