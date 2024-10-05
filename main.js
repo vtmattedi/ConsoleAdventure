@@ -27,12 +27,12 @@ Assets.Logos.animate(
     () => {
         setTimeout(() => {
             GameStates.getInstance().currentState = game.mainMenu;
-            Game.MainMenuStage.current_menu = MainMenuStage.PreMenu;
+            Game.mainMenuState = MainMenuStage.PreMenu;
             CH.clear_screen();
-            GameStates.getInstance().currentState?.rerender();
+            GameStates.rerender();
         }, 500);
     });
-GameStates.getInstance().currentState?.render();
+GameStates.render();
 game.exitTheGame = () => {
     CH.write("\x1b[3J");
     CH.clear_screen();
@@ -44,7 +44,7 @@ process.stdout.on('resize', () => {
 
     //Scroll down
     CH.write("\x1b[3J");
-    GameStates.getInstance().currentState?.rerender();
+    GameStates.rerender();
     //console.log(CH.getWidth());
     //console.log(CH.getHeight
 
@@ -79,14 +79,14 @@ process.stdin.on('keypress', (key, data) => {
     }
     else if (data.ctrl && data.name === 'b') {
         DevMode.getInstance().setValue();
-        GameStates.getInstance().currentState?.rerender();
+        GameStates.rerender();
         CH.print("Dev Mode: " + DevMode.getInstance().value);
         delCount = 1;
     }
 
     else {
         game.handleInput(input);
-        GameStates.getInstance().currentState?.render();
+        GameStates.render();
     }
 
 

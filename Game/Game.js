@@ -43,7 +43,7 @@ class GameStates {
     static #instance = null;
     #currentState;
     #lastState = [];
-
+    static #renderQueue = [];
     constructor() {
         if (!GameStates.#instance) {
             this.states = [];
@@ -69,7 +69,20 @@ class GameStates {
         return GameStates.#instance;
     }
     static rerender() {
-        GameStates.#instance.currentState?.rerender();
+        while (GameStates.#renderQueue.length > 0) {
+            //wait Queue to be empty
+        }
+        GameStates.#renderQueue.push(true);
+        GameStates.#instance?.currentState?.rerender();
+        GameStates.#renderQueue.pop();
+    }
+    static render() {
+        while (GameStates.#renderQueue.length > 0) {
+            //wait Queue to be empty
+        }
+        GameStates.#renderQueue.push(true);
+        GameStates.#instance?.currentState?.render();
+        GameStates.#renderQueue.pop();
     }
     addState() {
 
@@ -432,14 +445,14 @@ class Game {
         return itemOptions;
     }
     //Genie will speak and then timeout to the default speech
-     genieTempSpeech(phrase, time = 5000) {
+    genieTempSpeech(phrase, time = 5000) {
         this.#genieSpeech = phrase;
         if (this.#genieSpeechHandle !== null) {
             clearTimeout(this.#genieSpeechHandle);
         }
         this.#genieSpeechHandle = setTimeout(() => {
             this.#genieSpeech = "";
-            GameStates.getInstance().currentState.rerender();
+            GameStates.rerender();
         }, time);
 
     }
@@ -621,7 +634,7 @@ I shall call you ${CH.insert_format(
             else {
                 Game.introState.stage++;
             }
-            GameStates.getInstance().currentState.rerender();
+            GameStates.rerender();
 
         }
     )
@@ -880,7 +893,7 @@ I shall call you ${CH.insert_format(
                 GameStates.getInstance().currentState = this.playerDead;
             }
 
-            GameStates.getInstance().currentState.rerender();
+            GameStates.rerender();
         });
 
 
@@ -1392,7 +1405,7 @@ If you fled you won't restore as much Health`, CH.getWidth() / 2, true),
             else if (menu === GameMenuStage.Help_3) {
                 Game.gameMenuState = GameMenuStage.MainMenu
             }
-            GameStates.getInstance().currentState.rerender();
+            GameStates.rerender();
         }
     );
     //Makes an attack name into a third person verb

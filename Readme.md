@@ -79,7 +79,7 @@ For the website I made it compatible with Xterm.js and React by using the follow
                 //toggleDevMode
                 DevMode.getInstance().setValue()
                 //Renders the entire Terminal Screen again
-                GameStates.getInstance().currentState?.rerender();
+                GameStates.rerender();
             }
             else {
                 if (key.key) {
@@ -90,7 +90,7 @@ For the website I made it compatible with Xterm.js and React by using the follow
                         game.current.handleInput(keydomEvent.keytoLowerCase());
                     }
                     //Renders only what need to be render
-                    GameStates.getInstance().currentState?.render();
+                    GameStates.render();
                 }
             })
 
