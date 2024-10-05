@@ -76,11 +76,12 @@ class GameStates {
         if (GameStates.#slowRunning) {
             const now = Date.now();
             if (now - GameStates.#lastTime < GameStates.#slowTime) {
-                return;
+                return false;
             }
             GameStates.#lastTime = now;
         }
         GameStates.#instance?.currentState?.rerender();
+        return true;
 
     }
     static render() {
@@ -89,11 +90,12 @@ class GameStates {
         if (GameStates.#slowRunning) {
             const now = Date.now();
             if (now - GameStates.#lastTime < GameStates.#slowTime) {
-                return;
+                return false;
             }
             GameStates.#lastTime = now;
         }
         GameStates.#instance?.currentState?.render();
+        return true;
     }
     addState() {
 
