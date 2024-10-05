@@ -98,8 +98,7 @@ class Genie {
     }
     introduce() {
         this.speak(`
-Greetings Adventurer,
-I am ${this.#name}
+Greetings, I am ${this.#name}
 Welcome to the Great ${CH.insert_color(Colors.YELLOW, "Console")} ${CH.insert_color(Colors.GREEN, "Adventure")}!`,
             [{
                 text: this.#name.substring(0, this.#name.indexOf(' ')),

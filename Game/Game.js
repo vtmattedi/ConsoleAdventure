@@ -474,7 +474,7 @@ class Game {
                 CH.clear_screen();
                 genie.speak(
                     this.#genieSpeech === "" ?
-                        'Hello again Adventurer!\nI didn\'t catch your name. What was it?' :
+                        'You look like an Adventurer!\nI didn\'t catch your name. What was it?' :
                         this.#genieSpeech);
                 CH.show_cursor(true);
                 Game.inputState.vertical = false;
