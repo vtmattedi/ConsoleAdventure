@@ -432,7 +432,7 @@ class Game {
         return itemOptions;
     }
     //Genie will speak and then timeout to the default speech
-    genieTempSpeech(phrase, time = 5000) {
+     genieTempSpeech(phrase, time = 5000) {
         this.#genieSpeech = phrase;
         if (this.#genieSpeechHandle !== null) {
             clearTimeout(this.#genieSpeechHandle);
@@ -456,7 +456,7 @@ class Game {
     playerCreation = new GameState(
         //on create
         () => {
-            
+
             Game.inputState.index = 0;
             if (!Game.introState.init) {
                 Game.introState.init = true;
@@ -466,11 +466,11 @@ class Game {
             }
             const stage = Game.introState.stage;
             if (stage === 0) {
-                 /// Xterm Rendering issues -> rendering last line with the rest of the screen
-                 CH.show_cursor(false);
-                 CH.print();
-                 CH.clear_last_line(1);
-                 /// Normal Rendering
+                /// Xterm Rendering issues -> rendering last line with the rest of the screen
+                CH.show_cursor(false);
+                CH.print();
+                CH.clear_last_line(1);
+                /// Normal Rendering
                 CH.clear_screen();
                 genie.speak(
                     this.#genieSpeech === "" ?
@@ -558,6 +558,11 @@ I shall call you ${CH.insert_format(
                 );
                 CH.pressSpace();
             }
+            else if (stage === 5) {
+                CH.clear_screen();
+                genie.introduce();
+                CH.pressSpace();
+            }
         },
         //on render
         () => {
@@ -608,6 +613,10 @@ I shall call you ${CH.insert_format(
                 Game.inputState.index = 0;
                 Game.battleState = BattleStage.Encounter;
                 GameStates.getInstance().currentState = this.gauntletGame;
+            }
+            else if (stage === 5) {
+                Game.introState.stage = 0;
+                Game.inputState.string = "";
             }
             else {
                 Game.introState.stage++;
