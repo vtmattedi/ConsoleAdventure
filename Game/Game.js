@@ -43,7 +43,10 @@ class GameStates {
     static #instance = null;
     #currentState;
     #lastState = [];
-    static #renderQueue = [];
+    //Slow Running Mode, avoid flickering on slow terminals
+    static #slowRunning = false;
+    static #slowTime = 0;
+    static #lastTime = 0;
     constructor() {
         if (!GameStates.#instance) {
             this.states = [];
@@ -63,26 +66,34 @@ class GameStates {
     get currentState() {
         return this.#currentState;
     }
+    
     static getInstance() {
         if (!GameStates.#instance)
             GameStates.#instance = new GameStates();
         return GameStates.#instance;
     }
     static rerender() {
-        while (GameStates.#renderQueue.length > 0) {
-            //wait Queue to be empty
+        if (GameStates.#slowRunning) {
+            const now = Date.now();
+            if (now - GameStates.#lastTime < GameStates.#slowTime) {
+                return;
+            }
+            GameStates.#lastTime = now;
         }
-        GameStates.#renderQueue.push(true);
         GameStates.#instance?.currentState?.rerender();
-        GameStates.#renderQueue.pop();
+
     }
     static render() {
-        while (GameStates.#renderQueue.length > 0) {
-            //wait Queue to be empty
+        //Slows down the rendering process to avoid flickering
+        //useful for slow terminals
+        if (GameStates.#slowRunning) {
+            const now = Date.now();
+            if (now - GameStates.#lastTime < GameStates.#slowTime) {
+                return;
+            }
+            GameStates.#lastTime = now;
         }
-        GameStates.#renderQueue.push(true);
         GameStates.#instance?.currentState?.render();
-        GameStates.#renderQueue.pop();
     }
     addState() {
 
@@ -91,6 +102,16 @@ class GameStates {
         if (this.#lastState.length > 0) {
             this.#currentState = this.#lastState.pop();
         }
+    }
+    //Set the slow running mode
+    //time: time in milliseconds
+    //if time is less than or equal to 0, slow running is disabled
+    static setSlowRunning(time) {
+        if (time <= 0) {
+            GameStates.#slowRunning = false;
+        }
+        GameStates.#slowRunning = true;
+        GameStates.#slowTime = time;
     }
 
 }
