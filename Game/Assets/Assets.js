@@ -27,7 +27,7 @@ class Logos {
     static get ca_cutoff() { return 36 }
     static get mw_cutoff() { return 40 }
 
-    static animateSynced = (logo, ms, color = { color: Colors.RED, index: 1, bgcolor: Colors.YELLOW }, center = true) => {
+    static animatedSynced = (logo, ms, color = { color: Colors.RED, index: 1, bgcolor: Colors.YELLOW }, center = true) => {
         CH.show_cursor(false);
         let textArray = logo.split('\n');
         //center line and compensate for the new width
