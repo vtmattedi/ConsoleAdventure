@@ -34,7 +34,7 @@ You can check out the development logs you can check here [Devlogs](/Game/Devlog
 
 # Web Version
 
-You can try it now on the web [here](http://www.consoleadventure.com).
+You can try it now on the web [here](https://terminal.mattediworks.com/console-adventure).
 
 # Porting
 * One of the powerful things about not using node packages such as Chalk is that it makes way easier for me to change and implement stuff  for each plataform more easily (in this case if I use Chalk and I have to change how the output handles color i'm ducked)
